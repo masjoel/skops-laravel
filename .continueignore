@@ -1,0 +1,8 @@
+vendor/**
+node_modules/**
+storage/logs/**
+bootstrap/cache/**
+public/build/**
+public/hot
+coverage/**
+.git/**

@@ -1,0 +1,37 @@
+<?php
+
+// namespace App\Models;
+
+// use Illuminate\Database\Eloquent\Factories\HasFactory;
+// use Illuminate\Database\Eloquent\Model;
+// use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+// class Akun extends Model
+// {
+//     use HasFactory;
+
+//     protected $table = 'akun';
+
+//     protected $fillable = [
+//         'personil_id',
+//         'username',
+//         'password',
+//         'role',
+//     ];
+
+//     protected $hidden = [
+//         'password',
+//     ];
+
+//     protected function casts(): array
+//     {
+//         return [
+//             'password' => 'hashed',
+//         ];
+//     }
+
+//     public function personil(): BelongsTo
+//     {
+//         return $this->belongsTo(Personil::class);
+//     }
+// }
