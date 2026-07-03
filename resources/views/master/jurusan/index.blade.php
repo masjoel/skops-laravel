@@ -3,7 +3,7 @@
 @section('content')
     <div class="page-header">
         <div>
-            <h1><i class="fas fa-ruler me-2" style="color:#6366f1"></i>{{ $title }}</h1>
+            <h1><i class="fas fa-sitemap me-2" style="color:#6366f1"></i>{{ $title }}</h1>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
                 <li class="breadcrumb-item active">{{ $title }}</li>
@@ -15,7 +15,7 @@
     </div>
     <div class="row g-3">
         <div class="col-12 col-md-8">
-            <div class="card">
+            <div class="card bg-light">
                 <div class="card-header d-flex flex-wrap align-items-center justify-content-between">
                     <span>Daftar {{ $title }} <span class="text-muted fw-normal"
                             style="font-size:13px">({{ $jurusans->total() }} data)</span></span>
@@ -76,7 +76,7 @@
             </div>
         </div>
         <div class="col-12 col-md-4">
-            <div class="card">
+            <div class="card bg-light">
                 <div class="card-header"><i class="fas fa-plus-circle me-2" style="color:#6366f1"></i>Tambah Jurusan</div>
                 <div class="card-body">
                     <form method="POST" action="{{ route('master.jurusan.store') }}">

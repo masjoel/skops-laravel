@@ -54,7 +54,7 @@ class JenisPoinController extends Controller
         $data = $request->only(['urut', 'kode', 'deskripsi', 'keterangan', 'tindakan', 'skor', 'jenis']);
         $data['user_id'] = Auth::id();
         $data['skor'] = $data['jenis'] === 'reward' ? abs($data['skor']) : -1 * abs($data['skor']);
-        $data['urut'] = $data['urut'] ?? JenisPoin::max('urut') + 1;
+        $data['urut'] = $data['urut'] == 0 ? JenisPoin::max('urut') + 1 : $data['urut'];
 
         JenisPoin::create($data);
 
@@ -97,6 +97,7 @@ class JenisPoinController extends Controller
 
         $data = $request->only(['urut', 'kode', 'deskripsi', 'keterangan', 'tindakan', 'skor', 'jenis']);
         $data['skor'] = $data['jenis'] === 'reward' ? abs($data['skor']) : -1 * abs($data['skor']);
+        $data['urut'] = $data['urut'] == 0 ? JenisPoin::max('urut') + 1 : $data['urut'];
 
         $jenis_poin->update($data);
 
@@ -109,12 +110,12 @@ class JenisPoinController extends Controller
      */
     public function destroy(JenisPoin $jenis_poin)
     {
-        $cek = JenisPoin::withCount('kartuKontrol')->findOrFail($jenis_poin->id);
+        // $cek = JenisPoin::withCount('kartuKontrol')->findOrFail($jenis_poin->id);
 
-        if ($cek > 0) {
-            return redirect()->route('master.jenis-poin.index')
-                ->with('error', 'Jenis Poin tidak dapat dihapus karena sudah digunakan!');
-        }
+        // if ($cek > 0) {
+        //     return redirect()->route('master.jenis-poin.index')
+        //         ->with('error', 'Jenis Poin tidak dapat dihapus karena sudah digunakan!');
+        // }
         $jenis_poin->delete();
         return redirect()->route('master.jenis-poin.index')
             ->with('success', 'Jenis Poin berhasil dihapus.');

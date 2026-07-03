@@ -4,7 +4,7 @@
 @section('content')
     <div class="page-header">
         <div>
-            <h1><i class="fas fa-tags me-2" style="color:#6366f1"></i>{{ $title }}</h1>
+            <h1><i class="fas fa-list-ol me-2" style="color:#6366f1"></i>{{ $title }}</h1>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
@@ -17,7 +17,7 @@
         </a>
     </div>
 
-    <div class="card">
+    <div class="card bg-light">
         <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
             <span>
                 Daftar {{ $title }}

@@ -10,7 +10,7 @@
     </div>
     <div class="row justify-content-center">
         <div class="col-12 col-md-5">
-            <div class="card">
+            <div class="card bg-light">
                 <div class="card-header"><i class="fas fa-ruler me-2" style="color:#6366f1"></i>Form Edit {{ $title }}
                 </div>
                 <div class="card-body">

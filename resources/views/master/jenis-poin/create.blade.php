@@ -14,7 +14,7 @@
     </div>
     <div class="row justify-content-center">
         <div class="col-12 col-md-6">
-            <div class="card bg-white">
+            <div class="card bg-light">
                 <div class="card-header"><i class="fas fa-tags me-2" style="color:#6366f1"></i>Form {{ $title }}
                 </div>
                 <div class="card-body">

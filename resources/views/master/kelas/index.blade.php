@@ -3,7 +3,7 @@
 @section('content')
     <div class="page-header">
         <div>
-            <h1><i class="fas fa-ruler me-2" style="color:#6366f1"></i>{{ $title }}</h1>
+            <h1><i class="fas fa-chalkboard-teacher me-2" style="color:#6366f1"></i>{{ $title }}</h1>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
                 <li class="breadcrumb-item active">{{ $title }}</li>
@@ -17,7 +17,7 @@
     <div class="row g-3">
         <div class="col-12 col-md-8">
             {{-- Filter Bar --}}
-            <div class="card mb-3">
+            <div class="card bg-light mb-3">
                 <div class="card-body" style="padding:14px 20px">
                     <form method="GET" class="row g-2 align-items-end">
                         <div class="col-12 col-md-6">
@@ -50,7 +50,7 @@
                     </form>
                 </div>
             </div>
-            <div class="card">
+            <div class="card bg-light">
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <span>Daftar {{ $title }} <span class="text-muted fw-normal"
                             style="font-size:13px">({{ $kelas->total() }} data)</span></span>
@@ -105,7 +105,7 @@
             </div>
         </div>
         <div class="col-12 col-md-4">
-            <div class="card">
+            <div class="card bg-light">
                 <div class="card-header"><i class="fas fa-plus-circle me-2" style="color:#6366f1"></i>Tambah Kelas</div>
                 <div class="card-body">
                     <form method="POST" action="{{ route('master.kelas.store') }}">
