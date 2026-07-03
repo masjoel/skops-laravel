@@ -17,6 +17,7 @@ class Murid extends Model
     protected $fillable = [
         'personil_id',
         'nis',
+        'nisn',
     ];
 
     public function personil(): BelongsTo
@@ -46,23 +47,23 @@ class Murid extends Model
 
     /**
      * Daftar kelas yang pernah/sedang diikuti,
-     * lengkap dengan tahun_ajaran dari tabel pivot murid_kelas.
+     * lengkap dengan tahun_ajaran_id dari tabel pivot murid_kelas.
      */
     public function kelas(): BelongsToMany
     {
         return $this->belongsToMany(Kelas::class, 'murid_kelas')
-            ->withPivot('tahun_ajaran')
+            ->withPivot('tahun_ajaran_id')
             ->withTimestamps();
     }
 
     /**
      * Ambil data kelas murid pada tahun ajaran tertentu.
-     * Contoh: $murid->kelasPadaTahun('2025/2026')
+     * Contoh: $murid->kelasPadaTahun($tahunAjaran->id)
      */
-    public function kelasPadaTahun(string $tahunAjaran): ?MuridKelas
+    public function kelasPadaTahun(int $tahunAjaranId): ?MuridKelas
     {
         return $this->riwayatKelas()
-            ->where('tahun_ajaran', $tahunAjaran)
+            ->where('tahun_ajaran_id', $tahunAjaranId)
             ->first();
     }
 }

@@ -12,10 +12,10 @@ class MuridKelas extends Model
 
     protected $table = 'murid_kelas';
 
-    protected $fillable = [
+protected $fillable = [
         'murid_id',
         'kelas_id',
-        'tahun_ajaran',
+        'tahun_ajaran_id',
     ];
 
     public function murid(): BelongsTo
@@ -26,5 +26,10 @@ class MuridKelas extends Model
     public function kelas(): BelongsTo
     {
         return $this->belongsTo(Kelas::class);
+    }
+
+    public function tahunAjaran(): BelongsTo
+    {
+        return $this->belongsTo(TahunAjaran::class);
     }
 }

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
+use App\Models\Kelas;
 use App\Models\Murid;
+use App\Models\MuridKelas;
 use App\Models\Personil;
 use Illuminate\Http\Request;
 
@@ -53,7 +55,13 @@ class MuridController extends Controller
     public function create()
     {
         $title = 'Siswa';
-        return view('master.murid.create', compact('title'));
+        $kelas = Kelas::all();
+        $tahunAjaranAktif = Kelas::getTahunAjaranAktif();
+        if (!$tahunAjaranAktif) {
+            return redirect()->route('master.murid.index')
+                ->with('error', 'Tidak ada tahun ajaran aktif. Silakan aktifkan tahun ajaran terlebih dahulu.');
+        }
+        return view('master.murid.create', compact('title', 'kelas'));
     }
 
     /**
@@ -63,7 +71,8 @@ class MuridController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:100',
-            'nis' => 'required|string|max:20|unique:murid,nis',
+            'nis' => 'required|numeric|unique:murid,nis',
+            'nisn' => 'nullable|numeric|unique:murid,nisn',
             'jenis_kelamin' => 'nullable|in:L,P',
             'status' => 'nullable|in:aktif,nonaktif',
         ]);
@@ -74,9 +83,14 @@ class MuridController extends Controller
             'status' => $request->status,
         ]);
 
-        Murid::create([
+        $murid = Murid::create([
             'personil_id' => $personil->id,
             'nis' => $request->nis,
+            'nisn' => $request->nisn,
+        ]);
+        MuridKelas::create([
+            'murid_id' => $murid->id,
+            'kelas_id' => $request->kelas_id,
         ]);
 
         return redirect()->route('master.murid.index')
@@ -97,7 +111,8 @@ class MuridController extends Controller
     public function edit(Murid $murid)
     {
         $title = 'Siswa';
-        return view('master.murid.edit', compact('title', 'murid'));
+        $kelas = Kelas::all();
+        return view('master.murid.edit', compact('title', 'murid', 'kelas'));
     }
 
     /**
@@ -107,7 +122,8 @@ class MuridController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:100',
-            'nis' => 'required|string|max:20|unique:murid,nis,' . $murid->id,
+            'nis' => 'required|numeric|unique:murid,nis,' . $murid->id,
+            'nisn' => 'nullable|numeric|unique:murid,nisn,' . $murid->id,
             'jenis_kelamin' => 'nullable|in:L,P',
             'status' => 'nullable|in:aktif,nonaktif',
         ]);
@@ -121,7 +137,12 @@ class MuridController extends Controller
 
         $murid->update([
             'nis' => $request->nis,
+            'nisn' => $request->nisn,
         ]);
+        MuridKelas::updateOrCreate(
+            ['murid_id' => $murid->id],
+            ['kelas_id' => $request->kelas_id]
+        );
 
         return redirect()->route('master.murid.index')
             ->with('success', 'Murid berhasil diperbarui.');

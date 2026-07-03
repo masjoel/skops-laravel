@@ -34,27 +34,31 @@
                             @enderror
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Jenis Kelamin</label>
-                            <select name="jenis_kelamin" class="form-control @error('jenis_kelamin') is-invalid @enderror">
-                                <option value="L" {{ old('jenis_kelamin') == 'L' ? 'selected' : '' }}>
-                                    Laki-laki</option>
-                                <option value="P" {{ old('jenis_kelamin') == 'P' ? 'selected' : '' }}>
-                                    Perempuan</option>
-                            </select>
+                            <label class="form-label d-block">Jenis Kelamin</label>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input @error('jenis_kelamin') is-invalid @enderror" type="radio" name="jenis_kelamin" id="jk_l" value="L" {{ old('jenis_kelamin') == 'L' ? 'checked' : 'checked' }}>
+                                <label class="form-check-label" for="jk_l">Laki-laki</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input @error('jenis_kelamin') is-invalid @enderror" type="radio" name="jenis_kelamin" id="jk_p" value="P" {{ old('jenis_kelamin') == 'P' ? 'checked' : '' }}>
+                                <label class="form-check-label" for="jk_p">Perempuan</label>
+                            </div>
                             @error('jenis_kelamin')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="mb-4">
-                            <label class="form-label">Status</label>
-                            <select name="status" class="form-control @error('status') is-invalid @enderror">
-                                <option value="aktif" {{ old('status') == 'aktif' ? 'selected' : '' }}>
-                                    Aktif</option>
-                                <option value="nonaktif" {{ old('status') == 'nonaktif' ? 'selected' : '' }}>
-                                    Non Aktif</option>
-                            </select>
+                            <label class="form-label d-block">Status</label>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input @error('status') is-invalid @enderror" type="radio" name="status" id="status_aktif" value="aktif" {{ old('status', 'aktif') == 'aktif' ? 'checked' : '' }}>
+                                <label class="form-check-label" for="status_aktif">Aktif</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input @error('status') is-invalid @enderror" type="radio" name="status" id="status_nonaktif" value="nonaktif" {{ old('status') == 'nonaktif' ? 'checked' : '' }}>
+                                <label class="form-check-label" for="status_nonaktif">Non Aktif</label>
+                            </div>
                             @error('status')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="d-flex gap-2">

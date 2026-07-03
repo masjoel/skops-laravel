@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Perusahaan;
 use App\Models\User;
+use Database\Seeders\TahunAjaranSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -44,6 +45,7 @@ class DatabaseSeeder extends Seeder
             'role' => 'admin',
         ]);
         $this->call([
+            TahunAjaranSeeder::class,
             KelasSeeder::class,
             GuruSeeder::class,
             WaliKelasSeeder::class,

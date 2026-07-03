@@ -36,12 +36,12 @@ class Kelas extends Model
 
     /**
      * Daftar murid yang pernah/sedang berada di kelas ini,
-     * lengkap dengan tahun_ajaran dari tabel pivot murid_kelas.
+     * lengkap dengan tahun_ajaran_id dari tabel pivot murid_kelas.
      */
     public function murid(): BelongsToMany
     {
         return $this->belongsToMany(Murid::class, 'murid_kelas')
-            ->withPivot('tahun_ajaran')
+            ->withPivot('tahun_ajaran_id')
             ->withTimestamps();
     }
 
@@ -52,23 +52,23 @@ class Kelas extends Model
 
     /**
      * Daftar guru yang pernah/sedang menjadi wali kelas ini,
-     * lengkap dengan tahun_ajaran dari tabel pivot wali_kelas.
+     * lengkap dengan tahun_ajaran_id dari tabel pivot wali_kelas.
      */
     public function guruWali(): BelongsToMany
     {
         return $this->belongsToMany(Guru::class, 'wali_kelas')
-            ->withPivot('tahun_ajaran')
+            ->withPivot('tahun_ajaran_id')
             ->withTimestamps();
     }
 
     /**
      * Ambil wali kelas pada tahun ajaran tertentu.
-     * Contoh: $kelas->waliPadaTahun('2025/2026')
+     * Contoh: $kelas->waliPadaTahun($tahunAjaran->id)
      */
-    public function waliPadaTahun(string $tahunAjaran): ?WaliKelas
+    public function waliPadaTahun(int $tahunAjaranId): ?WaliKelas
     {
         return $this->waliKelas()
-            ->where('tahun_ajaran', $tahunAjaran)
+            ->where('tahun_ajaran_id', $tahunAjaranId)
             ->first();
     }
 }

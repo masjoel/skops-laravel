@@ -2,11 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use App\Models\Kelas;
 use App\Models\Murid;
 use App\Models\MuridKelas;
 use App\Models\OrangTua;
+use App\Models\TahunAjaran;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class MuridSeeder extends Seeder
@@ -14,12 +15,13 @@ class MuridSeeder extends Seeder
     public function run(): void
     {
         $kelasList = Kelas::all();
+        $tahunAjaranId = TahunAjaran::aktif()->id;
 
         Murid::factory()
             ->count(40)
             ->create()
-            ->each(function (Murid $murid) use ($kelasList) {
-                // User login murid
+            ->each(function (Murid $murid) use ($kelasList, $tahunAjaranId) {
+                // akun login murid
                 User::factory()
                     ->murid()
                     ->create([
@@ -31,7 +33,7 @@ class MuridSeeder extends Seeder
                 MuridKelas::create([
                     'murid_id' => $murid->id,
                     'kelas_id' => $kelasList->random()->id,
-                    'tahun_ajaran' => '2025/2026',
+                    'tahun_ajaran_id' => $tahunAjaranId,
                 ]);
 
                 // buat 1 atau 2 orang tua/wali untuk murid ini

@@ -41,4 +41,9 @@ class KartuKontrol extends Model
     {
         return $this->belongsTo(JenisPoin::class);
     }
+
+    public function periodeAkademik(): BelongsTo
+    {
+        return $this->belongsTo(PeriodeAkademik::class);
+    }
 }

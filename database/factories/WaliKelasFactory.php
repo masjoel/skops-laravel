@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Guru;
 use App\Models\Kelas;
+use App\Models\TahunAjaran;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class WaliKelasFactory extends Factory
@@ -15,7 +16,7 @@ class WaliKelasFactory extends Factory
         return [
             'kelas_id' => Kelas::factory(),
             'guru_id' => Guru::factory(),
-            'tahun_ajaran' => '2025/2026',
+            'tahun_ajaran_id' => TahunAjaran::factory(),
         ];
     }
 }

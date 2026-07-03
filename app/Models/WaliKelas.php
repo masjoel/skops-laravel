@@ -15,7 +15,7 @@ class WaliKelas extends Model
     protected $fillable = [
         'kelas_id',
         'guru_id',
-        'tahun_ajaran',
+        'tahun_ajaran_id',
     ];
 
     public function kelas(): BelongsTo
@@ -26,5 +26,10 @@ class WaliKelas extends Model
     public function guru(): BelongsTo
     {
         return $this->belongsTo(Guru::class);
+    }
+
+    public function tahunAjaran(): BelongsTo
+    {
+        return $this->belongsTo(TahunAjaran::class);
     }
 }

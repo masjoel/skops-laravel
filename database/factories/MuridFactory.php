@@ -14,6 +14,7 @@ class MuridFactory extends Factory
         return [
             'personil_id' => Personil::factory(),
             'nis' => $this->faker->unique()->numerify('##########'),
+            'nisn' => $this->faker->unique()->numerify('##########'),
         ];
     }
 }

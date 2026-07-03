@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Kelas;
 use App\Models\Murid;
+use App\Models\TahunAjaran;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class MuridKelasFactory extends Factory
@@ -15,7 +16,7 @@ class MuridKelasFactory extends Factory
         return [
             'murid_id' => Murid::factory(),
             'kelas_id' => Kelas::factory(),
-            'tahun_ajaran' => '2025/2026',
+            'tahun_ajaran_id' => TahunAjaran::factory(),
         ];
     }
 }

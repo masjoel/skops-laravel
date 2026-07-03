@@ -67,6 +67,7 @@
                                 <th style="width:40px">#</th>
                                 <th>Nama</th>
                                 <th>NIS</th>
+                                <th>NISN</th>
                                 <th>Status</th>
                                 <th class="text-center" style="width:100px">Aksi</th>
                             </tr>
@@ -78,6 +79,7 @@
                                     </td>
                                     <td>{{ $s->personil->nama }}</td>
                                     <td>{{ $s->nis }}</td>
+                                    <td>{{ $s->nisn }}</td>
                                     <td>{{ ucfirst($s->personil->status) }}</td>
                                     <td class="text-center">
                                         <div class="d-flex gap-1 justify-content-center">

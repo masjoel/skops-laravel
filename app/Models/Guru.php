@@ -31,12 +31,12 @@ class Guru extends Model
 
     /**
      * Kelas-kelas yang pernah/sedang diampu sebagai wali kelas,
-     * lengkap dengan tahun_ajaran dari tabel pivot wali_kelas.
+     * lengkap dengan tahun_ajaran_id dari tabel pivot wali_kelas.
      */
     public function kelasDiampu(): BelongsToMany
     {
         return $this->belongsToMany(Kelas::class, 'wali_kelas')
-            ->withPivot('tahun_ajaran')
+            ->withPivot('tahun_ajaran_id')
             ->withTimestamps();
     }
 }

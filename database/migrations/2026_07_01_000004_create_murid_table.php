@@ -14,6 +14,7 @@ return new class extends Migration
                 ->constrained('personil')
                 ->cascadeOnDelete();
             $table->string('nis', 30)->unique();
+            $table->string('nisn', 30)->nullable()->unique();
             $table->timestamps();
             // kelas_id sengaja tidak diletakkan di sini,
             // digantikan oleh tabel riwayat murid_kelas

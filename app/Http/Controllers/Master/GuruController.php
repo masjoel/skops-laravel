@@ -63,7 +63,7 @@ class GuruController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:100',
-            'nip' => 'required|string|max:20|unique:guru,nip',
+            'nip' => 'required|numeric|unique:guru,nip',
             'jenis_kelamin' => 'nullable|in:L,P',
             'status' => 'nullable|in:aktif,nonaktif',
         ]);
@@ -107,7 +107,7 @@ class GuruController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:100',
-            'nip' => 'required|string|max:20|unique:guru,nip,' . $guru->id,
+            'nip' => 'required|numeric|unique:guru,nip,' . $guru->id,
             'jenis_kelamin' => 'nullable|in:L,P',
             'status' => 'nullable|in:aktif,nonaktif',
         ]);
