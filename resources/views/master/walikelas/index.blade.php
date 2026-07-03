@@ -3,13 +3,13 @@
 @section('content')
     <div class="page-header">
         <div>
-            <h1><i class="fas fa-user-friends me-2" style="color:#6366f1"></i>{{ $title }}</h1>
+            <h1><i class="fas fa-user-plus me-2" style="color:#6366f1"></i>{{ $title }}</h1>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
                 <li class="breadcrumb-item active">{{ $title }}</li>
             </ol>
         </div>
-        <a href="{{ route('master.guru.create') }}" class="btn btn-accent">
+        <a href="{{ route('master.walikelas.create') }}" class="btn btn-accent">
             <i class="fas fa-plus me-2"></i>Tambah {{ $title }}
         </a>
     </div>
@@ -20,7 +20,7 @@
             <div class="card bg-light mb-3">
                 <div class="card-body" style="padding:14px 20px">
                     <form method="GET" class="row g-2 align-items-end">
-                        <div class="col-12 col-md-6">
+                        <div class="col-12 col-md-4">
                             <div class="input-group" style="border-radius:8px;overflow:hidden">
                                 <span class="input-group-text"
                                     style="background:var(--card-bg);border-color:var(--border-color);color:var(--text-muted)">
@@ -45,19 +45,31 @@
                                 </option>
                             </select>
                         </div>
+                        <div class="col-12 col-md-2">
+                            <select name="tahun_ajaran_id" class="form-select">
+                                @foreach ($tahunAjaranList as $ta)
+                                    <option value="{{ $ta->id }}"
+                                        {{ request('tahun_ajaran_id', $tahunAjaranAktifId) == $ta->id ? 'selected' : '' }}>
+                                        {{ $ta->nama }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="col-auto">
                             <button type="submit" class="btn btn-accent">Filter</button>
-                            @if (request()->hasAny(['search', 'gender', 'status']))
-                                <a href="{{ route('master.guru.index') }}" class="btn btn-outline-secondary ms-1">Reset</a>
+                            @if (request()->hasAny(['search', 'gender', 'status', 'tahun_ajaran_id']))
+                                <a href="{{ route('master.walikelas.index') }}"
+                                    class="btn btn-outline-secondary ms-1">Reset</a>
                             @endif
                         </div>
+
                     </form>
                 </div>
             </div>
             <div class="card bg-light">
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <span>Daftar {{ $title }} <span class="text-muted fw-normal"
-                            style="font-size:13px">({{ $guru->total() }} data)</span></span>
+                            style="font-size:13px">({{ $walikelas->total() }} data)</span></span>
                 </div>
                 <div class="card-body table-responsive" style="padding:0">
                     <table class="table table-hover mb-0">
@@ -66,25 +78,29 @@
                                 <th style="width:40px">#</th>
                                 <th>Nama</th>
                                 <th>NIP</th>
+                                <th>Kelas</th>
+                                <th>Tahun Ajaran</th>
                                 <th>Status</th>
                                 <th class="text-center" style="width:100px">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($guru as $i => $s)
+                            @forelse($walikelas as $i => $s)
                                 <tr>
-                                    <td style="color:var(--text-muted);font-size:12px">{{ $guru->firstItem() + $i }}
+                                    <td style="color:var(--text-muted);font-size:12px">{{ $walikelas->firstItem() + $i }}
                                     </td>
-                                    <td>{{ $s->personil->nama }}</td>
-                                    <td>{{ $s->nip }}</td>
-                                    <td>{{ ucfirst($s->personil->status) }}</td>
+                                    <td>{{ $s->guru->personil->nama }}</td>
+                                    <td>{{ $s->guru->nip }}</td>
+                                    <td>{{ $s->kelas->nama_kelas }}</td>
+                                    <td>{{ $s->tahunAjaran->nama }}</td>
+                                    <td>{{ ucfirst($s->guru->personil->status) }}</td>
                                     <td class="text-center">
                                         <div class="d-flex gap-1 justify-content-center">
-                                            <a href="{{ route('master.guru.edit', $s->id) }}" class="btn btn-sm"
+                                            <a href="{{ route('master.walikelas.edit', $s->id) }}" class="btn btn-sm"
                                                 style="padding:4px 8px;background:rgba(99,102,241,.1);color:#6366f1;border-radius:6px"><i
                                                     class="fas fa-pen"></i></a>
-                                            <form method="POST" action="{{ route('master.guru.destroy', $s->id) }}"
-                                                onsubmit="return confirm('Hapus guru {{ addslashes($s->personil->nama) }}?')">
+                                            <form method="POST" action="{{ route('master.walikelas.destroy', $s->id) }}"
+                                                onsubmit="return confirm('Hapus walikelas {{ addslashes($s->guru->personil->nama) }}?')">
                                                 @csrf @method('DELETE')
                                                 <button type="submit" class="btn btn-sm"
                                                     style="padding:4px 8px;background:rgba(239,68,68,.1);color:#ef4444;border-radius:6px"><i
@@ -95,16 +111,17 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="text-center" style="padding:40px;color:var(--text-muted)"><i
-                                            class="fas fa-ruler fa-2x mb-2 d-block" style="opacity:.2"></i>Belum ada guru
+                                    <td colspan="7" class="text-center" style="padding:40px;color:var(--text-muted)"><i
+                                            class="fas fa-ruler fa-2x mb-2 d-block" style="opacity:.2"></i>Belum ada
+                                        walikelas
                                     </td>
                                 </tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
-                @if ($guru->hasPages())
-                    <div class="card-body border-top" style="padding:12px 20px">{{ $guru->links() }}</div>
+                @if ($walikelas->hasPages())
+                    <div class="card-body border-top" style="padding:12px 20px">{{ $walikelas->links() }}</div>
                 @endif
             </div>
         </div>

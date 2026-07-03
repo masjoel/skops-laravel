@@ -20,7 +20,7 @@
                         <div class="mb-3">
                             <label class="form-label">Nama <span class="text-danger">*</span></label>
                             <input type="text" name="nama" class="form-control @error('nama') is-invalid @enderror"
-                                value="{{ old('nama') }}" placeholder="Contoh: John Doe" required>
+                                value="{{ old('nama') }}" placeholder="" required>
                             @error('nama')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -28,7 +28,7 @@
                         <div class="mb-3">
                             <label class="form-label">NIP <span class="text-danger">*</span></label>
                             <input type="text" name="nip" class="form-control @error('nip') is-invalid @enderror"
-                                value="{{ old('nip') }}" placeholder="Contoh: 123456789" required>
+                                value="{{ old('nip') }}" placeholder="" required>
                             @error('nip')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -36,7 +36,7 @@
                         <div class="mb-3">
                             <label class="form-label d-block">Jenis Kelamin</label>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input @error('jenis_kelamin') is-invalid @enderror" type="radio" name="jenis_kelamin" id="jk_l" value="L" {{ old('jenis_kelamin') == 'L' ? 'checked' : 'checked' }}>
+                                <input class="form-check-input @error('jenis_kelamin') is-invalid @enderror" type="radio" name="jenis_kelamin" id="jk_l" value="L" {{ old('jenis_kelamin', 'L') == 'L' ? 'checked' : '' }}>
                                 <label class="form-check-label" for="jk_l">Laki-laki</label>
                             </div>
                             <div class="form-check form-check-inline">

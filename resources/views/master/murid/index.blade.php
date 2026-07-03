@@ -20,7 +20,7 @@
             <div class="card bg-light mb-3">
                 <div class="card-body" style="padding:14px 20px">
                     <form method="GET" class="row g-2 align-items-end">
-                        <div class="col-12 col-md-6">
+                        <div class="col-12 col-md-4">
                             <div class="input-group" style="border-radius:8px;overflow:hidden">
                                 <span class="input-group-text"
                                     style="background:var(--card-bg);border-color:var(--border-color);color:var(--text-muted)">
@@ -30,14 +30,14 @@
                                     value="{{ request('search') }}">
                             </div>
                         </div>
-                        <div class="col-6 col-md-2">
+                        <div class="col-12 col-md-2">
                             <select name="gender" class="form-select">
                                 <option value="">Gender</option>
                                 <option value="L" {{ request('gender') == 'L' ? 'selected' : '' }}>Laki-laki</option>
                                 <option value="P" {{ request('gender') == 'P' ? 'selected' : '' }}>Perempuan</option>
                             </select>
                         </div>
-                        <div class="col-6 col-md-2">
+                        <div class="col-12 col-md-2">
                             <select name="status" class="form-select">
                                 <option value="">Status</option>
                                 <option value="aktif" {{ request('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
@@ -45,9 +45,19 @@
                                 </option>
                             </select>
                         </div>
+                        <div class="col-12 col-md-2">
+                            <select name="tahun_ajaran_id" class="form-select">
+                                @foreach ($tahunAjaran as $ta)
+                                    <option value="{{ $ta->id }}"
+                                        {{ request('tahun_ajaran_id', $tahunAjaranAktif) == $ta->id ? 'selected' : '' }}>
+                                        {{ $ta->nama }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="col-auto">
                             <button type="submit" class="btn btn-accent">Filter</button>
-                            @if (request()->hasAny(['search', 'gender', 'status']))
+                            @if (request()->hasAny(['search', 'gender', 'status', 'tahun_ajaran_id']))
                                 <a href="{{ route('master.murid.index') }}"
                                     class="btn btn-outline-secondary ms-1">Reset</a>
                             @endif
@@ -68,6 +78,7 @@
                                 <th>Nama</th>
                                 <th>NIS</th>
                                 <th>NISN</th>
+                                <th>Kelas</th>
                                 <th>Status</th>
                                 <th class="text-center" style="width:100px">Aksi</th>
                             </tr>
@@ -80,10 +91,12 @@
                                     <td>{{ $s->personil->nama }}</td>
                                     <td>{{ $s->nis }}</td>
                                     <td>{{ $s->nisn }}</td>
+                                    <td>{{ $s->riwayatKelas->first()->kelas->nama_kelas ?? 'Tidak ada kelas' }}
+                                        {{ $s->riwayatKelas->first()->kelas->jurusan->nama ?? '' }}</td>
                                     <td>{{ ucfirst($s->personil->status) }}</td>
                                     <td class="text-center">
                                         <div class="d-flex gap-1 justify-content-center">
-                                            <a href="{{ route('master.murid.edit', $s->id) }}" class="btn btn-sm"
+                                            <a href="{{ route('master.murid.edit', ['murid' => $s->id, 'tahun_ajaran_id' => request('tahun_ajaran_id')]) }}" class="btn btn-sm"
                                                 style="padding:4px 8px;background:rgba(99,102,241,.1);color:#6366f1;border-radius:6px"><i
                                                     class="fas fa-pen"></i></a>
                                             <form method="POST" action="{{ route('master.murid.destroy', $s->id) }}"
@@ -98,7 +111,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="text-center" style="padding:40px;color:var(--text-muted)"><i
+                                    <td colspan="7" class="text-center" style="padding:40px;color:var(--text-muted)"><i
                                             class="fas fa-ruler fa-2x mb-2 d-block" style="opacity:.2"></i>Belum ada siswa
                                     </td>
                                 </tr>

@@ -28,35 +28,47 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">NIS <span class="text-danger">*</span></label>
                                 <input type="text" name="nis" class="form-control @error('nis') is-invalid @enderror"
-                                    value="{{ old('nis', $murid->nis) }}" placeholder="Contoh: 123456789" required>
+                                    value="{{ old('nis', $murid->nis) }}" placeholder="" required>
                                 @error('nis')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">NISN <span class="text-danger">*</span></label>
+                                <label class="form-label">NISN</label>
                                 <input type="text" name="nisn"
                                     class="form-control @error('nisn') is-invalid @enderror"
-                                    value="{{ old('nisn', $murid->nisn) }}" placeholder="Contoh: 123456789">
+                                    value="{{ old('nisn', $murid->nisn) }}" placeholder="">
                                 @error('nisn')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Kelas <span class="text-danger">*</span></label>
-                            <select name="kelas_id" class="form-control @error('kelas_id') is-invalid @enderror" required>
-                                <option value="">Pilih Kelas</option>
-                                @foreach ($kelas as $k)
-                                    <option value="{{ $k->id }}"
-                                        {{ old('kelas_id', $murid->muridKelas->kelas_id ?? '') == $k->id ? 'selected' : '' }}>
-                                        {{ $k->nama_kelas }} {{ $k->jurusan->nama ?? '' }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('kelas_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <div class="col-md-8 mb-3">
+                                <label class="form-label">Kelas <span class="text-danger">*</span></label>
+                                @php
+                                    $kelasIdSaatIni = $murid->riwayatKelas->where('tahun_ajaran_id', $tahunAjaranEdit->id ?? null)->first()->kelas_id ?? '';
+                                @endphp
+                                <select name="kelas_id" class="form-control @error('kelas_id') is-invalid @enderror"
+                                    required>
+                                    <option value="">Pilih Kelas</option>
+                                    @foreach ($kelas as $k)
+                                        <option value="{{ $k->id }}"
+                                            {{ old('kelas_id', $kelasIdSaatIni) == $k->id ? 'selected' : '' }}>
+                                            {{ $k->nama_kelas }} {{ $k->jurusan->nama ?? '' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('kelas_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Tahun Ajaran <span class="text-danger">*</span></label>
+                                <input type="text" name="tahun_ajaran"
+                                    class="form-control @error('tahun_ajaran') is-invalid @enderror"
+                                    value="{{ old('tahun_ajaran', $tahunAjaranEdit->nama ?? '') }}" placeholder=""
+                                    readonly>
+                            </div>
+                            <input type="hidden" name="tahun_ajaran_id" value="{{ $tahunAjaranEdit->id ?? '' }}">
                         </div>
                         <div class="mb-3">
                             <label class="form-label d-block">Jenis Kelamin</label>

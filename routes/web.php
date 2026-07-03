@@ -60,7 +60,6 @@ Route::middleware(['auth.session'])->group(function () {
         Route::resource('walikelas', WaliKelasController::class);
         Route::resource('jurusan', JurusanController::class);
         Route::resource('kelas', KelasController::class);
-        Route::resource('kelas-ekstensi', KelasExtensiController::class);
         Route::resource('jenis-poin', JenisPoinController::class);
     });
 

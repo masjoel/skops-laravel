@@ -20,7 +20,7 @@
                         <div class="mb-3">
                             <label class="form-label">Nama <span class="text-danger">*</span></label>
                             <input type="text" name="nama" class="form-control @error('nama') is-invalid @enderror"
-                                value="{{ old('nama') }}" placeholder="Contoh: John Doe" required>
+                                value="{{ old('nama') }}" placeholder="" required>
                             @error('nama')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -29,41 +29,51 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">NIS <span class="text-danger">*</span></label>
                                 <input type="text" name="nis" class="form-control @error('nis') is-invalid @enderror"
-                                    value="{{ old('nis') }}" placeholder="Contoh: 123456789" required>
+                                    value="{{ old('nis') }}" placeholder="" required>
                                 @error('nis')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">NISN <span class="text-danger">*</span></label>
+                                <label class="form-label">NISN</label>
                                 <input type="text" name="nisn"
                                     class="form-control @error('nisn') is-invalid @enderror" value="{{ old('nisn') }}"
-                                    placeholder="Contoh: 123456789">
+                                    placeholder="">
                                 @error('nisn')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Kelas <span class="text-danger">*</span></label>
-                            <select name="kelas_id" class="form-control @error('kelas_id') is-invalid @enderror" required>
-                                <option value="">Pilih Kelas</option>
-                                @foreach ($kelas as $k)
-                                    <option value="{{ $k->id }}" {{ old('kelas_id') == $k->id ? 'selected' : '' }}>
-                                        {{ $k->nama_kelas }} {{ $k->jurusan->nama ?? '' }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('kelas_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <div class="col-md-8 mb-3">
+                                <label class="form-label">Kelas <span class="text-danger">*</span></label>
+                                <select name="kelas_id" class="form-control @error('kelas_id') is-invalid @enderror"
+                                    required>
+                                    <option value="">Pilih Kelas</option>
+                                    @foreach ($kelas as $k)
+                                        <option value="{{ $k->id }}"
+                                            {{ old('kelas_id') == $k->id ? 'selected' : '' }}>
+                                            {{ $k->nama_kelas }} {{ $k->jurusan->nama ?? '' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('kelas_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Tahun Ajaran <span class="text-danger">*</span></label>
+                                <input type="text" name="tahun_ajaran"
+                                    class="form-control @error('tahun_ajaran') is-invalid @enderror"
+                                    value="{{ old('tahun_ajaran', $tahunAjaranAktif->nama ?? '') }}" placeholder=""
+                                    readonly>
+                            </div>
+                            <input type="hidden" name="tahun_ajaran_id" value="{{ $tahunAjaranAktif->id }}">
                         </div>
                         <div class="mb-3">
                             <label class="form-label d-block">Jenis Kelamin</label>
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input @error('jenis_kelamin') is-invalid @enderror" type="radio"
                                     name="jenis_kelamin" id="jk_l" value="L"
-                                    {{ old('jenis_kelamin') == 'L' ? 'checked' : 'checked' }}>
+                                    {{ old('jenis_kelamin', 'L') == 'L' ? 'checked' : '' }}>
                                 <label class="form-check-label" for="jk_l">Laki-laki</label>
                             </div>
                             <div class="form-check form-check-inline">

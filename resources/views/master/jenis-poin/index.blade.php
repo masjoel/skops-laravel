@@ -88,7 +88,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center" style="padding:40px;color:var(--text-muted)">
+                            <td colspan="8" class="text-center" style="padding:40px;color:var(--text-muted)">
                                 <i class="fas fa-tags fa-2x mb-2 d-block" style="opacity:.2"></i>Belum ada jenis poin
                             </td>
                         </tr>

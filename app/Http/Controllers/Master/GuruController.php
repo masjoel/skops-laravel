@@ -38,8 +38,9 @@ class GuruController extends Controller
             });
         }
 
-        // Subquery ordering to avoid explicit join
-        $guru = $q->orderBy(Personil::select('nama')->whereColumn('personil.id', 'guru.personil_id'))
+        $guru = $q->join('personil', 'personil.id', '=', 'guru.personil_id')
+            ->select('guru.*')
+            ->orderBy('personil.nama')
             ->paginate(20)
             ->withQueryString();
 

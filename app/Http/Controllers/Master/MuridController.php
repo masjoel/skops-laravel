@@ -7,6 +7,7 @@ use App\Models\Kelas;
 use App\Models\Murid;
 use App\Models\MuridKelas;
 use App\Models\Personil;
+use App\Models\TahunAjaran;
 use Illuminate\Http\Request;
 
 class MuridController extends Controller
@@ -16,7 +17,14 @@ class MuridController extends Controller
      */
     public function index(Request $request)
     {
-        $q = Murid::with(['personil']);
+        $tahunAjaranAktif = TahunAjaran::where('is_aktif', true)->first()->id ?? null;
+        $filterTahunAjaran = $request->input('tahun_ajaran_id', $tahunAjaranAktif);
+
+        $q = Murid::with(['personil', 'kelas', 'riwayatKelas' => function ($query) use ($filterTahunAjaran) {
+            if ($filterTahunAjaran) {
+                $query->where('tahun_ajaran_id', $filterTahunAjaran);
+            }
+        }, 'riwayatKelas.kelas.jurusan']);
 
         if ($request->filled('search')) {
             $q->where(function ($query) use ($request) {
@@ -26,6 +34,9 @@ class MuridController extends Controller
                             ->orWhere('no_hp', 'like', '%' . $request->search . '%')
                             ->orWhere('email', 'like', '%' . $request->search . '%')
                             ->orWhere('alamat', 'like', '%' . $request->search . '%');
+                    })
+                    ->orWhereHas('kelas', function ($qKelas) use ($request) {
+                        $qKelas->where('nama_kelas', 'like', '%' . $request->search . '%');
                     });
             });
         }
@@ -39,14 +50,20 @@ class MuridController extends Controller
                 $qPersonil->where('status', $request->status);
             });
         }
+        if ($filterTahunAjaran) {
+            $q->whereHas('riwayatKelas', function ($qMuridKelas) use ($filterTahunAjaran) {
+                $qMuridKelas->where('tahun_ajaran_id', $filterTahunAjaran);
+            });
+        }
 
         // Subquery ordering to avoid explicit join
         $murid = $q->orderBy(Personil::select('nama')->whereColumn('personil.id', 'murid.personil_id'))
             ->paginate(20)
             ->withQueryString();
+        $tahunAjaran = TahunAjaran::get();
 
         $title = 'Siswa';
-        return view('master.murid.index', compact('murid', 'title'));
+        return view('master.murid.index', compact('murid', 'title', 'tahunAjaran', 'tahunAjaranAktif'));
     }
 
     /**
@@ -56,12 +73,8 @@ class MuridController extends Controller
     {
         $title = 'Siswa';
         $kelas = Kelas::all();
-        $tahunAjaranAktif = Kelas::getTahunAjaranAktif();
-        if (!$tahunAjaranAktif) {
-            return redirect()->route('master.murid.index')
-                ->with('error', 'Tidak ada tahun ajaran aktif. Silakan aktifkan tahun ajaran terlebih dahulu.');
-        }
-        return view('master.murid.create', compact('title', 'kelas'));
+        $tahunAjaranAktif = TahunAjaran::where('is_aktif', true)->first();
+        return view('master.murid.create', compact('title', 'kelas', 'tahunAjaranAktif'));
     }
 
     /**
@@ -91,6 +104,7 @@ class MuridController extends Controller
         MuridKelas::create([
             'murid_id' => $murid->id,
             'kelas_id' => $request->kelas_id,
+            'tahun_ajaran_id' => $request->tahun_ajaran_id,
         ]);
 
         return redirect()->route('master.murid.index')
@@ -108,11 +122,16 @@ class MuridController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Murid $murid)
+    public function edit(Request $request, Murid $murid)
     {
         $title = 'Siswa';
         $kelas = Kelas::all();
-        return view('master.murid.edit', compact('title', 'murid', 'kelas'));
+        $tahunAjaranAktif = TahunAjaran::where('is_aktif', true)->first();
+
+        $tahunAjaranId = $request->input('tahun_ajaran_id', $tahunAjaranAktif->id ?? null);
+        $tahunAjaranEdit = TahunAjaran::find($tahunAjaranId) ?? $tahunAjaranAktif;
+
+        return view('master.murid.edit', compact('title', 'murid', 'kelas', 'tahunAjaranEdit'));
     }
 
     /**
@@ -140,8 +159,13 @@ class MuridController extends Controller
             'nisn' => $request->nisn,
         ]);
         MuridKelas::updateOrCreate(
-            ['murid_id' => $murid->id],
-            ['kelas_id' => $request->kelas_id]
+            [
+                'murid_id' => $murid->id,
+                'tahun_ajaran_id' => $request->tahun_ajaran_id
+            ],
+            [
+                'kelas_id' => $request->kelas_id
+            ]
         );
 
         return redirect()->route('master.murid.index')
@@ -153,6 +177,12 @@ class MuridController extends Controller
      */
     public function destroy(Murid $murid)
     {
+        // cek kartu kontrol yang terkait dengan murid ini
+        $kartuKontrolCount = $murid->kartuKontrol()->count();
+        if ($kartuKontrolCount > 0) {
+            return redirect()->route('master.murid.index')
+                ->with('error', 'Murid tidak bisa dihapus karena sudah digunakan.');
+        }
         $personil = $murid->personil;
         $murid->delete();
         $personil->delete();

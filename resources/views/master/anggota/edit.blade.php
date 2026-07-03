@@ -1,1 +1,0 @@
-@include('master.anggota.create')
