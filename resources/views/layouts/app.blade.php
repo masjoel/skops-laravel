@@ -618,16 +618,16 @@
 
             {{-- Perilaku --}}
             <div class="nav-label">Perilaku</div>
-            <a href="{{ route('master.jurusan.index') }}"
-                class="nav-item-link {{ request()->routeIs('master.jurusan.*') ? 'active' : '' }}">
+            <a href="{{ route('transaksi.kartu-kontrol.index') }}"
+                class="nav-item-link {{ request()->routeIs('transaksi.kartu-kontrol.*') ? 'active' : '' }}">
                 <span class="nav-icon"><i class="fas fa-chart-line"></i></span>
                 Kartu Kontrol
             </a>
 
             {{-- Laporan --}}
             <div class="nav-label">Laporan</div>
-            <a href="{{ route('master.jurusan.index') }}"
-                class="nav-item-link {{ request()->routeIs('master.jurusan.*') ? 'active' : '' }}">
+            <a href="{{ route('laporan.rekapitulasi.index') }}"
+                class="nav-item-link {{ request()->routeIs('laporan.rekapitulasi.*') ? 'active' : '' }}">
                 <span class="nav-icon"><i class="fas fa-file"></i></span>
                 Rekapitulasi Poin
             </a>
