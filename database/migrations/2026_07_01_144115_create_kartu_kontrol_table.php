@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('murid_kelas_id')->nullable()->constrained('murid_kelas')->cascadeOnDelete();
             $table->foreignId('jenis_poin_id')->nullable()->constrained('jenis_poin')->nullOnDelete();
             $table->date('tgl')->nullable();
-            $table->decimal('skor', 8, 2)->nullable();
+            $table->integer('skor')->nullable();
             $table->tinyText('tindakan')->nullable();
             $table->tinyInteger('semester')->default(1);
             $table->boolean('is_reset')->default(false);

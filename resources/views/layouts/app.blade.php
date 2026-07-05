@@ -626,8 +626,8 @@
 
             {{-- Laporan --}}
             <div class="nav-label">Laporan</div>
-            <a href="{{ route('laporan.rekapitulasi.index') }}"
-                class="nav-item-link {{ request()->routeIs('laporan.rekapitulasi.*') ? 'active' : '' }}">
+            <a href="{{ route('laporan.rekapitulasi') }}"
+                class="nav-item-link {{ request()->routeIs('laporan.rekapitulasi') ? 'active' : '' }}">
                 <span class="nav-icon"><i class="fas fa-file"></i></span>
                 Rekapitulasi Poin
             </a>

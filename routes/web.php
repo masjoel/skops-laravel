@@ -8,7 +8,6 @@ use App\Http\Controllers\Master\GuruController;
 use App\Http\Controllers\Master\JenisPoinController;
 use App\Http\Controllers\Master\JurusanController;
 use App\Http\Controllers\Master\KelasController;
-use App\Http\Controllers\Master\KelasExtensiController;
 use App\Http\Controllers\Master\MuridController;
 use App\Http\Controllers\Master\OrangTuaController;
 use App\Http\Controllers\Master\PersonilController;
@@ -33,6 +32,7 @@ use Illuminate\Support\Facades\Route;
 | Auth Routes
 |--------------------------------------------------------------------------
 */
+
 Route::get('/', fn() => redirect()->route('login'));
 
 Route::get('/login', [LoginController::class, 'index'])->name('login');
@@ -70,7 +70,8 @@ Route::middleware(['auth.session'])->group(function () {
     |----------------------------------------------------------------------
     */
     Route::prefix('transaksi')->name('transaksi.')->group(function () {
-        Route::resource('kartu-kontrol', KartuKontrolController::class);
+        Route::resource('kartu-kontrol', KartuKontrolController::class)
+            ->parameters(['kartu-kontrol' => 'kartuKontrol']);
     });
     /*
     |----------------------------------------------------------------------
@@ -78,7 +79,8 @@ Route::middleware(['auth.session'])->group(function () {
     |----------------------------------------------------------------------
     */
     Route::prefix('laporan')->name('laporan.')->group(function () {
-        Route::resource('rekapitulasi', RekapitulasiController::class);
+        Route::get('rekapitulasi', [RekapitulasiController::class, 'index'])->name('rekapitulasi');
+        Route::get('rekapitulasi/{muridKelasId}', [RekapitulasiController::class, 'show'])->name('rekapitulasi.show');
     });
 
 

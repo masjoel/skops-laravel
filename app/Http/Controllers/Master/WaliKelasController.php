@@ -37,10 +37,9 @@ class WaliKelasController extends Controller
                                 ->orWhere('email', 'like', '%' . $search . '%')
                                 ->orWhere('alamat', 'like', '%' . $search . '%');
                         });
-                })
-                    ->orWhereHas('kelas', function ($qKelas) use ($search) {
-                        $qKelas->where('nama_kelas', 'like', '%' . $search . '%');
-                    });
+                })->orWhereHas('kelas', function ($qKelas) use ($search) {
+                    $qKelas->where('nama_kelas', 'like', '%' . $search . '%');
+                });
             });
         }
 

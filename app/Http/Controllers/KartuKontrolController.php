@@ -2,113 +2,205 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
+use App\Models\Guru;
+use App\Models\JenisPoin;
 use App\Models\KartuKontrol;
-use App\Models\Murid;
-use App\Models\Personil;
+use App\Models\MuridKelas;
+use App\Models\PeriodeAkademik;
 use App\Models\TahunAjaran;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redirect;
 
 class KartuKontrolController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
-        $tahunAjaranAktif = TahunAjaran::where('is_aktif', true)->first()->id ?? null;
-        $filterTahunAjaran = $request->input('tahun_ajaran_id', $tahunAjaranAktif);
+        $periodeAktif = PeriodeAkademik::aktif();
+        $tahunAjaranAktifId = $periodeAktif?->tahun_ajaran_id
+            ?? TahunAjaran::where('is_aktif', true)->first()?->id;
 
-        $q = Murid::with(['personil', 'kelas', 'riwayatKelas' => function ($query) use ($filterTahunAjaran) {
-            if ($filterTahunAjaran) {
-                $query->where('tahun_ajaran_id', $filterTahunAjaran);
-            }
-        }, 'riwayatKelas.kelas.jurusan']);
+        $filterTahunAjaran = $request->input('tahun_ajaran_id', $tahunAjaranAktifId);
+
+        $q = KartuKontrol::with([
+            'muridKelas.murid.personil',
+            'muridKelas.kelas.jurusan',
+            'muridKelas.tahunAjaran',
+            'muridKelas.kelas',
+            'jenisPoin',
+            'guru.personil',
+            'periodeAkademik.tahunAjaran',
+        ]);
+
+        if ($filterTahunAjaran) {
+            $q->whereHas('muridKelas', function ($qmk) use ($filterTahunAjaran) {
+                $qmk->where('tahun_ajaran_id', $filterTahunAjaran);
+            });
+        }
 
         if ($request->filled('search')) {
-            $q->where(function ($query) use ($request) {
-                $query->where('nis', 'like', '%' . $request->search . '%')
-                    ->orWhereHas('personil', function ($qPersonil) use ($request) {
-                        $qPersonil->where('nama', 'like', '%' . $request->search . '%')
-                            ->orWhere('no_hp', 'like', '%' . $request->search . '%')
-                            ->orWhere('email', 'like', '%' . $request->search . '%')
-                            ->orWhere('alamat', 'like', '%' . $request->search . '%');
-                    })
-                    ->orWhereHas('kelas', function ($qKelas) use ($request) {
-                        $qKelas->where('nama_kelas', 'like', '%' . $request->search . '%');
-                    });
+            $search = $request->search;
+            $q->where(function ($query) use ($search) {
+                $query->whereHas('muridKelas.murid', function ($qm) use ($search) {
+                    $qm->where('nis', 'like', '%' . $search . '%')
+                        ->orWhereHas('personil', function ($qp) use ($search) {
+                            $qp->where('nama', 'like', '%' . $search . '%');
+                        });
+                })->orWhereHas('jenisPoin', function ($qj) use ($search) {
+                    $qj->where('deskripsi', 'like', '%' . $search . '%')
+                        ->orWhere('kode', 'like', '%' . $search . '%');
+                })->orWhereHas('guru.personil', function ($qg) use ($search) {
+                    $qg->where('nama', 'like', '%' . $search . '%');
+                })->orWhereHas('muridKelas.kelas', function ($qKelas) use ($search) {
+                    $qKelas->where('nama_kelas', 'like', '%' . $search . '%');
+                });
             });
         }
-        if ($request->filled('gender')) {
-            $q->whereHas('personil', function ($qPersonil) use ($request) {
-                $qPersonil->where('jenis_kelamin', $request->gender);
+
+        if ($request->filled('jenis')) {
+            $q->whereHas('jenisPoin', function ($qj) use ($request) {
+                $qj->where('jenis', $request->jenis);
             });
         }
-        if ($request->filled('status')) {
-            $q->whereHas('personil', function ($qPersonil) use ($request) {
-                $qPersonil->where('status', $request->status);
+
+        if ($request->filled('semester')) {
+            $q->whereHas('periodeAkademik', function ($qp) use ($request) {
+                $qp->where('semester', $request->semester);
             });
         }
+
+        $kartuKontrol = $q->orderByDesc('tgl')->paginate(20)->withQueryString();
+
+        // Hitung total pelanggaran dan reward berdasarkan filter yang aktif
+        $totalsQuery = KartuKontrol::join('jenis_poin', 'jenis_poin.id', '=', 'kartu_kontrol.jenis_poin_id');
         if ($filterTahunAjaran) {
-            $q->whereHas('riwayatKelas', function ($qMuridKelas) use ($filterTahunAjaran) {
-                $qMuridKelas->where('tahun_ajaran_id', $filterTahunAjaran);
+            $totalsQuery->whereHas('muridKelas', function ($qmk) use ($filterTahunAjaran) {
+                $qmk->where('tahun_ajaran_id', $filterTahunAjaran);
             });
         }
+        if ($request->filled('semester')) {
+            $totalsQuery->whereHas('periodeAkademik', function ($qp) use ($request) {
+                $qp->where('semester', $request->semester);
+            });
+        }
+        $totals = $totalsQuery->selectRaw('jenis_poin.jenis, COUNT(*) as jumlah, SUM(jenis_poin.skor) as total_skor')
+            ->groupBy('jenis_poin.jenis')
+            ->get()
+            ->keyBy('jenis');
 
-        // Subquery ordering to avoid explicit join
-        $murid = $q->orderBy(Personil::select('nama')->whereColumn('personil.id', 'murid.personil_id'))
-            ->paginate(20)
-            ->withQueryString();
-        $tahunAjaran = TahunAjaran::get();
+        $totalPelanggaran  = $totals['pelanggaran']?->jumlah ?? 0;
+        $totalReward       = $totals['reward']?->jumlah ?? 0;
+        $skorPelanggaran   = $totals['pelanggaran']?->total_skor ?? 0;
+        $skorReward        = $totals['reward']?->total_skor ?? 0;
 
-        $title = 'Siswa';
-        return view('transaksi.kartu-kontrol.index', compact('murid', 'title', 'tahunAjaran', 'tahunAjaranAktif'));
+        $tahunAjaran = TahunAjaran::orderByDesc('nama')->get();
+        $title = 'Kartu Kontrol';
+
+        return view('transaksi.kartu-kontrol.index', compact(
+            'kartuKontrol',
+            'title',
+            'tahunAjaran',
+            'tahunAjaranAktifId',
+            'filterTahunAjaran',
+            'totalPelanggaran',
+            'totalReward',
+            'skorPelanggaran',
+            'skorReward',
+        ));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $title = 'Kartu Kontrol';
+
+        return view('transaksi.kartu-kontrol.create', $this->formData(), compact('title'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $validated = $this->validasi($request);
+
+        DB::transaction(function () use ($validated) {
+            // kalau skor tidak diisi manual, ambil dari jenis poin terkait
+            if (!isset($validated['skor']) || $validated['skor'] === null) {
+                $validated['skor'] = JenisPoin::find($validated['jenis_poin_id'])->skor;
+            }
+            $validated['user_id'] = Auth::id();
+            KartuKontrol::create($validated);
+        });
+
+        return Redirect::route('transaksi.kartu-kontrol.index')
+            ->with('success', 'Kartu kontrol berhasil ditambahkan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(KartuKontrol $kartuKontrol)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(KartuKontrol $kartuKontrol)
     {
-        //
+        $title = 'Kartu Kontrol';
+
+        return view(
+            'transaksi.kartu-kontrol.edit',
+            array_merge($this->formData(), ['kartuKontrol' => $kartuKontrol, 'title' => $title])
+        );
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, KartuKontrol $kartuKontrol)
     {
-        //
+        $validated = $this->validasi($request, $kartuKontrol);
+
+        if (!isset($validated['skor']) || $validated['skor'] === null) {
+            $validated['skor'] = JenisPoin::find($validated['jenis_poin_id'])->skor;
+        }
+
+        $kartuKontrol->update($validated);
+
+        return Redirect::route('transaksi.kartu-kontrol.index')
+            ->with('success', 'Kartu kontrol berhasil diperbarui.');
+    }
+
+    public function destroy(KartuKontrol $kartuKontrol)
+    {
+        $kartuKontrol->delete();
+
+        return Redirect::route('transaksi.kartu-kontrol.index')
+            ->with('success', 'Kartu kontrol berhasil dihapus.');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Validasi input form tambah/edit kartu kontrol.
      */
-    public function destroy(KartuKontrol $kartuKontrol)
+    private function validasi(Request $request, ?KartuKontrol $kartuKontrol = null): array
     {
-        //
+        return $request->validate([
+            'murid_kelas_id' => ['required', 'exists:murid_kelas,id'],
+            'guru_id' => ['nullable', 'exists:guru,id'],
+            'jenis_poin_id' => ['required', 'exists:jenis_poin,id'],
+            'periode_akademik_id' => ['required', 'exists:periode_akademik,id'],
+            'tgl' => ['required', 'date'],
+            'skor' => ['nullable', 'numeric'],
+            'tindakan' => ['nullable', 'string', 'max:255'],
+        ]);
+    }
+
+    /**
+     * Data dropdown yang dipakai bersama oleh form create & edit.
+     */
+    private function formData(): array
+    {
+        $tahunAjaranAktifId = TahunAjaran::aktif()?->id;
+
+        return [
+            'muridKelasList' => MuridKelas::with(['murid.personil', 'kelas'])
+                ->where('tahun_ajaran_id', $tahunAjaranAktifId)
+                ->get(),
+            'jenisPoinList' => JenisPoin::orderBy('urut')->get(),
+            'guruList' => Guru::with('personil')->get(),
+            'periodeAkademikList' => PeriodeAkademik::with('tahunAjaran')
+                ->orderByDesc('tahun_ajaran_id')
+                ->orderBy('semester')
+                ->get(),
+            'periodeAkademikAktifId' => PeriodeAkademik::aktif()?->id,
+        ];
     }
 }

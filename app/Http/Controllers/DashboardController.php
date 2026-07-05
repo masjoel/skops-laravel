@@ -2,57 +2,130 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Barang;
-use App\Models\TransaksiBarang;
-use App\Models\AccJurnalDetail;
-use App\Models\AccJurnal;
-use App\Models\GraphOmset;
-use Illuminate\Support\Facades\DB;
+use App\Models\Guru;
+use App\Models\JenisPoin;
+use App\Models\KartuKontrol;
+use App\Models\Murid;
+use App\Models\PeriodeAkademik;
+use App\Models\TahunAjaran;
 
 class DashboardController extends Controller
 {
     public function index()
     {
         $tahun = date('Y');
+        $periodeAktif = PeriodeAkademik::aktif();
+        $tahunAjaranAktifId = $periodeAktif?->tahun_ajaran_id
+            ?? TahunAjaran::where('is_aktif', true)->first()?->id;
+
+        $filterTahunAjaran = $tahunAjaranAktifId;
+
+        $q = KartuKontrol::with([
+            'muridKelas.murid.personil',
+            'muridKelas.kelas.jurusan',
+            'muridKelas.tahunAjaran',
+            'muridKelas.kelas',
+            'jenisPoin',
+            'guru.personil',
+            'periodeAkademik.tahunAjaran',
+        ]);
+
+        if ($filterTahunAjaran) {
+            $q->whereHas('muridKelas', function ($qmk) use ($filterTahunAjaran) {
+                $qmk->where('tahun_ajaran_id', $filterTahunAjaran);
+            });
+        }
+        $totalsQuery = KartuKontrol::join('jenis_poin', 'jenis_poin.id', '=', 'kartu_kontrol.jenis_poin_id');
+        if ($filterTahunAjaran) {
+            $totalsQuery->whereHas('muridKelas', function ($qmk) use ($filterTahunAjaran) {
+                $qmk->where('tahun_ajaran_id', $filterTahunAjaran);
+            });
+        }
+        $totals = $totalsQuery->selectRaw('jenis_poin.jenis, COUNT(*) as jumlah, SUM(jenis_poin.skor) as total_skor')
+            ->groupBy('jenis_poin.jenis')
+            ->get()
+            ->keyBy('jenis');
+
+        $totalPelanggaran  = $totals['pelanggaran']?->jumlah ?? 0;
+        $skorPelanggaran   = $totals['pelanggaran']?->total_skor ?? 0;
+        $totalReward       = $totals['reward']?->jumlah ?? 0;
+        $skorReward        = $totals['reward']?->total_skor ?? 0;
+        $totalPemutihan       = $totals['pemutihan']?->jumlah ?? 0;
+        $skorPemutihan        = $totals['pemutihan']?->total_skor ?? 0;
+
 
         // Statistik ringkas
-        // $totalBarang    = Barang::count();
-        // $barangKritis   = Barang::kritis()->count();
-        // $totalPenjualan = TransaksiBarang::where('jenis', 'jual')
-        //     ->whereYear('tgl_inv', $tahun)->sum('jml');
-        // $totalPembelian = TransaksiBarang::where('jenis', 'beli')
-        //     ->whereYear('tgl_inv', $tahun)->sum('jml');
+        $totalMurid    = Murid::count() ?? 0;
+        $totalGuru    = Guru::count() ?? 0;
+        $totalJenisPoin    = JenisPoin::count() ?? 0;
 
-        // // Omset & biaya per bulan untuk chart
-        // $chartData = GraphOmset::where('tahun', $tahun)
-        //     ->orderBy('bulan')->get();
+        $chartDataRaw = KartuKontrol::query()
+            ->selectRaw('MONTH(kartu_kontrol.tgl) as bulan, jenis_poin.jenis, SUM(jenis_poin.skor) as total_skor')
+            ->join('jenis_poin', 'jenis_poin.id', '=', 'kartu_kontrol.jenis_poin_id')
+            ->whereYear('kartu_kontrol.tgl', $tahun)
+            ->when($filterTahunAjaran, function ($q) use ($filterTahunAjaran) {
+                $q->whereHas('muridKelas', function ($qmk) use ($filterTahunAjaran) {
+                    $qmk->where('tahun_ajaran_id', $filterTahunAjaran);
+                });
+            })
+            ->groupBy('bulan', 'jenis_poin.jenis')
+            ->get();
 
-        // // Transaksi penjualan terbaru
-        // $transaksiTerbaru = TransaksiBarang::where('jenis', 'jual')
-        //     ->orderByDesc('tgl_inv')
-        //     ->limit(10)
-        //     ->get();
+        $chartData = collect();
+        for ($i = 1; $i <= 12; $i++) {
+            $chartData->push((object) [
+                'bulan' => $i,
+                'namabulan' => \Carbon\Carbon::create()->month($i)->translatedFormat('M'),
+                'reward' => $chartDataRaw->where('bulan', $i)->where('jenis', 'reward')->sum('total_skor'),
+                'pelanggaran' => $chartDataRaw->where('bulan', $i)->where('jenis', 'pelanggaran')->sum('total_skor'),
+            ]);
+        }
 
-        // // Barang stok kritis
-        // $stokKritis = Barang::kritis()
-        //     ->with(['kategori', 'satuan'])
-        //     ->limit(10)
-        //     ->get();
-        $totalBarang = 0;
-        $barangKritis = 0;
-        $totalPenjualan = 0;
-        $totalPembelian = 0;
-        $chartData = [];
-        $transaksiTerbaru = [];
-        $stokKritis = [];
+        // 10 Siswa dengan poin tertinggi
+        $siswaTertinggi = KartuKontrol::query()
+            ->select('murid_kelas_id')
+            ->join('jenis_poin', 'jenis_poin.id', '=', 'kartu_kontrol.jenis_poin_id')
+            ->selectRaw('SUM(CASE WHEN jenis_poin.jenis = "pelanggaran" THEN jenis_poin.skor ELSE 0 END) as total_pelanggaran')
+            ->selectRaw('SUM(CASE WHEN jenis_poin.jenis = "reward" THEN jenis_poin.skor ELSE 0 END) as total_reward')
+            ->when($filterTahunAjaran, function ($q) use ($filterTahunAjaran) {
+                $q->whereHas('muridKelas', function ($qmk) use ($filterTahunAjaran) {
+                    $qmk->where('tahun_ajaran_id', $filterTahunAjaran);
+                });
+            })
+            ->with(['muridKelas.murid.personil', 'muridKelas.kelas'])
+            ->groupBy('murid_kelas_id')
+            ->orderByRaw('(total_reward + total_pelanggaran) DESC')
+            ->limit(10)
+            ->get();
+
+        // 10 Pelanggaran/Reward terbanyak
+        $poinTerbanyak = KartuKontrol::query()
+            ->select('jenis_poin_id')
+            ->selectRaw('COUNT(*) as jumlah_kejadian')
+            ->when($filterTahunAjaran, function ($q) use ($filterTahunAjaran) {
+                $q->whereHas('muridKelas', function ($qmk) use ($filterTahunAjaran) {
+                    $qmk->where('tahun_ajaran_id', $filterTahunAjaran);
+                });
+            })
+            ->with('jenisPoin')
+            ->groupBy('jenis_poin_id')
+            ->orderByDesc('jumlah_kejadian')
+            ->limit(10)
+            ->get();
+
         return view('dashboard.index', compact(
-            'totalBarang',
-            'barangKritis',
-            'totalPenjualan',
-            'totalPembelian',
+            'totalMurid',
+            'totalGuru',
+            'totalJenisPoin',
+            'totalReward',
+            'skorReward',
+            'totalPelanggaran',
+            'skorPelanggaran',
+            'totalPemutihan',
+            'skorPemutihan',
             'chartData',
-            'transaksiTerbaru',
-            'stokKritis'
+            'siswaTertinggi',
+            'poinTerbanyak'
         ));
     }
 }

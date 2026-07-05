@@ -29,7 +29,7 @@
                     <div class="d-flex align-items-start justify-content-between">
                         <div>
                             <div class="stat-label">Siswa</div>
-                            <div class="stat-value text-primary" id="val-barang">{{ number_format($totalBarang) }}</div>
+                            <div class="stat-value text-primary" id="val-barang">{{ number_format($totalMurid) }}</div>
                             <div class="stat-sub">terdaftar</div>
                         </div>
                         <div class="stat-icon" style="background:rgba(99,102,241,.12);color:#6366f1">
@@ -47,7 +47,7 @@
                         <div>
                             <div class="stat-label">Guru</div>
                             <div class="stat-value text-primary" id="val-jual">
-                                {{ number_format($totalPenjualan, 0, ',', '.') }}
+                                {{ number_format($totalGuru, 0, ',', '.') }}
                             </div>
                             <div class="stat-sub">terdaftar</div>
                         </div>
@@ -66,7 +66,7 @@
                         <div>
                             <div class="stat-label">Jenis Poin</div>
                             <div class="stat-value" style="color:#f59e0b" id="val-beli">
-                                {{ number_format($totalPembelian, 0, ',', '.') }}
+                                {{ number_format($totalJenisPoin, 0, ',', '.') }}
                             </div>
                             <div class="stat-sub">item</div>
                         </div>
@@ -85,9 +85,9 @@
                         <div>
                             <div class="stat-label">Reward</div>
                             <div class="stat-value text-success" id="val-jual">
-                                {{ number_format($totalPenjualan, 0, ',', '.') }}
+                                {{ number_format($totalReward, 0, ',', '.') }}
                             </div>
-                            <div class="stat-sub text-success">poin</div>
+                            <div class="stat-sub text-success">{{ number_format($skorReward, 0, ',', '.') }} poin</div>
                         </div>
                         <div class="stat-icon" style="background:rgba(34,197,94,.12);color:#22c55e">
                             <i class="fas fa-star"></i>
@@ -102,8 +102,8 @@
                     <div class="d-flex align-items-start justify-content-between">
                         <div>
                             <div class="stat-label">Pemutihan</div>
-                            <div class="stat-value text-info" id="val-barang">{{ number_format($totalBarang) }}</div>
-                            <div class="stat-sub text-info">poin</div>
+                            <div class="stat-value text-info" id="val-barang">{{ number_format($totalPemutihan, 0, ',', '.') }}</div>
+                            <div class="stat-sub text-info">{{ number_format($skorPemutihan, 0, ',', '.') }} poin</div>
                         </div>
                         <div class="stat-icon" style="background:rgba(99,102,241,.12);color:#63b6f1">
                             <i class="fas fa-recycle"></i>
@@ -120,9 +120,9 @@
                     <div class="d-flex align-items-start justify-content-between">
                         <div>
                             <div class="stat-label">Pelanggaran</div>
-                            <div class="stat-value text-danger" id="val-kritis">{{ number_format(17500000) }}</div>
+                            <div class="stat-value text-danger" id="val-kritis">{{ number_format($totalPelanggaran, 0, ',', '.') }}</div>
                             <div class="stat-sub text-danger">
-                                poin
+                                {{ number_format($skorPelanggaran, 0, ',', '.') }} poin
                             </div>
                         </div>
                         <div class="stat-icon" style="background:rgba(239,68,68,.12);color:#ef4444">
@@ -172,26 +172,28 @@
                 <div class="card-body d-flex flex-column align-items-center justify-content-center" style="padding:24px">
                     <canvas id="donutChart" width="180" height="180"></canvas>
                     <div class="mt-4 w-100">
-                        {{-- @php
-                        $totalPend = $chartData->sum('pendapatan');
-                        $totalBiaya = $chartData->sum('biaya');
-                        $labaBersih = $totalPend - $totalBiaya;
-                    @endphp
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span style="font-size:13px;color:var(--text-muted)"><i class="fas fa-arrow-up me-1" style="color:#22c55e"></i>Total Pendapatan</span>
-                        <strong style="font-size:13px;color:#22c55e">Rp {{ number_format($totalPend, 0, ',', '.') }}</strong>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span style="font-size:13px;color:var(--text-muted)"><i class="fas fa-arrow-down me-1" style="color:#ef4444"></i>Total Biaya</span>
-                        <strong style="font-size:13px;color:#ef4444">Rp {{ number_format($totalBiaya, 0, ',', '.') }}</strong>
-                    </div>
-                    <hr style="border-color:var(--border-color);margin:10px 0">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span style="font-size:14px;font-weight:600">Laba Bersih</span>
-                        <strong style="font-size:14px;color:{{ $labaBersih >= 0 ? '#22c55e' : '#ef4444' }}">
-                            Rp {{ number_format($labaBersih, 0, ',', '.') }}
-                        </strong>
-                    </div> --}}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span style="font-size:13px;color:var(--text-muted)"><i class="fas fa-star me-1" style="color:#22c55e"></i>Skor Reward</span>
+                            <strong style="font-size:13px;color:#22c55e">{{ number_format($skorReward, 0, ',', '.') }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span style="font-size:13px;color:var(--text-muted)"><i class="fas fa-exclamation-triangle me-1" style="color:#ef4444"></i>Skor Pelanggaran</span>
+                            <strong style="font-size:13px;color:#ef4444">{{ number_format($skorPelanggaran, 0, ',', '.') }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span style="font-size:13px;color:var(--text-muted)"><i class="fas fa-recycle me-1" style="color:#63b6f1"></i>Skor Pemutihan</span>
+                            <strong style="font-size:13px;color:#63b6f1">{{ number_format($skorPemutihan, 0, ',', '.') }}</strong>
+                        </div>
+                        <hr style="border-color:var(--border-color);margin:10px 0">
+                        @php
+                            $totalSkorNet = $skorReward - $skorPelanggaran + $skorPemutihan;
+                        @endphp
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span style="font-size:14px;font-weight:600">Net Skor Total</span>
+                            <strong style="font-size:14px;color:{{ $totalSkorNet >= 0 ? '#22c55e' : '#ef4444' }}">
+                                {{ number_format($totalSkorNet, 0, ',', '.') }}
+                            </strong>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -200,11 +202,11 @@
 
     {{-- ── Bottom Tables ── --}}
     <div class="row g-3">
-        <div class="col-12 col-xl-5">
+        <div class="col-12 col-xl-6">
             <div class="card">
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <div class="text-primary"><i class="fas fa-receipt me-2 text-primary"></i>10 Siswa dengan poin tertinggi</div>
-                    <a href="{{ route('master.murid.index') }}" class="btn btn-sm btn-primary"
+                    <a href="{{ route('laporan.rekapitulasi') }}" class="btn btn-sm btn-primary"
                         style="font-size:12px;padding:4px 12px">
                         Lihat Semua <i class="fas fa-arrow-right ms-1"></i>
                     </a>
@@ -214,34 +216,35 @@
                         <table class="table table-hover mb-0">
                             <thead>
                                 <tr>
-                                    <th>No</th>
                                     <th>Nama</th>
                                     <th>Kelas</th>
-                                    <th class="text-end">Total</th>
+                                    <th class="text-center">Pelanggaran</th>
+                                    <th class="text-center">Reward</th>
+                                    <th class="text-end">Total Poin</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($transaksiTerbaru as $trx)
+                                @forelse($siswaTertinggi as $index => $siswa)
                                     <tr>
                                         <td>
-                                            <a href="{{ route('master.murid.show', $trx->invoice) }}"
-                                                style="color:#6366f1;font-weight:600;font-size:12.5px;text-decoration:none">
-                                                {{ $trx->invoice }}
-                                            </a>
+                                            {{ $siswa->muridKelas?->murid?->personil?->nama ?? '-' }}
                                         </td>
-                                        <td style="font-size:13px;color:var(--text-muted)">
-                                            {{ \Carbon\Carbon::parse($trx->tgl_inv)->format('d M Y') }}
+                                        <td>
+                                            {{ $siswa->muridKelas?->kelas?->nama_kelas ?? '-' }}
                                         </td>
-                                        <td style="font-size:13px">
-                                            {{ $trx->anggota?->nama ?? '-' }}
+                                        <td class="text-center text-danger">
+                                            {{ $siswa->total_pelanggaran ?: '0' }}
                                         </td>
-                                        <td class="text-end" style="font-weight:600;font-size:13px;color:#22c55e">
-                                            Rp {{ number_format($trx->jml, 0, ',', '.') }}
+                                        <td class="text-center text-success">
+                                            {{ $siswa->total_reward ?: '0' }}
+                                        </td>
+                                        <td class="text-end" style="font-weight:600;">
+                                            {{ $siswa->total_reward + $siswa->total_pelanggaran }}
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="text-center"
+                                        <td colspan="5" class="text-center"
                                             style="padding:32px;color:var(--text-muted);font-size:13px">
                                             <i class="fas fa-inbox fa-2x mb-2 d-block" style="opacity:.3"></i>
                                             Belum ada data
@@ -255,13 +258,13 @@
             </div>
         </div>
 
-        <div class="col-12 col-xl-7">
+        <div class="col-12 col-xl-6">
             <div class="card">
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <div class="text-danger">
                         <i class="fas fa-exclamation-triangle me-2 text-danger"></i>10 Pelanggaran/Reward terbanyak
                     </div>
-                    <a href="{{ route('master.jenis-poin.index') }}" class="btn btn-sm btn-outline-danger"
+                    <a href="{{ route('transaksi.kartu-kontrol.index') }}" class="btn btn-sm btn-outline-danger"
                         style="font-size:12px;padding:4px 12px;border-radius:8px">
                         Lihat Semua
                     </a>
@@ -272,29 +275,31 @@
                             <thead>
                                 <tr>
                                     <th>Deskripsi</th>
-                                    <th>Jenis</th>
+                                    <th class="text-center">Jenis</th>
                                     <th class="text-center">Skor</th>
                                     <th class="text-center">Jumlah Siswa</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($stokKritis as $brg)
+                                @forelse($poinTerbanyak as $poin)
                                     <tr>
                                         <td>
-                                            <div style="font-size:13px;font-weight:500">{{ $brg->namabrg }}</div>
-                                            <div style="font-size:11px;color:var(--text-muted)">
-                                                {{ $brg->kategori?->nama ?? '-' }}
-                                                · {{ $brg->satuan?->nama ?? '-' }}
-                                            </div>
+                                            <div>{{ $poin->jenisPoin?->deskripsi ?? '-' }}</div>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge-status badge-danger">{{ $brg->stok }}</span>
+                                            @if($poin->jenisPoin?->jenis === 'pelanggaran')
+                                                <span class="badge bg-danger bg-opacity-10 text-danger" style="font-size:11px;padding:4px 8px;border-radius:20px">Pelanggaran</span>
+                                            @elseif($poin->jenisPoin?->jenis === 'reward')
+                                                <span class="badge bg-success bg-opacity-10 text-success" style="font-size:11px;padding:4px 8px;border-radius:20px">Reward</span>
+                                            @else
+                                                <span class="badge bg-secondary bg-opacity-10 text-secondary" style="font-size:11px;padding:4px 8px;border-radius:20px">{{ ucfirst($poin->jenisPoin?->jenis) }}</span>
+                                            @endif
                                         </td>
-                                        <td class="text-center" style="font-size:13px;color:var(--text-muted)">
-                                            {{ $brg->stok_kritis }}
+                                        <td class="text-center" style="color:{{ $poin->jenisPoin?->jenis === 'reward' ? 'green' : 'red' }}">
+                                            {{ $poin->jenisPoin?->skor ?? '-' }}
                                         </td>
-                                        <td class="text-center" style="font-size:13px;color:var(--text-muted)">
-                                            {{ $brg->stok_kritis }}
+                                        <td class="text-center" style="color:var(--text-muted)">
+                                            {{ $poin->jumlah_kejadian }}
                                         </td>
                                     </tr>
                                 @empty
@@ -314,69 +319,7 @@
             </div>
         </div>
 
-        <div class="col-12 col-xl-12">
-            <div class="card">
-                <div class="card-header d-flex align-items-center justify-content-between">
-                    <div class="text-warning"><i class="fas fa-list-ol me-2 text-warning"></i>Jenis Reward/Pelanggaran</div>
-                    <a href="{{ route('master.murid.index') }}" class="btn btn-sm btn-warning"
-                        style="font-size:12px;padding:4px 12px">
-                        Lihat Semua <i class="fas fa-arrow-right ms-1"></i>
-                    </a>
-                </div>
-                <div class="card-body" style="padding:0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Kode</th>
-                                    <th>Deskripsi</th>
-                                    <th>Jenis</th>
-                                    <th class="text-end">Skor</th>
-                                    <th>Keterangan</th>
-                                    <th>Tindak Lanjut</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($transaksiTerbaru as $trx)
-                                    <tr>
-                                        <td>
-                                            <a href="{{ route('master.murid.show', $trx->invoice) }}"
-                                                style="color:#f59e0b;font-weight:600;font-size:12.5px;text-decoration:none">
-                                                {{ $trx->invoice }}
-                                            </a>
-                                        </td>
-                                        <td style="font-size:13px;color:var(--text-muted)">
-                                            {{ \Carbon\Carbon::parse($trx->tgl_inv)->format('d M Y') }}
-                                        </td>
-                                        <td style="font-size:13px">
-                                            {{ $trx->anggota?->nama ?? '-' }}
-                                        </td>
-                                        <td class="text-end" style="font-weight:600;font-size:13px;color:#22c55e">
-                                            Rp {{ number_format($trx->jml, 0, ',', '.') }}
-                                        </td>
-                                        <td style="font-size:13px">
-                                            {{ $trx->anggota?->nama ?? '-' }}
-                                        </td>
-                                        <td style="font-size:13px">
-                                            {{ $trx->anggota?->nama ?? '-' }}
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="6" class="text-center"
-                                            style="padding:32px;color:var(--text-muted);font-size:13px">
-                                            <i class="fas fa-inbox fa-2x mb-2 d-block" style="opacity:.3"></i>
-                                            Belum ada data
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
 
     <style>
         .stat-card {
@@ -434,29 +377,29 @@
             // ── Chart Data dari Laravel ──
             const chartData = @json($chartData);
             const labels = chartData.map(d => d.namabulan || 'Bln ' + d.bulan);
-            const pendData = chartData.map(d => parseFloat(d.pendapatan) || 0);
-            const biayaData = chartData.map(d => parseFloat(d.biaya) || 0);
+            const rewardData = chartData.map(d => parseFloat(d.reward) || 0);
+            const pelanggaranData = chartData.map(d => parseFloat(d.pelanggaran) || 0);
 
-            // ── Omset Area Chart ──
+            // ── Omset Area Chart (now Reward vs Pelanggaran) ──
             const omsetCtx = document.getElementById('omsetChart').getContext('2d');
 
-            const gradPend = omsetCtx.createLinearGradient(0, 0, 0, 300);
-            gradPend.addColorStop(0, 'rgba(99,102,241,.35)');
-            gradPend.addColorStop(1, 'rgba(99,102,241,0)');
+            const gradReward = omsetCtx.createLinearGradient(0, 0, 0, 300);
+            gradReward.addColorStop(0, 'rgba(99,102,241,.35)');
+            gradReward.addColorStop(1, 'rgba(99,102,241,0)');
 
-            const gradBiaya = omsetCtx.createLinearGradient(0, 0, 0, 300);
-            gradBiaya.addColorStop(0, 'rgba(245,158,11,.25)');
-            gradBiaya.addColorStop(1, 'rgba(245,158,11,0)');
+            const gradPelanggaran = omsetCtx.createLinearGradient(0, 0, 0, 300);
+            gradPelanggaran.addColorStop(0, 'rgba(245,158,11,.25)');
+            gradPelanggaran.addColorStop(1, 'rgba(245,158,11,0)');
 
             const omsetChart = new Chart(omsetCtx, {
                 type: 'line',
                 data: {
                     labels,
                     datasets: [{
-                            label: 'Pendapatan',
-                            data: pendData,
+                            label: 'Reward',
+                            data: rewardData,
                             borderColor: '#6366f1',
-                            backgroundColor: gradPend,
+                            backgroundColor: gradReward,
                             borderWidth: 2.5,
                             pointBackgroundColor: '#6366f1',
                             pointRadius: 4,
@@ -465,10 +408,10 @@
                             tension: 0.4,
                         },
                         {
-                            label: 'Biaya',
-                            data: biayaData,
+                            label: 'Pelanggaran',
+                            data: pelanggaranData,
                             borderColor: '#f59e0b',
-                            backgroundColor: gradBiaya,
+                            backgroundColor: gradPelanggaran,
                             borderWidth: 2.5,
                             pointBackgroundColor: '#f59e0b',
                             pointRadius: 4,
@@ -496,8 +439,8 @@
                             borderWidth: 1,
                             padding: 12,
                             callbacks: {
-                                label: ctx => ' ' + ctx.dataset.label + ': Rp ' + ctx.raw.toLocaleString(
-                                    'id-ID'),
+                                label: ctx => ' ' + ctx.dataset.label + ': ' + ctx.raw.toLocaleString(
+                                    'id-ID') + ' poin',
                             },
                         },
                     },
@@ -524,8 +467,7 @@
                                 font: {
                                     size: 11
                                 },
-                                callback: v => 'Rp ' + (v >= 1e6 ? (v / 1e6).toFixed(1) + 'jt' : v
-                                    .toLocaleString('id-ID')),
+                                callback: v => v.toLocaleString('id-ID') + ' poin',
                             },
                         },
                     },
@@ -534,16 +476,16 @@
 
             // ── Donut Chart ──
             const donutCtx = document.getElementById('donutChart').getContext('2d');
-            const totalPend = pendData.reduce((a, b) => a + b, 0);
-            const totalBiaya = biayaData.reduce((a, b) => a + b, 0);
+            const totalReward = rewardData.reduce((a, b) => a + b, 0);
+            const totalPelanggaran = pelanggaranData.reduce((a, b) => a + b, 0);
 
             new Chart(donutCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Pendapatan', 'Biaya'],
+                    labels: ['Reward', 'Pelanggaran'],
                     datasets: [{
-                        data: [totalPend || 1, totalBiaya || 0],
-                        backgroundColor: ['#6366f1', '#f59e0b'],
+                        data: [totalReward || 1, totalPelanggaran || 0],
+                        backgroundColor: ['#22c55e', '#ef4444'],
                         borderWidth: 0,
                         hoverOffset: 6,
                     }],
@@ -560,7 +502,7 @@
                             titleColor: '#94a3b8',
                             bodyColor: '#f8fafc',
                             callbacks: {
-                                label: ctx => ' Rp ' + ctx.raw.toLocaleString('id-ID')
+                                label: ctx => ' ' + ctx.raw.toLocaleString('id-ID') + ' poin'
                             },
                         },
                     },
