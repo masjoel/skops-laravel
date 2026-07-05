@@ -37,6 +37,10 @@
                         Reset
                     </a>
                 @endif
+
+                <a href="{{ route('master.jenis-poin.download', request()->query()) }}" class="btn btn-sm btn-success">
+                    <i class="fas fa-file-excel me-1"></i> Excel
+                </a>
             </form>
         </div>
         <div class="card-body table-responsive" style="padding:0">

@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Guru;
 use App\Models\Personil;
 use Illuminate\Http\Request;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class GuruController extends Controller
 {
@@ -84,12 +86,77 @@ class GuruController extends Controller
             ->with('success', 'Guru berhasil ditambahkan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function download(Request $request)
     {
-        //
+        $q = Guru::with(['personil']);
+
+        if ($request->filled('search')) {
+            $q->where(function ($query) use ($request) {
+                $query->where('nip', 'like', '%' . $request->search . '%')
+                    ->orWhereHas('personil', function ($qPersonil) use ($request) {
+                        $qPersonil->where('nama', 'like', '%' . $request->search . '%')
+                            ->orWhere('no_hp', 'like', '%' . $request->search . '%')
+                            ->orWhere('email', 'like', '%' . $request->search . '%')
+                            ->orWhere('alamat', 'like', '%' . $request->search . '%');
+                    });
+            });
+        }
+        if ($request->filled('gender')) {
+            $q->whereHas('personil', function ($qPersonil) use ($request) {
+                $qPersonil->where('jenis_kelamin', $request->gender);
+            });
+        }
+        if ($request->filled('status')) {
+            $q->whereHas('personil', function ($qPersonil) use ($request) {
+                $qPersonil->where('status', $request->status);
+            });
+        }
+
+        $guru = $q->join('personil', 'personil.id', '=', 'guru.personil_id')
+            ->select('guru.*')
+            ->orderBy('personil.nama')
+            ->get();
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Data Guru');
+
+        $headers = ['No', 'NIP', 'Nama', 'L/P', 'No. HP', 'Email', 'Alamat', 'Status'];
+        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+        foreach ($headers as $idx => $h) {
+            $sheet->setCellValue($cols[$idx] . '1', $h);
+        }
+        $sheet->getStyle('A1:H1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:H1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFD9D9D9');
+
+        $row = 2;
+        foreach ($guru as $i => $g) {
+            $sheet->setCellValue('A' . $row, $i + 1);
+            $sheet->setCellValueExplicit('B' . $row, $g->nip, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValue('C' . $row, $g->personil->nama ?? '-');
+            $sheet->setCellValue('D' . $row, $g->personil->jenis_kelamin ?? '-');
+            $sheet->setCellValueExplicit('E' . $row, $g->personil->no_hp ?? '-', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValue('F' . $row, $g->personil->email ?? '-');
+            $sheet->setCellValue('G' . $row, $g->personil->alamat ?? '-');
+            $sheet->setCellValue('H' . $row, ucfirst($g->personil->status ?? '-'));
+            $row++;
+        }
+
+        foreach ($cols as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $filename = "data_guru_" . date('Ymd_His') . ".xlsx";
+        $headersInfo = [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment;filename="' . $filename . '"',
+            'Cache-Control' => 'max-age=0',
+        ];
+
+        return response()->stream(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, 200, $headersInfo);
     }
 
     /**

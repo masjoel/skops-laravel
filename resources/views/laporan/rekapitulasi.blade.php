@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Rekapitulasi Poin')
-@section('style')
+@section('content')
     <style>
         .stat-card {
             border-radius: 12px;
@@ -44,16 +44,14 @@
             flex-shrink: 0;
         }
     </style>
-@endsection
-@section('content')
+
     <div class="page-header">
         <div>
-            <h1><i class="fas fa-chart-pie me-2" style="color:#6366f1"></i>Rekapitulasi Poin</h1>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item active">Beranda</li>
-                </ol>
-            </nav>
+            <h1><i class="fas fa-file me-2" style="color:#6366f1"></i>{{ $title }}</h1>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item active">{{ $title }}</li>
+            </ol>
         </div>
         <div class="d-flex align-items-center gap-2">
             <span class="badge bg-primary bg-opacity-10 text-primary"
@@ -62,7 +60,6 @@
             </span>
         </div>
     </div>
-
     {{-- ── Stat Cards ── --}}
     <div class="row g-3 mb-4">
         <div class="col-6 col-xl-4">
@@ -166,13 +163,14 @@
                 </div>
             </div>
             <div class="card bg-light">
-                <div class="card-header d-flex align-items-center justify-content-between">
-                    <div class="text-primary"><i class="fas fa-receipt me-2 text-primary"></i>Rekapitulasi Poin Siswa <span
+                <div class="card-header d-flex flex-wrap align-items-center justify-content-between">
+                    <div>Rekapitulasi Poin Siswa <span
                             class="text-muted fw-normal" style="font-size:13px">({{ $rekapitullasi->total() }} data)</span>
                     </div>
-                    <a href="{{ route('laporan.rekapitulasi') }}" class="btn btn-sm btn-primary"
+                    <a href="{{ route('laporan.rekapitulasi.download', request()->query()) }}" class="btn btn-sm btn-success"
                         style="font-size:12px;padding:4px 12px">
-                        Lihat Semua <i class="fas fa-arrow-right ms-1"></i>
+                        <i class="fas fa-file-excel me-1"></i> Excel
+                        {{-- Download <i class="fas fa-download ms-1"></i> --}}
                     </a>
                 </div>
                 <div class="card-body" style="padding:0">

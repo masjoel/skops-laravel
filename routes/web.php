@@ -56,12 +56,16 @@ Route::middleware(['auth.session'])->group(function () {
     */
     Route::prefix('master')->name('master.')->group(function () {
         Route::resource('personil', PersonilController::class);
+        Route::get('guru/download', [GuruController::class, 'download'])->name('guru.download');
         Route::resource('guru', GuruController::class);
+        Route::get('murid/download', [MuridController::class, 'download'])->name('murid.download');
         Route::resource('murid', MuridController::class);
         Route::resource('orangtua', OrangTuaController::class);
+        Route::get('walikelas/download', [WaliKelasController::class, 'download'])->name('walikelas.download');
         Route::resource('walikelas', WaliKelasController::class);
         Route::resource('jurusan', JurusanController::class);
         Route::resource('kelas', KelasController::class);
+        Route::get('jenis-poin/download', [JenisPoinController::class, 'download'])->name('jenis-poin.download');
         Route::resource('jenis-poin', JenisPoinController::class);
     });
     /*
@@ -70,6 +74,7 @@ Route::middleware(['auth.session'])->group(function () {
     |----------------------------------------------------------------------
     */
     Route::prefix('transaksi')->name('transaksi.')->group(function () {
+        Route::get('kartu-kontrol/download', [KartuKontrolController::class, 'download'])->name('kartu-kontrol.download');
         Route::resource('kartu-kontrol', KartuKontrolController::class)
             ->parameters(['kartu-kontrol' => 'kartuKontrol']);
     });
@@ -80,6 +85,8 @@ Route::middleware(['auth.session'])->group(function () {
     */
     Route::prefix('laporan')->name('laporan.')->group(function () {
         Route::get('rekapitulasi', [RekapitulasiController::class, 'index'])->name('rekapitulasi');
+        Route::get('rekapitulasi/download', [RekapitulasiController::class, 'download'])->name('rekapitulasi.download');
+        Route::get('rekapitulasi/{muridKelasId}/download', [RekapitulasiController::class, 'downloadDetail'])->name('rekapitulasi.download-detail');
         Route::get('rekapitulasi/{muridKelasId}', [RekapitulasiController::class, 'show'])->name('rekapitulasi.show');
     });
 

@@ -70,6 +70,9 @@
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <span>Daftar {{ $title }} <span class="text-muted fw-normal"
                             style="font-size:13px">({{ $walikelas->total() }} data)</span></span>
+                    <a href="{{ route('master.walikelas.download', request()->query()) }}" class="btn btn-sm btn-success">
+                        <i class="fas fa-file-excel me-1"></i> Excel
+                    </a>
                 </div>
                 <div class="card-body table-responsive" style="padding:0">
                     <table class="table table-hover mb-0">

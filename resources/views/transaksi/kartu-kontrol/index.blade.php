@@ -91,9 +91,14 @@
             </div>
 
             <div class="card bg-light">
-                <div class="card-header d-flex align-items-center justify-content-between">
-                    <span>Daftar {{ $title }} <span class="text-muted fw-normal"
+                <div class="card-header d-flex flex-wrap align-items-center justify-content-between">
+                    <span class="mb-2">Daftar {{ $title }} <span class="text-muted fw-normal"
                             style="font-size:13px">({{ $kartuKontrol->total() }} data)</span></span>
+                    <a href="{{ route('transaksi.kartu-kontrol.download', request()->query()) }}"
+                        class="btn btn-sm btn-success" style="font-size:12px;padding:4px 12px">
+                        <i class="fas fa-file-excel me-1"></i> Excel 
+                        {{-- Download <i class="fas fa-download ms-1"></i> --}}
+                    </a>
                 </div>
                 <div class="card-body table-responsive" style="padding:0">
                     <table class="table table-hover mb-0">
@@ -126,7 +131,7 @@
                                         {{ $kk->muridKelas?->kelas?->jurusan?->nama ?? '' }}
                                     </td>
                                     <td><span class="badge bg-secondary">{{ $kk->jenisPoin?->kode ?? '-' }}</span></td>
-                                    <td>{{ $kk->jenisPoin?->deskripsi ?? '-' }}</td>
+                                    <td style="font-size: 70%">{{ $kk->jenisPoin?->deskripsi ?? '-' }}</td>
                                     <td>
                                         @if ($kk->jenisPoin?->jenis == 'pelanggaran')
                                             <span class="badge"
@@ -139,14 +144,13 @@
                                         @endif
                                     </td>
                                     <td class="text-center">
-                                        <span
-                                            class="{{ ($kk->skor ?? 0) < 0 ? 'text-danger' : 'text-success' }} fw-bold">
+                                        <span class="{{ ($kk->skor ?? 0) < 0 ? 'text-danger' : 'text-success' }} fw-bold">
                                             {{ $kk->skor ?? '-' }}
                                         </span>
                                     </td>
-                                    <td>{{ $kk->tindakan ?? '-' }}</td>
-                                    <td>{{ $kk->guru?->personil?->nama ?? '-' }}</td>
-                                    <td>
+                                    <td style="font-size: 70%">{{ $kk->tindakan ?? '-' }}</td>
+                                    <td style="font-size: 70%">{{ $kk->guru?->personil?->nama ?? '-' }}</td>
+                                    <td style="font-size: 70%">
                                         @if ($kk->periodeAkademik)
                                             {{ $kk->periodeAkademik->semester == 1 ? 'Ganjil' : 'Genap' }}
                                         @else

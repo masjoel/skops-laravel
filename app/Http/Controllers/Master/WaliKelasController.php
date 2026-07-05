@@ -8,6 +8,8 @@ use App\Models\Kelas;
 use App\Models\TahunAjaran;
 use App\Models\WaliKelas;
 use Illuminate\Http\Request;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class WaliKelasController extends Controller
 {
@@ -127,12 +129,96 @@ class WaliKelasController extends Controller
         return redirect()->route('master.walikelas.index')->with('success', 'Wali Kelas berhasil ditambahkan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function download(Request $request)
     {
-        //
+        $q = WaliKelas::with(['guru.personil', 'kelas', 'tahunAjaran']);
+
+        $tahunAjaranId = $request->filled('tahun_ajaran_id')
+            ? $request->tahun_ajaran_id
+            : TahunAjaran::aktif()?->id;
+
+        if ($tahunAjaranId) {
+            $q->where('tahun_ajaran_id', $tahunAjaranId);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $q->where(function ($query) use ($search) {
+                $query->whereHas('guru', function ($qGuru) use ($search) {
+                    $qGuru->where('nip', 'like', '%' . $search . '%')
+                        ->orWhereHas('personil', function ($qPersonil) use ($search) {
+                            $qPersonil->where('nama', 'like', '%' . $search . '%')
+                                ->orWhere('no_hp', 'like', '%' . $search . '%')
+                                ->orWhere('email', 'like', '%' . $search . '%')
+                                ->orWhere('alamat', 'like', '%' . $search . '%');
+                        });
+                })->orWhereHas('kelas', function ($qKelas) use ($search) {
+                    $qKelas->where('nama_kelas', 'like', '%' . $search . '%');
+                });
+            });
+        }
+
+        if ($request->filled('gender')) {
+            $q->whereHas('guru.personil', function ($qPersonil) use ($request) {
+                $qPersonil->where('jenis_kelamin', $request->gender);
+            });
+        }
+
+        if ($request->filled('status')) {
+            $q->whereHas('guru.personil', function ($qPersonil) use ($request) {
+                $qPersonil->where('status', $request->status);
+            });
+        }
+
+        if ($request->filled('kelas_id')) {
+            $q->where('kelas_id', $request->kelas_id);
+        }
+
+        $walikelas = $q->join('guru', 'guru.id', '=', 'wali_kelas.guru_id')
+            ->join('personil', 'personil.id', '=', 'guru.personil_id')
+            ->select('wali_kelas.*')
+            ->orderBy('personil.nama')
+            ->get();
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Data Wali Kelas');
+
+        $headers = ['No', 'Tahun Ajaran', 'Kelas', 'Tingkat', 'NIP Guru', 'Nama Guru'];
+        $cols = ['A', 'B', 'C', 'D', 'E', 'F'];
+        foreach ($headers as $idx => $h) {
+            $sheet->setCellValue($cols[$idx] . '1', $h);
+        }
+        $sheet->getStyle('A1:F1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:F1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFD9D9D9');
+
+        $row = 2;
+        foreach ($walikelas as $i => $wk) {
+            $sheet->setCellValue('A' . $row, $i + 1);
+            $sheet->setCellValue('B' . $row, $wk->tahunAjaran->nama ?? '-');
+            $sheet->setCellValue('C' . $row, $wk->kelas->nama_kelas ?? '-');
+            $sheet->setCellValueExplicit('D' . $row, $wk->kelas->tingkat ?? '-', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('E' . $row, $wk->guru->nip ?? '-', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValue('F' . $row, $wk->guru->personil->nama ?? '-');
+            $row++;
+        }
+
+        foreach ($cols as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $filename = "data_walikelas_" . date('Ymd_His') . ".xlsx";
+        $headersInfo = [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment;filename="' . $filename . '"',
+            'Cache-Control' => 'max-age=0',
+        ];
+
+        return response()->stream(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, 200, $headersInfo);
     }
 
     /**
