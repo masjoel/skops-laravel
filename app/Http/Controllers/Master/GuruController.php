@@ -196,6 +196,7 @@ class GuruController extends Controller
         array_shift($rows);
 
         $imported = 0;
+        $skipped = [];
         foreach ($rows as $row) {
             // Kolom A=No, B=Nama, C=L/P, D=NIP, E=JABATAN, F=No. HP, G=Email, H=Alamat, I=Status
             if (empty($row[1])) continue; // Skip jika Nama kosong
@@ -211,6 +212,19 @@ class GuruController extends Controller
 
             // Skip jika NIP sudah ada
             if (!empty($nip) && $nip !== '-' && Guru::where('nip', $nip)->exists()) {
+                $skipped[] = "$nama (NIP duplikat)";
+                continue;
+            }
+
+            // Skip jika No HP sudah ada
+            if (!empty($noHp) && $noHp !== '-' && Personil::where('no_hp', $noHp)->exists()) {
+                $skipped[] = "$nama (No HP duplikat)";
+                continue;
+            }
+
+            // Skip jika Email sudah ada
+            if (!empty($email) && $email !== '-' && Personil::where('email', $email)->exists()) {
+                $skipped[] = "$nama (Email duplikat)";
                 continue;
             }
 
@@ -243,8 +257,27 @@ class GuruController extends Controller
             $imported++;
         }
 
-        return redirect()->route('master.guru.index')
-            ->with('success', "Berhasil mengimpor $imported data guru.");
+        $redirect = redirect()->route('master.guru.index');
+        
+        if ($imported > 0) {
+            $redirect->with('success', "Berhasil mengimpor $imported data guru.");
+        }
+
+        if (count($skipped) > 0) {
+            $errorMsg = count($skipped) . " data gagal diimpor karena (NIP/No.HP/Email) sudah digunakan: ";
+            if (count($skipped) > 1) {
+                $errorMsg .= implode(', ', array_slice($skipped, 0, 1)) . ', dan ' . (count($skipped) - 1) . ' lainnya.';
+            } else {
+                $errorMsg .= implode(', ', $skipped);
+            }
+            $redirect->with('error', $errorMsg);
+        }
+
+        if ($imported === 0 && count($skipped) === 0) {
+            $redirect->with('error', "Tidak ada data yang valid untuk diimpor.");
+        }
+
+        return $redirect;
     }
 
     /**
