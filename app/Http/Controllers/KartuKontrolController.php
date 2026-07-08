@@ -208,11 +208,12 @@ class KartuKontrolController extends Controller
             $sheet->setCellValue('C' . $row, trim(($kk->muridKelas?->kelas?->nama_kelas ?? '') . ' ' . ($kk->muridKelas?->kelas?->jurusan?->nama ?? '')) ?: '-');
             $sheet->setCellValue('D' . $row, $kk->jenisPoin?->kode ?? '-');
             $sheet->setCellValue('E' . $row, $kk->jenisPoin?->deskripsi ?? '-');
-            
+
             $jenis = '-';
             if ($kk->jenisPoin?->jenis == 'pelanggaran') $jenis = 'Pelanggaran';
-            elseif ($kk->jenisPoin?->jenis == 'reward') $jenis = 'Reward';
-            
+            else if ($kk->jenisPoin?->jenis == 'reward') $jenis = 'Reward';
+            else if ($kk->jenisPoin?->jenis == 'pemutihan') $jenis = 'Pemutihan';
+
             $sheet->setCellValue('F' . $row, $jenis);
             $sheet->setCellValue('G' . $row, $kk->skor ?? '0');
             $sheet->setCellValue('H' . $row, $kk->tindakan ?? '-');

@@ -17,7 +17,7 @@
                 <div class="card-body">
                     <form method="POST" action="{{ route('master.guru.store') }}">
                         @csrf
-                        <div class="mb-3">
+                        <div class="mb-2">
                             <label class="form-label">Nama <span class="text-danger">*</span></label>
                             <input type="text" name="nama" class="form-control @error('nama') is-invalid @enderror"
                                 value="{{ old('nama') }}" placeholder="" required>
@@ -26,35 +26,86 @@
                             @enderror
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">NIP <span class="text-danger">*</span></label>
-                            <input type="text" name="nip" class="form-control @error('nip') is-invalid @enderror"
-                                value="{{ old('nip') }}" placeholder="" required>
-                            @error('nip')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="mb-3">
                             <label class="form-label d-block">Jenis Kelamin</label>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input @error('jenis_kelamin') is-invalid @enderror" type="radio" name="jenis_kelamin" id="jk_l" value="L" {{ old('jenis_kelamin', 'L') == 'L' ? 'checked' : '' }}>
+                                <input class="form-check-input @error('jenis_kelamin') is-invalid @enderror" type="radio"
+                                    name="jenis_kelamin" id="jk_l" value="L"
+                                    {{ old('jenis_kelamin', 'L') == 'L' ? 'checked' : '' }}>
                                 <label class="form-check-label" for="jk_l">Laki-laki</label>
                             </div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input @error('jenis_kelamin') is-invalid @enderror" type="radio" name="jenis_kelamin" id="jk_p" value="P" {{ old('jenis_kelamin') == 'P' ? 'checked' : '' }}>
+                                <input class="form-check-input @error('jenis_kelamin') is-invalid @enderror" type="radio"
+                                    name="jenis_kelamin" id="jk_p" value="P"
+                                    {{ old('jenis_kelamin') == 'P' ? 'checked' : '' }}>
                                 <label class="form-check-label" for="jk_p">Perempuan</label>
                             </div>
                             @error('jenis_kelamin')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
+                        <div class="row">
+                            <div class="col-6 mb-2">
+                                <label class="form-label">NIP</label>
+                                <input type="text" name="nip" class="form-control @error('nip') is-invalid @enderror"
+                                    value="{{ old('nip') }}" placeholder="">
+                                @error('nip')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-6 mb-2">
+                                <label class="form-label">No. HP</label>
+                                <input type="text" name="no_hp"
+                                    class="form-control @error('no_hp') is-invalid @enderror" value="{{ old('no_hp') }}"
+                                    placeholder="">
+                                @error('no_hp')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-6 mb-2">
+                                <label class="form-label">Email</label>
+                                <input type="email" name="email"
+                                    class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}"
+                                    placeholder="">
+                                @error('email')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-6 mb-2">
+                                <label class="form-label">Jabatan</label>
+                                <select name="jabatan_struktural_id"
+                                    class="form-select @error('jabatan_struktural_id') is-invalid @enderror">
+                                    <option value="">-- Pilih Jabatan --</option>
+                                    @foreach ($jabatan as $item)
+                                        <option value="{{ $item->id }}"
+                                            {{ old('jabatan_struktural_id') == $item->id ? 'selected' : '' }}>
+                                            {{ $item->nama_jabatan }}</option>
+                                    @endforeach
+                                </select>
+                                @error('jabatan_struktural_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Alamat</label>
+                            <textarea name="alamat" class="form-control @error('alamat') is-invalid @enderror" rows="3" placeholder="">{{ old('alamat') }}</textarea>
+                            @error('alamat')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
                         <div class="mb-4">
                             <label class="form-label d-block">Status</label>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input @error('status') is-invalid @enderror" type="radio" name="status" id="status_aktif" value="aktif" {{ old('status', 'aktif') == 'aktif' ? 'checked' : '' }}>
+                                <input class="form-check-input @error('status') is-invalid @enderror" type="radio"
+                                    name="status" id="status_aktif" value="aktif"
+                                    {{ old('status', 'aktif') == 'aktif' ? 'checked' : '' }}>
                                 <label class="form-check-label" for="status_aktif">Aktif</label>
                             </div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input @error('status') is-invalid @enderror" type="radio" name="status" id="status_nonaktif" value="nonaktif" {{ old('status') == 'nonaktif' ? 'checked' : '' }}>
+                                <input class="form-check-input @error('status') is-invalid @enderror" type="radio"
+                                    name="status" id="status_nonaktif" value="nonaktif"
+                                    {{ old('status') == 'nonaktif' ? 'checked' : '' }}>
                                 <label class="form-check-label" for="status_nonaktif">Non Aktif</label>
                             </div>
                             @error('status')

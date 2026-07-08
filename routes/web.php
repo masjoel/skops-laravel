@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KartuKontrolController;
 use App\Http\Controllers\Master\GuruController;
+use App\Http\Controllers\Master\JabatanStrukturalController;
 use App\Http\Controllers\Master\JenisPoinController;
 use App\Http\Controllers\Master\JurusanController;
 use App\Http\Controllers\Master\KelasController;
@@ -67,6 +68,7 @@ Route::middleware(['auth.session'])->group(function () {
         Route::resource('kelas', KelasController::class);
         Route::get('jenis-poin/download', [JenisPoinController::class, 'download'])->name('jenis-poin.download');
         Route::resource('jenis-poin', JenisPoinController::class);
+        Route::resource('jabatan', JabatanStrukturalController::class);
     });
     /*
     |----------------------------------------------------------------------

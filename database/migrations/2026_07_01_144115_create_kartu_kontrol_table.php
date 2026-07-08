@@ -22,6 +22,10 @@ return new class extends Migration
             $table->tinyText('tindakan')->nullable();
             $table->tinyInteger('semester')->default(1);
             $table->boolean('is_reset')->default(false);
+            $table->foreignId('pemanggilan_bk_id')
+                ->nullable() // hanya diisi kalau baris ini adalah baris pemutihan
+                ->constrained('pemanggilan_bk')
+                ->nullOnDelete();
             $table->timestamps();
             $table->index(['murid_kelas_id', 'semester']);
             $table->index('tgl');

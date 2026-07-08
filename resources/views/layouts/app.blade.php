@@ -615,6 +615,11 @@
                 <span class="nav-icon"><i class="fas fa-list-ol"></i></span>
                 Jenis Poin
             </a>
+            <a href="{{ route('master.jabatan.index') }}"
+                class="nav-item-link {{ request()->routeIs('master.jabatan.*') ? 'active' : '' }}">
+                <span class="nav-icon"><i class="fas fa-user-tie"></i></span>
+                Jabatan
+            </a>
 
             {{-- Perilaku --}}
             <div class="nav-label">Perilaku</div>
@@ -788,6 +793,40 @@
                 document.getElementById('sidebar').classList.remove('mobile-open');
                 document.getElementById('sidebar-overlay').classList.remove('show');
             }
+        });
+    </script>
+
+    {{-- SweetAlert2 --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const confirmForms = document.querySelectorAll('form[onsubmit*="return confirm"]');
+            confirmForms.forEach(form => {
+                const onsubmitAttr = form.getAttribute('onsubmit');
+                const match = onsubmitAttr.match(/return confirm\(['"](.*)['"]\)/);
+                const message = match ? match[1] : 'Apakah Anda yakin?';
+                
+                form.removeAttribute('onsubmit');
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Peringatan',
+                        text: message,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#64748b',
+                        confirmButtonText: 'Ya, Lanjutkan',
+                        cancelButtonText: 'Batal',
+                        background: 'var(--card-bg)',
+                        color: 'var(--text-main)'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
         });
     </script>
 

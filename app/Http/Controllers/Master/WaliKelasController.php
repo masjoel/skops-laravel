@@ -185,7 +185,7 @@ class WaliKelasController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Data Wali Kelas');
 
-        $headers = ['No', 'Tahun Ajaran', 'Kelas', 'Tingkat', 'NIP Guru', 'Nama Guru'];
+        $headers = ['No', 'Tahun Ajaran', 'Kelas', 'Tingkat', 'NIP', 'Nama Guru'];
         $cols = ['A', 'B', 'C', 'D', 'E', 'F'];
         foreach ($headers as $idx => $h) {
             $sheet->setCellValue($cols[$idx] . '1', $h);

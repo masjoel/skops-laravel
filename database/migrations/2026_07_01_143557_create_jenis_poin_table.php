@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('tindakan')->nullable();
             $table->string('keterangan')->nullable();
             $table->integer('skor')->default(0);
-            $table->enum('jenis', ['reward', 'pelanggaran']);
+            $table->enum('jenis', ['reward', 'pelanggaran', 'pemutihan']);
             $table->timestamps();
             $table->index('jenis');
             $table->index('kode');

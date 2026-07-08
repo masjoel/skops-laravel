@@ -17,6 +17,7 @@ class Guru extends Model
     protected $fillable = [
         'personil_id',
         'nip',
+        'jabatan_struktural_id',
     ];
 
     public function personil(): BelongsTo
@@ -28,7 +29,10 @@ class Guru extends Model
     {
         return $this->hasMany(WaliKelas::class);
     }
-
+    public function jabatanStruktural(): BelongsTo
+    {
+        return $this->belongsTo(JabatanStruktural::class);
+    }
     /**
      * Kelas-kelas yang pernah/sedang diampu sebagai wali kelas,
      * lengkap dengan tahun_ajaran_id dari tabel pivot wali_kelas.

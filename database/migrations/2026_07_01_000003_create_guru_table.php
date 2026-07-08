@@ -13,7 +13,11 @@ return new class extends Migration
             $table->foreignId('personil_id')
                 ->constrained('personil')
                 ->cascadeOnDelete();
-            $table->string('nip', 30)->unique();
+            $table->string('nip', 30)->unique()->nullable();
+            $table->foreignId('jabatan_struktural_id')
+                ->nullable() // kebanyakan guru tidak punya jabatan struktural
+                ->constrained('jabatan_struktural')
+                ->nullOnDelete();
             $table->timestamps();
         });
     }

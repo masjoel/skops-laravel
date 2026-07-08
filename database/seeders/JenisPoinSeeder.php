@@ -21,6 +21,10 @@ class JenisPoinSeeder extends Seeder
             ['kode' => 'PS-02', 'deskripsi' => 'Tidak mengerjakan tugas', 'tindakan' => 'Teguran lisan', 'keterangan' => 'Tidak mengumpulkan tugas sesuai tenggat waktu', 'skor' => -10, 'jenis' => 'pelanggaran'],
             ['kode' => 'PS-03', 'deskripsi' => 'Bolos pelajaran', 'tindakan' => 'Pembinaan oleh BK', 'keterangan' => 'Tidak mengikuti pelajaran tanpa izin', 'skor' => -15, 'jenis' => 'pelanggaran'],
             ['kode' => 'PB-04', 'deskripsi' => 'Berkelahi di sekolah', 'tindakan' => 'Pembinaan oleh BK dan orang tua', 'keterangan' => 'Terlibat perkelahian dengan siswa lain', 'skor' => -25, 'jenis' => 'pelanggaran'],
+
+            // pemutihan
+            // per kasus ditentukan guru BK dan disimpan di kartu_kontrol.skor
+            ['kode' => 'PMT', 'deskripsi' => 'Pemutihan Poin', 'tindakan' => 'Persetujuan BK setelah tugas selesai', 'keterangan' => 'Penutupan poin pelanggaran setelah proses pemanggilan BK selesai', 'skor' => 0, 'jenis' => 'pemutihan'],
         ];
 
         foreach ($data as $i => $item) {

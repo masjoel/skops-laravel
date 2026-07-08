@@ -20,7 +20,7 @@
             <div class="card bg-light mb-3">
                 <div class="card-body" style="padding:14px 20px">
                     <form method="GET" class="row g-2 align-items-end">
-                        <div class="col-12 col-md-6">
+                        <div class="col-12 col-md-4">
                             <div class="input-group" style="border-radius:8px;overflow:hidden">
                                 <span class="input-group-text"
                                     style="background:var(--card-bg);border-color:var(--border-color);color:var(--text-muted)">
@@ -29,6 +29,16 @@
                                 <input type="text" name="search" class="form-control" placeholder="Cari..."
                                     value="{{ request('search') }}">
                             </div>
+                        </div>
+                        <div class="col-12 col-md-2">
+                            <select name="jabatan" class="form-select">
+                                <option value="">Jabatan</option>
+                                @foreach ($jabatan as $item)
+                                    <option value="{{ $item->id }}"
+                                        {{ request('jabatan') == $item->id ? 'selected' : '' }}>
+                                        {{ $item->nama_jabatan }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="col-12 col-md-2">
                             <select name="gender" class="form-select">
@@ -69,6 +79,9 @@
                                 <th style="width:40px">#</th>
                                 <th>Nama</th>
                                 <th>NIP</th>
+                                <th>No. HP</th>
+                                <th>Email</th>
+                                <th>Jabatan</th>
                                 <th>Status</th>
                                 <th class="text-center" style="width:100px">Aksi</th>
                             </tr>
@@ -80,6 +93,9 @@
                                     </td>
                                     <td>{{ $s->personil->nama }}</td>
                                     <td>{{ $s->nip }}</td>
+                                    <td>{{ $s->personil->no_hp }}</td>
+                                    <td>{{ $s->personil->email }}</td>
+                                    <td>{{ $s->jabatanStruktural ? $s->jabatanStruktural->nama_jabatan : '-' }}</td>
                                     <td>{{ ucfirst($s->personil->status) }}</td>
                                     <td class="text-center">
                                         <div class="d-flex gap-1 justify-content-center">

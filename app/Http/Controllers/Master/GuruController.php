@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
 use App\Models\Guru;
+use App\Models\JabatanStruktural;
 use App\Models\Personil;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -16,7 +17,7 @@ class GuruController extends Controller
      */
     public function index(Request $request)
     {
-        $q = Guru::with(['personil']);
+        $q = Guru::with(['personil', 'jabatanStruktural']);
 
         if ($request->filled('search')) {
             $q->where(function ($query) use ($request) {
@@ -27,6 +28,11 @@ class GuruController extends Controller
                             ->orWhere('email', 'like', '%' . $request->search . '%')
                             ->orWhere('alamat', 'like', '%' . $request->search . '%');
                     });
+            });
+        }
+        if ($request->filled('jabatan')) {
+            $q->whereHas('jabatanStruktural', function ($qJabatan) use ($request) {
+                $qJabatan->where('jabatan_struktural_id', $request->jabatan);
             });
         }
         if ($request->filled('gender')) {
@@ -45,9 +51,10 @@ class GuruController extends Controller
             ->orderBy('personil.nama')
             ->paginate(20)
             ->withQueryString();
+        $jabatan = JabatanStruktural::orderBy('nama_jabatan')->get();
 
         $title = 'Guru';
-        return view('master.guru.index', compact('guru', 'title'));
+        return view('master.guru.index', compact('guru', 'title', 'jabatan'));
     }
 
     /**
@@ -56,7 +63,8 @@ class GuruController extends Controller
     public function create()
     {
         $title = 'Guru';
-        return view('master.guru.create', compact('title'));
+        $jabatan = JabatanStruktural::orderBy('nama_jabatan')->get();
+        return view('master.guru.create', compact('title', 'jabatan'));
     }
 
     /**
@@ -66,20 +74,28 @@ class GuruController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:100',
-            'nip' => 'required|numeric|unique:guru,nip',
+            'nip' => 'nullable|numeric|unique:guru,nip',
             'jenis_kelamin' => 'nullable|in:L,P',
             'status' => 'nullable|in:aktif,nonaktif',
+            'no_hp' => 'nullable|numeric',
+            'email' => 'nullable|email|max:100',
+            'alamat' => 'nullable|string|max:255',
+            'jabatan_struktural_id' => 'nullable|exists:jabatan_struktural,id',
         ]);
 
         $personil = Personil::create([
             'nama' => $request->nama,
             'jenis_kelamin' => $request->jenis_kelamin,
             'status' => $request->status,
+            'no_hp' => $request->no_hp,
+            'email' => $request->email,
+            'alamat' => $request->alamat,
         ]);
 
         Guru::create([
             'personil_id' => $personil->id,
             'nip' => $request->nip,
+            'jabatan_struktural_id' => $request->jabatan_struktural_id,
         ]);
 
         return redirect()->route('master.guru.index')
@@ -88,7 +104,7 @@ class GuruController extends Controller
 
     public function download(Request $request)
     {
-        $q = Guru::with(['personil']);
+        $q = Guru::with(['personil', 'jabatanStruktural']);
 
         if ($request->filled('search')) {
             $q->where(function ($query) use ($request) {
@@ -99,6 +115,11 @@ class GuruController extends Controller
                             ->orWhere('email', 'like', '%' . $request->search . '%')
                             ->orWhere('alamat', 'like', '%' . $request->search . '%');
                     });
+            });
+        }
+        if ($request->filled('jabatan')) {
+            $q->whereHas('jabatanStruktural', function ($qJabatan) use ($request) {
+                $qJabatan->where('jabatan_struktural_id', $request->jabatan);
             });
         }
         if ($request->filled('gender')) {
@@ -121,24 +142,25 @@ class GuruController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Data Guru');
 
-        $headers = ['No', 'NIP', 'Nama', 'L/P', 'No. HP', 'Email', 'Alamat', 'Status'];
-        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+        $headers = ['No', 'Nama', 'L/P',  'NIP', 'JABATAN', 'No. HP', 'Email', 'Alamat', 'Status'];
+        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
         foreach ($headers as $idx => $h) {
             $sheet->setCellValue($cols[$idx] . '1', $h);
         }
-        $sheet->getStyle('A1:H1')->getFont()->setBold(true);
-        $sheet->getStyle('A1:H1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFD9D9D9');
+        $sheet->getStyle('A1:I1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:I1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFD9D9D9');
 
         $row = 2;
         foreach ($guru as $i => $g) {
             $sheet->setCellValue('A' . $row, $i + 1);
-            $sheet->setCellValueExplicit('B' . $row, $g->nip, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-            $sheet->setCellValue('C' . $row, $g->personil->nama ?? '-');
-            $sheet->setCellValue('D' . $row, $g->personil->jenis_kelamin ?? '-');
-            $sheet->setCellValueExplicit('E' . $row, $g->personil->no_hp ?? '-', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-            $sheet->setCellValue('F' . $row, $g->personil->email ?? '-');
-            $sheet->setCellValue('G' . $row, $g->personil->alamat ?? '-');
-            $sheet->setCellValue('H' . $row, ucfirst($g->personil->status ?? '-'));
+            $sheet->setCellValue('B' . $row, $g->personil->nama ?? '-');
+            $sheet->setCellValue('C' . $row, $g->personil->jenis_kelamin ?? '-');
+            $sheet->setCellValueExplicit('D' . $row, $g->nip, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValue('E' . $row, $g->jabatanStruktural->nama_jabatan ?? '-');
+            $sheet->setCellValueExplicit('F' . $row, $g->personil->no_hp ?? '-', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValue('G' . $row, $g->personil->email ?? '-');
+            $sheet->setCellValue('H' . $row, $g->personil->alamat ?? '-');
+            $sheet->setCellValue('I' . $row, ucfirst($g->personil->status ?? '-'));
             $row++;
         }
 
@@ -165,7 +187,8 @@ class GuruController extends Controller
     public function edit(Guru $guru)
     {
         $title = 'Guru';
-        return view('master.guru.edit', compact('guru', 'title'));
+        $jabatan = JabatanStruktural::orderBy('nama_jabatan')->get();
+        return view('master.guru.edit', compact('guru', 'title', 'jabatan'));
     }
 
     /**
@@ -175,19 +198,27 @@ class GuruController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:100',
-            'nip' => 'required|numeric|unique:guru,nip,' . $guru->id,
+            'nip' => 'nullable|numeric|unique:guru,nip,' . $guru->id,
             'jenis_kelamin' => 'nullable|in:L,P',
             'status' => 'nullable|in:aktif,nonaktif',
+            'no_hp' => 'nullable|numeric',
+            'email' => 'nullable|email|max:100',
+            'alamat' => 'nullable|string|max:255',
+            'jabatan_struktural_id' => 'nullable|exists:jabatan_struktural,id',
         ]);
 
         $guru->personil->update([
             'nama' => $request->nama,
             'jenis_kelamin' => $request->jenis_kelamin,
             'status' => $request->status,
+            'no_hp' => $request->no_hp,
+            'email' => $request->email,
+            'alamat' => $request->alamat,
         ]);
 
         $guru->update([
             'nip' => $request->nip,
+            'jabatan_struktural_id' => $request->jabatan_struktural_id,
         ]);
 
         return redirect()->route('master.guru.index')

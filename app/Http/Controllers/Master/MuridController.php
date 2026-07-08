@@ -161,13 +161,14 @@ class MuridController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Data Siswa');
 
-        $headers = ['No', 'NIS', 'NISN', 'Nama', 'L/P', 'Kelas', 'No. HP', 'Email', 'Status'];
-        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
+        // $headers = ['No', 'NIS', 'NISN', 'Nama', 'L/P', 'Kelas', 'No. HP', 'Email', 'Status'];
+        $headers = ['No', 'NIS', 'NISN', 'Nama', 'L/P', 'Kelas', 'Status'];
+        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
         foreach ($headers as $idx => $h) {
             $sheet->setCellValue($cols[$idx] . '1', $h);
         }
-        $sheet->getStyle('A1:I1')->getFont()->setBold(true);
-        $sheet->getStyle('A1:I1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFD9D9D9');
+        $sheet->getStyle('A1:G1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:G1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFD9D9D9');
 
         $row = 2;
         foreach ($murid as $i => $m) {
@@ -183,9 +184,9 @@ class MuridController extends Controller
             $sheet->setCellValue('D' . $row, $m->personil->nama ?? '-');
             $sheet->setCellValue('E' . $row, $m->personil->jenis_kelamin ?? '-');
             $sheet->setCellValue('F' . $row, $kelasStr);
-            $sheet->setCellValueExplicit('G' . $row, $m->personil->no_hp ?? '-', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-            $sheet->setCellValue('H' . $row, $m->personil->email ?? '-');
-            $sheet->setCellValue('I' . $row, ucfirst($m->personil->status ?? '-'));
+            // $sheet->setCellValueExplicit('G' . $row, $m->personil->no_hp ?? '-', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            // $sheet->setCellValue('H' . $row, $m->personil->email ?? '-');
+            $sheet->setCellValue('G' . $row, ucfirst($m->personil->status ?? '-'));
             $row++;
         }
 
