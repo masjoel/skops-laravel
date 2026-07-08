@@ -61,14 +61,21 @@ Route::middleware(['auth.session'])->group(function () {
         Route::post('guru/import', [GuruController::class, 'import'])->name('guru.import');
         Route::resource('guru', GuruController::class);
         Route::get('murid/download', [MuridController::class, 'download'])->name('murid.download');
+        Route::post('murid/import', [MuridController::class, 'import'])->name('murid.import');
         Route::resource('murid', MuridController::class);
         Route::resource('orangtua', OrangTuaController::class);
         Route::get('walikelas/download', [WaliKelasController::class, 'download'])->name('walikelas.download');
+        Route::post('walikelas/import', [WaliKelasController::class, 'import'])->name('walikelas.import');
         Route::resource('walikelas', WaliKelasController::class);
         Route::resource('jurusan', JurusanController::class);
+        Route::get('kelas/download', [KelasController::class, 'download'])->name('kelas.download');
+        Route::post('kelas/import', [KelasController::class, 'import'])->name('kelas.import');
         Route::resource('kelas', KelasController::class);
         Route::get('jenis-poin/download', [JenisPoinController::class, 'download'])->name('jenis-poin.download');
+        Route::post('jenis-poin/import', [JenisPoinController::class, 'import'])->name('jenis-poin.import');
         Route::resource('jenis-poin', JenisPoinController::class);
+        Route::get('jabatan/download', [JabatanStrukturalController::class, 'download'])->name('jabatan.download');
+        Route::post('jabatan/import', [JabatanStrukturalController::class, 'import'])->name('jabatan.import');
         Route::resource('jabatan', JabatanStrukturalController::class);
     });
     /*

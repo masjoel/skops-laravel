@@ -170,4 +170,79 @@ class JenisPoinController extends Controller
         return redirect()->route('master.jenis-poin.index')
             ->with('success', 'Jenis Poin berhasil dihapus.');
     }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:2048'
+        ]);
+
+        $file = $request->file('file');
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getPathname());
+        $sheet = $spreadsheet->getActiveSheet();
+        $rows = $sheet->toArray();
+        array_shift($rows); // skip header
+
+        // Kolom export: A=No, B=Kode, C=Jenis, D=Skor, E=Deskripsi, F=Tindakan, G=Keterangan
+
+        $imported = 0;
+        $skipped  = [];
+
+        foreach ($rows as $row) {
+            if (empty($row[1])) continue; // Skip jika Kode kosong
+
+            $kode       = strtoupper(trim($row[1]));
+            $jenis      = strtolower(trim($row[2] ?? ''));
+            $skor       = $row[3] ?? 0;
+            $deskripsi  = $row[4] ?? '';
+            $tindakan   = $row[5] ?? null;
+            $keterangan = $row[6] ?? null;
+
+            // Cek duplikat kode
+            if (JenisPoin::where('kode', $kode)->exists()) {
+                $skipped[] = "$kode (kode duplikat)";
+                continue;
+            }
+
+            // Normalisasi jenis
+            if (!in_array($jenis, ['reward', 'pelanggaran'])) {
+                $skipped[] = "$kode (jenis '$jenis' tidak valid, gunakan 'reward' atau 'pelanggaran')";
+                continue;
+            }
+
+            // Normalisasi skor sesuai jenis
+            $skor = $jenis === 'reward' ? abs((float)$skor) : -1 * abs((float)$skor);
+
+            JenisPoin::create([
+                'kode'       => $kode,
+                'jenis'      => $jenis,
+                'skor'       => $skor,
+                'deskripsi'  => $deskripsi === '-' ? null : $deskripsi,
+                'tindakan'   => $tindakan === '-' ? null : $tindakan,
+                'keterangan' => $keterangan === '-' ? null : $keterangan,
+                'urut'       => JenisPoin::max('urut') + 1,
+                'user_id'    => Auth::id(),
+            ]);
+
+            $imported++;
+        }
+
+        $redirect = redirect()->route('master.jenis-poin.index');
+
+        if ($imported > 0) {
+            $redirect->with('success', "Berhasil mengimpor $imported data jenis poin.");
+        }
+        if (count($skipped) > 0) {
+            $errorMsg = count($skipped) . " data gagal diimpor: ";
+            $errorMsg .= count($skipped) > 1
+                ? implode(', ', array_slice($skipped, 0, 1)) . ', dan ' . (count($skipped) - 1) . ' lainnya.'
+                : implode(', ', $skipped);
+            $redirect->with('error', $errorMsg);
+        }
+        if ($imported === 0 && count($skipped) === 0) {
+            $redirect->with('error', 'Tidak ada data yang valid untuk diimpor.');
+        }
+
+        return $redirect;
+    }
 }

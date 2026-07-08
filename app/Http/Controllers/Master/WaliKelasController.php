@@ -289,4 +289,92 @@ class WaliKelasController extends Controller
 
         return redirect()->route('master.walikelas.index')->with('success', 'Wali Kelas berhasil dihapus.');
     }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:2048'
+        ]);
+
+        $file = $request->file('file');
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getPathname());
+        $sheet = $spreadsheet->getActiveSheet();
+        $rows = $sheet->toArray();
+        array_shift($rows); // skip header
+
+        // Kolom export: A=No, B=Tahun Ajaran, C=Kelas, D=Tingkat, E=NIP, F=Nama Guru
+
+        $imported = 0;
+        $skipped  = [];
+
+        foreach ($rows as $row) {
+            if (empty($row[2])) continue; // Skip jika Kelas kosong
+
+            $tahunAjaranNama = $row[1];
+            $kelasNama       = $row[2];
+            $nip             = $row[4];
+
+            // Cari Tahun Ajaran
+            $tahunAjaran = \App\Models\TahunAjaran::where('nama', $tahunAjaranNama)->first();
+            if (!$tahunAjaran) {
+                $skipped[] = "Kelas $kelasNama (tahun ajaran '$tahunAjaranNama' tidak ditemukan)";
+                continue;
+            }
+
+            // Cari Kelas
+            $kelas = Kelas::where('nama_kelas', strtoupper($kelasNama))->first();
+            if (!$kelas) {
+                $skipped[] = "Kelas $kelasNama (kelas tidak ditemukan)";
+                continue;
+            }
+
+            // Cari Guru via NIP
+            $guru = null;
+            if (!empty($nip) && $nip !== '-') {
+                $guru = Guru::where('nip', $nip)->first();
+            }
+            if (!$guru) {
+                $skipped[] = "Kelas $kelasNama (guru dengan NIP '$nip' tidak ditemukan)";
+                continue;
+            }
+
+            // Cek duplikat: guru yang sama di tahun ajaran yang sama
+            if (WaliKelas::where('guru_id', $guru->id)->where('tahun_ajaran_id', $tahunAjaran->id)->exists()) {
+                $skipped[] = "{$guru->personil->nama} (guru duplikat di tahun ajaran yang sama)";
+                continue;
+            }
+
+            // Cek duplikat: kelas yang sama di tahun ajaran yang sama
+            if (WaliKelas::where('kelas_id', $kelas->id)->where('tahun_ajaran_id', $tahunAjaran->id)->exists()) {
+                $skipped[] = "Kelas $kelasNama (kelas duplikat di tahun ajaran yang sama)";
+                continue;
+            }
+
+            WaliKelas::create([
+                'guru_id'         => $guru->id,
+                'kelas_id'        => $kelas->id,
+                'tahun_ajaran_id' => $tahunAjaran->id,
+            ]);
+
+            $imported++;
+        }
+
+        $redirect = redirect()->route('master.walikelas.index');
+
+        if ($imported > 0) {
+            $redirect->with('success', "Berhasil mengimpor $imported data wali kelas.");
+        }
+        if (count($skipped) > 0) {
+            $errorMsg = count($skipped) . " data gagal diimpor: ";
+            $errorMsg .= count($skipped) > 1
+                ? implode(', ', array_slice($skipped, 0, 1)) . ', dan ' . (count($skipped) - 1) . ' lainnya.'
+                : implode(', ', $skipped);
+            $redirect->with('error', $errorMsg);
+        }
+        if ($imported === 0 && count($skipped) === 0) {
+            $redirect->with('error', 'Tidak ada data yang valid untuk diimpor.');
+        }
+
+        return $redirect;
+    }
 }

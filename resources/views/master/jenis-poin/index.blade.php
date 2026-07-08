@@ -38,8 +38,12 @@
                     </a>
                 @endif
 
+                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#importJenisPoinModal">
+                    <i class="fas fa-file-import me-1"></i> Import
+                </button>
+
                 <a href="{{ route('master.jenis-poin.download', request()->query()) }}" class="btn btn-sm btn-success">
-                    <i class="fas fa-file-excel me-1"></i> Excel
+                    <i class="fas fa-file-excel me-1"></i> Export
                 </a>
             </form>
         </div>
@@ -103,5 +107,31 @@
         @if ($jenisPoin->hasPages())
             <div class="card-body border-top" style="padding:12px 20px">{{ $jenisPoin->links() }}</div>
         @endif
+    </div>
+
+    <!-- Modal Import Jenis Poin -->
+    <div class="modal fade" id="importJenisPoinModal" tabindex="-1" aria-labelledby="importJenisPoinLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background:var(--card-bg);border-color:var(--border-color)">
+                <form action="{{ route('master.jenis-poin.import') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-header border-bottom" style="border-color:var(--border-color)!important">
+                        <h5 class="modal-title" id="importJenisPoinLabel">Import Data Jenis Poin</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="fileJenisPoin" class="form-label">Pilih File Excel (.xlsx, .xls, .csv)</label>
+                            <input class="form-control" type="file" id="fileJenisPoin" name="file" accept=".xlsx,.xls,.csv" required>
+                        </div>
+                        <small class="text-muted">Format kolom: No, Kode, Jenis (reward/pelanggaran), Skor, Deskripsi, Tindakan, Keterangan. Gunakan tombol Export untuk melihat formatnya.</small>
+                    </div>
+                    <div class="modal-footer border-top" style="border-color:var(--border-color)!important">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Import</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 @endsection

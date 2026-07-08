@@ -70,9 +70,14 @@
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <span>Daftar {{ $title }} <span class="text-muted fw-normal"
                             style="font-size:13px">({{ $walikelas->total() }} data)</span></span>
-                    <a href="{{ route('master.walikelas.download', request()->query()) }}" class="btn btn-sm btn-success">
-                        <i class="fas fa-file-excel me-1"></i> Excel
-                    </a>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-primary me-1" data-bs-toggle="modal" data-bs-target="#importWaliKelasModal">
+                            <i class="fas fa-file-import me-1"></i> Import
+                        </button>
+                        <a href="{{ route('master.walikelas.download', request()->query()) }}" class="btn btn-sm btn-success">
+                            <i class="fas fa-file-excel me-1"></i> Export
+                        </a>
+                    </div>
                 </div>
                 <div class="card-body table-responsive" style="padding:0">
                     <table class="table table-hover mb-0">
@@ -129,5 +134,31 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- Modal Import Wali Kelas -->
+    <div class="modal fade" id="importWaliKelasModal" tabindex="-1" aria-labelledby="importWaliKelasLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background:var(--card-bg);border-color:var(--border-color)">
+                <form action="{{ route('master.walikelas.import') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-header border-bottom" style="border-color:var(--border-color)!important">
+                        <h5 class="modal-title" id="importWaliKelasLabel">Import Data Wali Kelas</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="fileWaliKelas" class="form-label">Pilih File Excel (.xlsx, .xls, .csv)</label>
+                            <input class="form-control" type="file" id="fileWaliKelas" name="file" accept=".xlsx,.xls,.csv" required>
+                        </div>
+                        <small class="text-muted">Format kolom: No, Tahun Ajaran, Kelas, Tingkat, NIP, Nama Guru. Pastikan data Guru dan Kelas sudah ada di sistem. Gunakan tombol Export untuk melihat formatnya.</small>
+                    </div>
+                    <div class="modal-footer border-top" style="border-color:var(--border-color)!important">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Import</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 @endsection

@@ -207,6 +207,99 @@ class MuridController extends Controller
         }, 200, $headersInfo);
     }
 
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:2048'
+        ]);
+
+        $tahunAjaranAktif = TahunAjaran::where('is_aktif', true)->first();
+
+        $file = $request->file('file');
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getPathname());
+        $sheet = $spreadsheet->getActiveSheet();
+        $rows = $sheet->toArray();
+
+        // Lewati baris pertama (header)
+        array_shift($rows);
+
+        $imported = 0;
+        $skipped = [];
+
+        foreach ($rows as $row) {
+            // Kolom A=No, B=NIS, C=NISN, D=Nama, E=L/P, F=Kelas, G=Status
+            if (empty($row[3])) continue; // Skip jika Nama kosong
+
+            $nis          = $row[1];
+            $nisn         = $row[2];
+            $nama         = $row[3];
+            $jenisKelamin = $row[4];
+            $kelasNama    = $row[5];
+            $status       = strtolower($row[6] ?? 'aktif');
+
+            // Cek duplikat NIS
+            if (!empty($nis) && $nis !== '-' && Murid::where('nis', $nis)->exists()) {
+                $skipped[] = "$nama (NIS duplikat)";
+                continue;
+            }
+
+            // Cek duplikat NISN
+            if (!empty($nisn) && $nisn !== '-' && Murid::where('nisn', $nisn)->exists()) {
+                $skipped[] = "$nama (NISN duplikat)";
+                continue;
+            }
+
+            // Cari kelas
+            $kelasId = null;
+            if ($kelasNama && $kelasNama !== '-') {
+                $kelas = Kelas::where('nama_kelas', $kelasNama)->first();
+                if ($kelas) $kelasId = $kelas->id;
+            }
+
+            $personil = Personil::create([
+                'nama'         => $nama,
+                'jenis_kelamin' => ($jenisKelamin === 'L' || $jenisKelamin === 'P') ? $jenisKelamin : null,
+                'status'       => in_array($status, ['aktif', 'nonaktif']) ? $status : 'aktif',
+            ]);
+
+            $murid = Murid::create([
+                'personil_id' => $personil->id,
+                'nis'         => $nis === '-' ? null : $nis,
+                'nisn'        => $nisn === '-' ? null : $nisn,
+            ]);
+
+            if ($kelasId && $tahunAjaranAktif) {
+                MuridKelas::create([
+                    'murid_id'       => $murid->id,
+                    'kelas_id'       => $kelasId,
+                    'tahun_ajaran_id' => $tahunAjaranAktif->id,
+                ]);
+            }
+
+            $imported++;
+        }
+
+        $redirect = redirect()->route('master.murid.index');
+
+        if ($imported > 0) {
+            $redirect->with('success', "Berhasil mengimpor $imported data siswa.");
+        }
+
+        if (count($skipped) > 0) {
+            $errorMsg = count($skipped) . " data gagal diimpor karena duplikasi (NIS/NISN): ";
+            $errorMsg .= count($skipped) > 1
+                ? implode(', ', array_slice($skipped, 0, 1)) . ', dan ' . (count($skipped) - 1) . ' lainnya.'
+                : implode(', ', $skipped);
+            $redirect->with('error', $errorMsg);
+        }
+
+        if ($imported === 0 && count($skipped) === 0) {
+            $redirect->with('error', 'Tidak ada data yang valid untuk diimpor.');
+        }
+
+        return $redirect;
+    }
+
     /**
      * Show the form for editing the specified resource.
      */
