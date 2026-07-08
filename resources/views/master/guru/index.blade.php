@@ -68,9 +68,14 @@
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <span>Daftar {{ $title }} <span class="text-muted fw-normal"
                             style="font-size:13px">({{ $guru->total() }} data)</span></span>
-                    <a href="{{ route('master.guru.download', request()->query()) }}" class="btn btn-sm btn-success">
-                        <i class="fas fa-file-excel me-1"></i> Excel
-                    </a>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-primary me-1" data-bs-toggle="modal" data-bs-target="#importModal">
+                            <i class="fas fa-file-import me-1"></i> Import
+                        </button>
+                        <a href="{{ route('master.guru.download', request()->query()) }}" class="btn btn-sm btn-success">
+                            <i class="fas fa-file-excel me-1"></i> Export
+                        </a>
+                    </div>
                 </div>
                 <div class="card-body table-responsive" style="padding:0">
                     <table class="table table-hover mb-0">
@@ -128,5 +133,31 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- Modal Import -->
+    <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background:var(--card-bg);border-color:var(--border-color)">
+                <form action="{{ route('master.guru.import') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-header border-bottom" style="border-color:var(--border-color)!important">
+                        <h5 class="modal-title" id="importModalLabel">Import Data Guru</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Pilih File Excel (.xlsx, .xls, .csv)</label>
+                            <input class="form-control" type="file" id="file" name="file" accept=".xlsx,.xls,.csv" required>
+                        </div>
+                        <small class="text-muted">Pastikan format kolom sesuai dengan format hasil export Excel (Export dulu untuk melihat formatnya, mulai baris ke-2).</small>
+                    </div>
+                    <div class="modal-footer border-top" style="border-color:var(--border-color)!important">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Import</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 @endsection

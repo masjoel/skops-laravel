@@ -181,6 +181,72 @@ class GuruController extends Controller
         }, 200, $headersInfo);
     }
 
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:2048'
+        ]);
+
+        $file = $request->file('file');
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getPathname());
+        $sheet = $spreadsheet->getActiveSheet();
+        $rows = $sheet->toArray();
+
+        // Lewati baris pertama (header)
+        array_shift($rows);
+
+        $imported = 0;
+        foreach ($rows as $row) {
+            // Kolom A=No, B=Nama, C=L/P, D=NIP, E=JABATAN, F=No. HP, G=Email, H=Alamat, I=Status
+            if (empty($row[1])) continue; // Skip jika Nama kosong
+
+            $nama = $row[1];
+            $jenisKelamin = $row[2];
+            $nip = $row[3];
+            $jabatanNama = $row[4];
+            $noHp = $row[5];
+            $email = $row[6];
+            $alamat = $row[7];
+            $status = strtolower($row[8] ?? 'aktif');
+
+            // Skip jika NIP sudah ada
+            if (!empty($nip) && $nip !== '-' && Guru::where('nip', $nip)->exists()) {
+                continue;
+            }
+
+            // Cari ID jabatan
+            $jabatanId = null;
+            if ($jabatanNama && $jabatanNama !== '-') {
+                $jabatan = JabatanStruktural::where('nama_jabatan', $jabatanNama)->first();
+                if ($jabatan) {
+                    $jabatanId = $jabatan->id;
+                }
+            }
+
+            // Buat Personil
+            $personil = Personil::create([
+                'nama' => $nama,
+                'jenis_kelamin' => ($jenisKelamin === 'L' || $jenisKelamin === 'P') ? $jenisKelamin : null,
+                'status' => in_array($status, ['aktif', 'nonaktif']) ? $status : 'aktif',
+                'no_hp' => $noHp === '-' ? null : $noHp,
+                'email' => $email === '-' ? null : $email,
+                'alamat' => $alamat === '-' ? null : $alamat,
+            ]);
+
+            // Buat Guru
+            Guru::create([
+                'personil_id' => $personil->id,
+                'nip' => $nip === '-' ? null : $nip,
+                'jabatan_struktural_id' => $jabatanId,
+            ]);
+
+            $imported++;
+        }
+
+        return redirect()->route('master.guru.index')
+            ->with('success', "Berhasil mengimpor $imported data guru.");
+    }
+
     /**
      * Show the form for editing the specified resource.
      */

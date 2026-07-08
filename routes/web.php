@@ -58,6 +58,7 @@ Route::middleware(['auth.session'])->group(function () {
     Route::prefix('master')->name('master.')->group(function () {
         Route::resource('personil', PersonilController::class);
         Route::get('guru/download', [GuruController::class, 'download'])->name('guru.download');
+        Route::post('guru/import', [GuruController::class, 'import'])->name('guru.import');
         Route::resource('guru', GuruController::class);
         Route::get('murid/download', [MuridController::class, 'download'])->name('murid.download');
         Route::resource('murid', MuridController::class);
