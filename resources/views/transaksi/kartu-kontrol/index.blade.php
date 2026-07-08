@@ -94,11 +94,16 @@
                 <div class="card-header d-flex flex-wrap align-items-center justify-content-between">
                     <span class="mb-2">Daftar {{ $title }} <span class="text-muted fw-normal"
                             style="font-size:13px">({{ $kartuKontrol->total() }} data)</span></span>
-                    <a href="{{ route('transaksi.kartu-kontrol.download', request()->query()) }}"
-                        class="btn btn-sm btn-success" style="font-size:12px;padding:4px 12px">
-                        <i class="fas fa-file-excel me-1"></i> Excel 
-                        {{-- Download <i class="fas fa-download ms-1"></i> --}}
-                    </a>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#importKKModal"
+                            style="font-size:12px;padding:4px 12px">
+                            <i class="fas fa-file-import me-1"></i> Import
+                        </button>
+                        <a href="{{ route('transaksi.kartu-kontrol.download', request()->query()) }}"
+                            class="btn btn-sm btn-success" style="font-size:12px;padding:4px 12px">
+                            <i class="fas fa-file-excel me-1"></i> Export
+                        </a>
+                    </div>
                 </div>
                 <div class="card-body table-responsive" style="padding:0">
                     <table class="table table-hover mb-0">
@@ -194,6 +199,40 @@
                 @if ($kartuKontrol->hasPages())
                     <div class="card-body border-top" style="padding:12px 20px">{{ $kartuKontrol->links() }}</div>
                 @endif
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Import Kartu Kontrol -->
+    <div class="modal fade" id="importKKModal" tabindex="-1" aria-labelledby="importKKLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background:var(--card-bg);border-color:var(--border-color)">
+                <form action="{{ route('transaksi.kartu-kontrol.import') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-header border-bottom" style="border-color:var(--border-color)!important">
+                        <h5 class="modal-title" id="importKKLabel">Import Data Kartu Kontrol</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="fileKK" class="form-label">Pilih File Excel (.xlsx, .xls, .csv)</label>
+                            <input class="form-control" type="file" id="fileKK" name="file" accept=".xlsx,.xls,.csv" required>
+                        </div>
+                        <div class="alert alert-warning py-2" style="font-size:12px">
+                            <strong>Penting:</strong> Gunakan file Export dari sistem ini sebagai template.
+                            <ul class="mb-0 mt-1">
+                                <li>Data akan diimpor ke <strong>tahun ajaran aktif</strong>.</li>
+                                <li>Kolom <strong>Kode</strong> digunakan untuk mencari jenis poin.</li>
+                                <li>Kolom <strong>Guru</strong> bisa diisi <strong>Nama</strong> atau <strong>NIP</strong> guru (sesuai hasil Export).</li>
+                                <li>Kolom <strong>Semester</strong>: tulis <em>Ganjil</em> atau <em>Genap</em>.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top" style="border-color:var(--border-color)!important">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Import</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

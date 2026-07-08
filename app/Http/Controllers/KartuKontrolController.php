@@ -298,6 +298,167 @@ class KartuKontrolController extends Controller
             ->with('success', 'Kartu kontrol berhasil dihapus.');
     }
 
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:5120'
+        ]);
+
+        $file = $request->file('file');
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getPathname());
+        $sheet = $spreadsheet->getActiveSheet();
+        $rows = $sheet->toArray();
+
+        // Format export: Baris 1=Info, Baris 2=Kosong, Baris 3=Header, Baris 4+=Data
+        // Kolom: A=Tanggal, B=Nama Siswa, C=Kelas, D=Kode, E=Deskripsi, F=Jenis, G=Skor, H=Tindakan, I=Guru (NIP), J=Semester
+        // Lewati 3 baris pertama (info + kosong + header)
+        $rows = array_slice($rows, 3);
+
+        // Ambil tahun ajaran aktif untuk lookup murid_kelas
+        $tahunAjaranAktifId = TahunAjaran::where('is_aktif', true)->first()?->id;
+
+        $imported = 0;
+        $skipped  = [];
+
+        foreach ($rows as $idx => $row) {
+            $lineNo = $idx + 4; // nomor baris Excel sesungguhnya
+
+            // Skip baris kosong
+            if (empty($row[0]) && empty($row[1]) && empty($row[3])) continue;
+
+            $tanggal    = $row[0]; // dd/mm/yyyy
+            $namaSiswa  = $row[1];
+            $kelasNama  = $row[2];
+            $kode       = strtoupper(trim($row[3] ?? ''));
+            // $deskripsi = $row[4]; // tidak dipakai, lookup via kode
+            // $jenis     = $row[5]; // tidak dipakai, diambil dari model
+            $skor       = $row[6]; // bisa override, bisa null
+            $tindakan   = $row[7];
+            // kolom I = nama guru (atau NIP jika tersedia) — diproses di blok lookup guru
+            $semesterStr = strtolower(trim($row[9] ?? ''));
+
+            // --- Parse tanggal ---
+            if (empty($tanggal)) {
+                $skipped[] = "Baris $lineNo: tanggal kosong";
+                continue;
+            }
+            // format d/m/Y
+            $tglParsed = \DateTime::createFromFormat('d/m/Y', $tanggal);
+            if (!$tglParsed) {
+                // coba format Y-m-d
+                $tglParsed = \DateTime::createFromFormat('Y-m-d', $tanggal);
+            }
+            if (!$tglParsed) {
+                $skipped[] = "Baris $lineNo ($namaSiswa): format tanggal '$tanggal' tidak valid (gunakan dd/mm/yyyy)";
+                continue;
+            }
+            $tglFormatted = $tglParsed->format('Y-m-d');
+
+            // --- Cari JenisPoin via Kode ---
+            if (empty($kode)) {
+                $skipped[] = "Baris $lineNo ($namaSiswa): kode jenis poin kosong";
+                continue;
+            }
+            $jenisPoin = JenisPoin::where('kode', $kode)->first();
+            if (!$jenisPoin) {
+                $skipped[] = "Baris $lineNo ($namaSiswa): kode '$kode' tidak ditemukan";
+                continue;
+            }
+
+            // --- Cari MuridKelas via nama siswa & kelas di tahun ajaran aktif ---
+            $muridKelasQuery = MuridKelas::with(['murid.personil', 'kelas'])
+                ->where('tahun_ajaran_id', $tahunAjaranAktifId)
+                ->whereHas('murid.personil', function ($q) use ($namaSiswa) {
+                    $q->where('nama', $namaSiswa);
+                });
+
+            if ($kelasNama && $kelasNama !== '-') {
+                $muridKelasQuery->whereHas('kelas', function ($q) use ($kelasNama) {
+                    $q->where('nama_kelas', strtoupper(explode(' ', trim($kelasNama))[0]));
+                });
+            }
+
+            $muridKelas = $muridKelasQuery->first();
+            if (!$muridKelas) {
+                $skipped[] = "Baris $lineNo: siswa '$namaSiswa' di kelas '$kelasNama' tidak ditemukan di tahun ajaran aktif";
+                continue;
+            }
+
+            // --- Cari Guru via NIP atau Nama (NIP bersifat opsional/nullable) ---
+            $guruId = null;
+            $guruNamaOrNip = trim($row[8] ?? '');
+            if (!empty($guruNamaOrNip) && $guruNamaOrNip !== '-') {
+                // Coba cari via NIP terlebih dahulu
+                $guru = Guru::where('nip', $guruNamaOrNip)->first();
+
+                // Jika tidak ketemu via NIP, coba cari via nama personil
+                if (!$guru) {
+                    $guru = Guru::whereHas('personil', function ($q) use ($guruNamaOrNip) {
+                        $q->where('nama', $guruNamaOrNip);
+                    })->first();
+                }
+
+                if ($guru) {
+                    $guruId = $guru->id;
+                }
+                // Jika guru tetap tidak ditemukan, biarkan null (guru tidak wajib)
+            }
+
+            // --- Cari PeriodeAkademik ---
+            $semester = null;
+            if (str_contains($semesterStr, 'ganjil') || $semesterStr === '1') $semester = 1;
+            elseif (str_contains($semesterStr, 'genap') || $semesterStr === '2') $semester = 2;
+
+            $periodeAkademik = null;
+            if ($semester && $tahunAjaranAktifId) {
+                $periodeAkademik = PeriodeAkademik::where('tahun_ajaran_id', $tahunAjaranAktifId)
+                    ->where('semester', $semester)
+                    ->first();
+            }
+            if (!$periodeAkademik) {
+                $periodeAkademik = PeriodeAkademik::aktif();
+            }
+            if (!$periodeAkademik) {
+                $skipped[] = "Baris $lineNo ($namaSiswa): periode akademik '$semesterStr' tidak ditemukan";
+                continue;
+            }
+
+            // --- Skor: gunakan dari file jika ada, fallback ke default jenis poin ---
+            $skorFinal = (is_numeric($skor) && $skor !== '') ? (float)$skor : $jenisPoin->skor;
+
+            KartuKontrol::create([
+                'murid_kelas_id'      => $muridKelas->id,
+                'guru_id'             => $guruId,
+                'jenis_poin_id'       => $jenisPoin->id,
+                'periode_akademik_id' => $periodeAkademik->id,
+                'tgl'                 => $tglFormatted,
+                'skor'                => $skorFinal,
+                'tindakan'            => ($tindakan && $tindakan !== '-') ? $tindakan : null,
+                'user_id'             => Auth::id(),
+            ]);
+
+            $imported++;
+        }
+
+        $redirect = redirect()->route('transaksi.kartu-kontrol.index');
+
+        if ($imported > 0) {
+            $redirect->with('success', "Berhasil mengimpor $imported data kartu kontrol.");
+        }
+        if (count($skipped) > 0) {
+            $errorMsg = "Terdapat " . count($skipped) . " data gagal diimpor: ";
+            $errorMsg .= count($skipped) > 5
+                ? implode('; ', array_slice($skipped, 0, 5)) . '; dan ' . (count($skipped) - 5) . ' lainnya.'
+                : implode('; ', $skipped);
+            $redirect->with('error', $errorMsg);
+        }
+        if ($imported === 0 && count($skipped) === 0) {
+            $redirect->with('error', 'Tidak ada data yang valid untuk diimpor.');
+        }
+
+        return $redirect;
+    }
+
     /**
      * Validasi input form tambah/edit kartu kontrol.
      */
