@@ -87,7 +87,7 @@ class KartuKontrolController extends Controller
                 $qp->where('semester', $request->semester);
             });
         }
-        $totals = $totalsQuery->selectRaw('jenis_poin.jenis, COUNT(*) as jumlah, SUM(jenis_poin.skor) as total_skor')
+        $totals = $totalsQuery->selectRaw('jenis_poin.jenis, COUNT(*) as jumlah, SUM(kartu_kontrol.skor) as total_skor')
             ->groupBy('jenis_poin.jenis')
             ->get()
             ->keyBy('jenis');

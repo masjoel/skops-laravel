@@ -59,6 +59,7 @@
                 style="font-size:12px;padding:6px 12px;border-radius:20px">
                 <i class="fas fa-calendar-alt me-1"></i>{{ now()->isoFormat('D MMMM Y') }}
             </span>
+            @include('partials.periode-switcher')
         </div>
     </div>
 
@@ -272,7 +273,8 @@
                                     <th>Kelas</th>
                                     <th class="text-center">Pelanggaran</th>
                                     <th class="text-center">Reward</th>
-                                    <th class="text-end">Total Poin</th>
+                                    <th class="text-center">Pemutihan</th>
+                                    <th class="text-end">Net Poin</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -290,8 +292,11 @@
                                         <td class="text-center text-success">
                                             {{ $siswa->total_reward ?: '0' }}
                                         </td>
+                                        <td class="text-center text-info">
+                                            {{ $siswa->total_pemutihan ?: '0' }}
+                                        </td>
                                         <td class="text-end" style="font-weight:600;">
-                                            {{ $siswa->total_reward + $siswa->total_pelanggaran }}
+                                            {{ $siswa->total_reward - $siswa->total_pelanggaran + $siswa->total_pemutihan }}
                                         </td>
                                     </tr>
                                 @empty
@@ -346,7 +351,7 @@
                                                 <span class="badge bg-success bg-opacity-10 text-success"
                                                     style="font-size:11px;padding:4px 8px;border-radius:20px">Reward</span>
                                             @else
-                                                <span class="badge bg-secondary bg-opacity-10 text-secondary"
+                                                <span class="badge bg-info bg-opacity-10 text-info"
                                                     style="font-size:11px;padding:4px 8px;border-radius:20px">{{ ucfirst($poin->jenisPoin?->jenis) }}</span>
                                             @endif
                                         </td>
@@ -393,6 +398,7 @@
                 const labels = chartData.map(d => d.namabulan || 'Bln ' + d.bulan);
                 const rewardData = chartData.map(d => parseFloat(d.reward) || 0);
                 const pelanggaranData = chartData.map(d => parseFloat(d.pelanggaran) || 0);
+                const pemutihanData = chartData.map(d => parseFloat(d.pemutihan) || 0);
 
                 // ── Omset Area Chart (now Reward vs Pelanggaran) ──
                 const omsetCtx = document.getElementById('omsetChart').getContext('2d');
@@ -492,14 +498,15 @@
                 const donutCtx = document.getElementById('donutChart').getContext('2d');
                 const totalReward = rewardData.reduce((a, b) => a + b, 0);
                 const totalPelanggaran = pelanggaranData.reduce((a, b) => a + b, 0);
+                const totalPemutihan = pemutihanData.reduce((a, b) => a + b, 0);
 
                 new Chart(donutCtx, {
                     type: 'doughnut',
                     data: {
-                        labels: ['Reward', 'Pelanggaran'],
+                        labels: ['Reward', 'Pelanggaran', 'Pemutihan'],
                         datasets: [{
-                            data: [totalReward || 1, totalPelanggaran || 0],
-                            backgroundColor: ['#22c55e', '#ef4444'],
+                            data: [totalReward || 1, totalPelanggaran || 0, totalPemutihan || 0],
+                            backgroundColor: ['#22c55e', '#ef4444', '#63b6f1'],
                             borderWidth: 0,
                             hoverOffset: 6,
                         }],

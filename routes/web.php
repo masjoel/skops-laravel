@@ -12,6 +12,7 @@ use App\Http\Controllers\Master\KelasController;
 use App\Http\Controllers\Master\MuridController;
 use App\Http\Controllers\Master\OrangTuaController;
 use App\Http\Controllers\Master\PersonilController;
+use App\Http\Controllers\Master\TahunAjaranController;
 use App\Http\Controllers\Master\WaliKelasController;
 use App\Http\Controllers\RekapitulasiController;
 use App\Http\Controllers\Seting\SetingController;
@@ -77,7 +78,26 @@ Route::middleware(['auth.session'])->group(function () {
         Route::get('jabatan/download', [JabatanStrukturalController::class, 'download'])->name('jabatan.download');
         Route::post('jabatan/import', [JabatanStrukturalController::class, 'import'])->name('jabatan.import');
         Route::resource('jabatan', JabatanStrukturalController::class);
+        // Route::resource('tahun-ajaran', TahunAjaranController::class)->parameters(['tahun-ajaran' => 'tahunAjaran']);
+        // Route::post('tahun-ajaran/{tahunAjaran}/aktifkan', [TahunAjaranController::class, 'aktifkanTahunAjaran'])->name('aktifkan');
     });
+
+    // Tambahkan ke routes/web.php, di dalam middleware auth
+    // PENTING: route ini harus masuk daftar $except di PastikanPeriodeAktif
+    // (sudah didaftarkan sebagai 'master.tahun-ajaran.*')
+    Route::prefix('master/tahun-ajaran')->name('master.tahun-ajaran.')->group(function () {
+        Route::get('/', [TahunAjaranController::class, 'index'])->name('index');
+        Route::post('/', [TahunAjaranController::class, 'store'])->name('store');
+        Route::get('/{tahunAjaran}/edit', [TahunAjaranController::class, 'edit'])->name('edit');
+        Route::put('/{tahunAjaran}', [TahunAjaranController::class, 'update'])->name('update');
+        Route::delete('/{tahunAjaran}', [TahunAjaranController::class, 'destroy'])->name('destroy');
+        Route::post('/{tahunAjaran}/aktifkan', [TahunAjaranController::class, 'aktifkanTahunAjaran'])
+            ->name('aktifkan');
+    });
+
+    Route::post('/periode-akademik/{periodeAkademik}/aktifkan', [TahunAjaranController::class, 'aktifkanPeriode'])
+        ->name('periode-akademik.aktifkan');
+        
     /*
     |----------------------------------------------------------------------
     | Transaksi Data

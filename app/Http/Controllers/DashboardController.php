@@ -41,7 +41,7 @@ class DashboardController extends Controller
                 $qmk->where('tahun_ajaran_id', $filterTahunAjaran);
             });
         }
-        $totals = $totalsQuery->selectRaw('jenis_poin.jenis, COUNT(*) as jumlah, SUM(jenis_poin.skor) as total_skor')
+        $totals = $totalsQuery->selectRaw('jenis_poin.jenis, COUNT(*) as jumlah, SUM(kartu_kontrol.skor) as total_skor')
             ->groupBy('jenis_poin.jenis')
             ->get()
             ->keyBy('jenis');
@@ -60,7 +60,7 @@ class DashboardController extends Controller
         $totalJenisPoin    = JenisPoin::count() ?? 0;
 
         $chartDataRaw = KartuKontrol::query()
-            ->selectRaw('MONTH(kartu_kontrol.tgl) as bulan, jenis_poin.jenis, SUM(jenis_poin.skor) as total_skor')
+            ->selectRaw('MONTH(kartu_kontrol.tgl) as bulan, jenis_poin.jenis, SUM(kartu_kontrol.skor) as total_skor')
             ->join('jenis_poin', 'jenis_poin.id', '=', 'kartu_kontrol.jenis_poin_id')
             ->whereYear('kartu_kontrol.tgl', $tahun)
             ->when($filterTahunAjaran, function ($q) use ($filterTahunAjaran) {
@@ -78,6 +78,7 @@ class DashboardController extends Controller
                 'namabulan' => \Carbon\Carbon::create()->month($i)->translatedFormat('M'),
                 'reward' => $chartDataRaw->where('bulan', $i)->where('jenis', 'reward')->sum('total_skor'),
                 'pelanggaran' => $chartDataRaw->where('bulan', $i)->where('jenis', 'pelanggaran')->sum('total_skor'),
+                'pemutihan' => $chartDataRaw->where('bulan', $i)->where('jenis', 'pemutihan')->sum('total_skor'),
             ]);
         }
 
@@ -85,8 +86,9 @@ class DashboardController extends Controller
         $siswaTertinggi = KartuKontrol::query()
             ->select('murid_kelas_id')
             ->join('jenis_poin', 'jenis_poin.id', '=', 'kartu_kontrol.jenis_poin_id')
-            ->selectRaw('SUM(CASE WHEN jenis_poin.jenis = "pelanggaran" THEN jenis_poin.skor ELSE 0 END) as total_pelanggaran')
-            ->selectRaw('SUM(CASE WHEN jenis_poin.jenis = "reward" THEN jenis_poin.skor ELSE 0 END) as total_reward')
+            ->selectRaw('SUM(CASE WHEN jenis_poin.jenis = "pelanggaran" THEN kartu_kontrol.skor ELSE 0 END) as total_pelanggaran')
+            ->selectRaw('SUM(CASE WHEN jenis_poin.jenis = "reward" THEN kartu_kontrol.skor ELSE 0 END) as total_reward')
+            ->selectRaw('SUM(CASE WHEN jenis_poin.jenis = "pemutihan" THEN kartu_kontrol.skor ELSE 0 END) as total_pemutihan')
             ->when($filterTahunAjaran, function ($q) use ($filterTahunAjaran) {
                 $q->whereHas('muridKelas', function ($qmk) use ($filterTahunAjaran) {
                     $qmk->where('tahun_ajaran_id', $filterTahunAjaran);
@@ -95,8 +97,9 @@ class DashboardController extends Controller
             ->with(['muridKelas.murid.personil', 'muridKelas.kelas'])
             ->groupBy('murid_kelas_id')
             ->orderByRaw('
-                (SUM(CASE WHEN jenis_poin.jenis = "reward" THEN jenis_poin.skor ELSE 0 END)
-                + SUM(CASE WHEN jenis_poin.jenis = "pelanggaran" THEN jenis_poin.skor ELSE 0 END)) DESC')
+                (SUM(CASE WHEN jenis_poin.jenis = "reward" THEN kartu_kontrol.skor ELSE 0 END)
+                + SUM(CASE WHEN jenis_poin.jenis = "pelanggaran" THEN kartu_kontrol.skor ELSE 0 END)
+                + SUM(CASE WHEN jenis_poin.jenis = "pemutihan" THEN kartu_kontrol.skor ELSE 0 END)) DESC')
             ->limit(10)
             ->get();
 
