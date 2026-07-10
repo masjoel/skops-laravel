@@ -37,13 +37,13 @@ class TahunAjaranSeeder extends Seeder
         PeriodeAkademik::create([
             'tahun_ajaran_id' => $tahunAktif->id,
             'semester' => 1,
-            'is_aktif' => true,
+            'is_aktif' => false,
         ]);
 
         PeriodeAkademik::create([
             'tahun_ajaran_id' => $tahunAktif->id,
             'semester' => 2,
-            'is_aktif' => false,
+            'is_aktif' => true,
         ]);
     }
 }

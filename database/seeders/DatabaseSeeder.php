@@ -20,9 +20,9 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
         Perusahaan::create([
             'nama_client' => 'SKOPS',
-            'nama_app' => 'Reward Point',
+            'nama_app' => 'Sistem Kelola Operasional Sekolah',
             'versi_app' => '1.0',
-            'desc_app' => 'Aplikasi Reward Point',
+            'desc_app' => 'Aplikasi Sistem Kelola Operasional Sekolah',
             'alamat_client' => 'Jl. Raya No.1',
             'signature' => 'Kepala Sekolah',
             'email' => 'sekolah@sekolah.com',

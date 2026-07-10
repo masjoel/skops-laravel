@@ -19,7 +19,7 @@ class MuridSeeder extends Seeder
         $tahunLalu = TahunAjaran::where('id', '!=', $tahunAktif->id)->first();
 
         Murid::factory()
-            ->count(40)
+            ->count(5)
             ->create()
             ->each(function (Murid $murid) use ($kelasList, $tahunAktif, $tahunLalu) {
                 // akun login murid
