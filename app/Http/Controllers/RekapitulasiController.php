@@ -88,7 +88,8 @@ class RekapitulasiController extends Controller
             })
             ->with(['muridKelas.murid.personil', 'muridKelas.kelas'])
             ->groupBy('murid_kelas_id')
-            ->orderByRaw('(total_reward + total_pelanggaran) DESC')
+            ->orderByRaw('(SUM(CASE WHEN jenis_poin.jenis = "reward" THEN jenis_poin.skor ELSE 0 END)
+                + SUM(CASE WHEN jenis_poin.jenis = "pelanggaran" THEN jenis_poin.skor ELSE 0 END))  DESC')
             ->paginate(20)
             ->withQueryString();
         $tahunAjaran = TahunAjaran::orderByDesc('nama')->get();
@@ -158,7 +159,8 @@ class RekapitulasiController extends Controller
             })
             ->with(['muridKelas.murid.personil', 'muridKelas.kelas'])
             ->groupBy('murid_kelas_id')
-            ->orderByRaw('(total_reward + total_pelanggaran) DESC')
+            ->orderByRaw('(SUM(CASE WHEN jenis_poin.jenis = "reward" THEN jenis_poin.skor ELSE 0 END)
+                + SUM(CASE WHEN jenis_poin.jenis = "pelanggaran" THEN jenis_poin.skor ELSE 0 END))  DESC')
             ->get();
 
         $spreadsheet = new Spreadsheet();

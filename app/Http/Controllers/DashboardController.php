@@ -96,8 +96,7 @@ class DashboardController extends Controller
             ->groupBy('murid_kelas_id')
             ->orderByRaw('
                 (SUM(CASE WHEN jenis_poin.jenis = "reward" THEN jenis_poin.skor ELSE 0 END)
-                + SUM(CASE WHEN jenis_poin.jenis = "pelanggaran" THEN jenis_poin.skor ELSE 0 END)) DESC
-            ')
+                + SUM(CASE WHEN jenis_poin.jenis = "pelanggaran" THEN jenis_poin.skor ELSE 0 END)) DESC')
             ->limit(10)
             ->get();
 
