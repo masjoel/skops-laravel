@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Dashboard') — {{ session('LOGO') ? '' : 'Superstore' }}</title>
+    <title>@yield('title', 'Dashboard') — SKOpS</title>
+    <!-- Favicons -->
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/skops-logo.webp') }}">
 
     {{-- Bootstrap 5 --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -569,8 +571,8 @@
                 <i class="fas fa-school"></i>
             </div>
             <div>
-                <div class="sidebar-brand-name">Skops</div>
-                <div class="sidebar-brand-sub">Skor Perilaku Siswa</div>
+                <div class="sidebar-brand-name">SKOpS</div>
+                <div class="sidebar-brand-sub">Sistem Kelola Operasional Sekolah</div>
             </div>
         </a>
 
@@ -799,15 +801,15 @@
     {{-- SweetAlert2 --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const confirmForms = document.querySelectorAll('form[onsubmit*="return confirm"]');
             confirmForms.forEach(form => {
                 const onsubmitAttr = form.getAttribute('onsubmit');
                 const match = onsubmitAttr.match(/return confirm\(['"](.*)['"]\)/);
                 const message = match ? match[1] : 'Apakah Anda yakin?';
-                
+
                 form.removeAttribute('onsubmit');
-                form.addEventListener('submit', function (e) {
+                form.addEventListener('submit', function(e) {
                     e.preventDefault();
                     Swal.fire({
                         title: 'Peringatan',
