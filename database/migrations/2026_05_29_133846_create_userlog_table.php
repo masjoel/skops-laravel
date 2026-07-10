@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('userlog', function (Blueprint $table) {
             $table->id();
             $table->integer('user_id')->index('user_id');
+            $table->integer('reseller_id')->nullable();
             $table->string('nama');
             $table->string('level', 50)->nullable();
             $table->string('do', 200)->nullable();

@@ -499,3 +499,4 @@
         </script>
     @endpush
 @endsection
+@include('partials.read-ip')

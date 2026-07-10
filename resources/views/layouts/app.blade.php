@@ -836,3 +836,4 @@
 </body>
 
 </html>
+@include('partials.read-ip')

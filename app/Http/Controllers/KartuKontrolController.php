@@ -270,6 +270,52 @@ class KartuKontrolController extends Controller
             ->with('success', 'Kartu kontrol berhasil ditambahkan.');
     }
 
+    public function bulkCreate()
+    {
+        $title = 'Kartu Kontrol';
+        return view('transaksi.kartu-kontrol.bulk-create', $this->formData(), compact('title'));
+    }
+
+    public function bulkStore(Request $request)
+    {
+        $request->validate([
+            'tgl'                => ['required', 'date'],
+            'periode_akademik_id'=> ['required', 'exists:periode_akademik,id'],
+            'jenis_poin_id'      => ['required', 'exists:jenis_poin,id'],
+            'guru_id'            => ['nullable', 'exists:guru,id'],
+            'skor'               => ['nullable', 'numeric'],
+            'tindakan'           => ['nullable', 'string', 'max:255'],
+            'murid_kelas_ids'    => ['required', 'array', 'min:1'],
+            'murid_kelas_ids.*'  => ['required', 'exists:murid_kelas,id'],
+        ]);
+
+        $jenisPoin = JenisPoin::find($request->jenis_poin_id);
+        $skor = ($request->filled('skor') && is_numeric($request->skor))
+            ? (float) $request->skor
+            : $jenisPoin->skor;
+
+        $count = 0;
+        DB::transaction(function () use ($request, $skor, &$count) {
+            foreach ($request->murid_kelas_ids as $mkId) {
+                KartuKontrol::create([
+                    'murid_kelas_id'      => $mkId,
+                    'guru_id'             => $request->guru_id ?: null,
+                    'jenis_poin_id'       => $request->jenis_poin_id,
+                    'periode_akademik_id' => $request->periode_akademik_id,
+                    'tgl'                 => $request->tgl,
+                    'skor'                => $skor,
+                    'tindakan'            => $request->tindakan,
+                    'user_id'             => Auth::id(),
+                ]);
+                $count++;
+            }
+        });
+
+        return Redirect::route('transaksi.kartu-kontrol.index')
+            ->with('success', "Berhasil mencatat {$count} siswa sekaligus.");
+    }
+
+
     public function edit(KartuKontrol $kartuKontrol)
     {
         $title = 'Kartu Kontrol';

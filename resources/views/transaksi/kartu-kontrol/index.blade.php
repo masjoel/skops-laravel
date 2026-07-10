@@ -52,9 +52,14 @@
                 <li class="breadcrumb-item active">{{ $title }}</li>
             </ol>
         </div>
-        <a href="{{ route('transaksi.kartu-kontrol.create') }}" class="btn btn-accent">
-            <i class="fas fa-plus me-2"></i>Tambah {{ $title }}
-        </a>
+        <div class="d-flex gap-2">
+            {{-- <a href="{{ route('transaksi.kartu-kontrol.bulk-create') }}" class="btn btn-outline-primary">
+                <i class="fas fa-layer-group me-2"></i>Input Massal
+            </a> --}}
+            <a href="{{ route('transaksi.kartu-kontrol.create') }}" class="btn btn-accent">
+                <i class="fas fa-plus me-2"></i>Tambah {{ $title }}
+            </a>
+        </div>
     </div>
 
     <div class="row g-3">

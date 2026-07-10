@@ -106,6 +106,8 @@ Route::middleware(['auth.session'])->group(function () {
     Route::prefix('transaksi')->name('transaksi.')->group(function () {
         Route::get('kartu-kontrol/download', [KartuKontrolController::class, 'download'])->name('kartu-kontrol.download');
         Route::post('kartu-kontrol/import', [KartuKontrolController::class, 'import'])->name('kartu-kontrol.import');
+        Route::get('kartu-kontrol/bulk-create', [KartuKontrolController::class, 'bulkCreate'])->name('kartu-kontrol.bulk-create');
+        Route::post('kartu-kontrol/bulk-store', [KartuKontrolController::class, 'bulkStore'])->name('kartu-kontrol.bulk-store');
         Route::resource('kartu-kontrol', KartuKontrolController::class)
             ->parameters(['kartu-kontrol' => 'kartuKontrol']);
     });
