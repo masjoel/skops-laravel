@@ -238,7 +238,7 @@
                         </div>
                         <hr style="border-color:var(--border-color);margin:10px 0">
                         @php
-                            $totalSkorNet = $skorReward - $skorPelanggaran + $skorPemutihan;
+                            $totalSkorNet = $skorReward + $skorPelanggaran + $skorPemutihan;
                         @endphp
                         <div class="d-flex justify-content-between align-items-center">
                             <span style="font-size:14px;font-weight:600">Net Skor Total</span>
@@ -274,7 +274,7 @@
                                     <th class="text-center">Pelanggaran</th>
                                     <th class="text-center">Reward</th>
                                     <th class="text-center">Pemutihan</th>
-                                    <th class="text-end">Net Poin</th>
+                                    <th class="text-end">Poin Akhir</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -296,7 +296,7 @@
                                             {{ $siswa->total_pemutihan ?: '0' }}
                                         </td>
                                         <td class="text-end" style="font-weight:600;">
-                                            {{ $siswa->total_reward - $siswa->total_pelanggaran + $siswa->total_pemutihan }}
+                                            {{ $siswa->total_reward + $siswa->total_pelanggaran + $siswa->total_pemutihan }}
                                         </td>
                                     </tr>
                                 @empty
