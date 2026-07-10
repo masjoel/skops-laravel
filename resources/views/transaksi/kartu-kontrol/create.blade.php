@@ -52,8 +52,7 @@
                                 if ($selectedGuruId) {
                                     $sg = $guruList->firstWhere('id', $selectedGuruId);
                                     if ($sg) {
-                                        $selectedGuruName =
-                                            ($sg->personil?->nama ?? '');
+                                        $selectedGuruName = $sg->personil?->nama ?? '';
                                     }
                                 }
                             @endphp
@@ -109,8 +108,7 @@
                                     if ($selectedJenisPoinId) {
                                         $sjp = $jenisPoinList->firstWhere('id', $selectedJenisPoinId);
                                         if ($sjp) {
-                                            $selectedJenisPoinName =
-                                                $sjp->kode . ' - ' . $sjp->deskripsi;
+                                            $selectedJenisPoinName = $sjp->kode . ' - ' . $sjp->deskripsi;
                                         }
                                     }
                                 @endphp
@@ -212,7 +210,11 @@
                                 <div class="d-flex justify-content-between">
                                     <strong>{{ $jp->deskripsi }}</strong>
                                     <span
-                                        class="badge {{ $jp->jenis === 'reward' ? 'bg-success' : 'bg-danger' }}">{{ ucfirst($jp->jenis) }}</span>
+                                        class="badge {{ match ($jp->jenis) {
+                                            'reward' => 'bg-success',
+                                            'pelanggaran' => 'bg-danger',
+                                            default => 'bg-info',
+                                        } }}">{{ ucfirst($jp->jenis) }}</span>
                                 </div>
                                 <small class="text-muted">Kode: {{ $jp->kode }} | Skor: {{ $jp->skor }}</small>
                             </button>
@@ -240,8 +242,7 @@
                     <div class="list-group" id="guruList">
                         @foreach ($guruList as $g)
                             <button type="button" class="list-group-item list-group-item-action guru-item"
-                                data-id="{{ $g->id }}"
-                                data-name="{{ $g->personil?->nama }}">
+                                data-id="{{ $g->id }}" data-name="{{ $g->personil?->nama }}">
                                 <strong>{{ $g->personil?->nama }}</strong>
                                 <br><small class="text-muted">NIP: {{ $g->nip ?? '-' }}</small>
                             </button>

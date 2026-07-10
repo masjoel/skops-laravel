@@ -20,7 +20,8 @@
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Tanggal <span class="text-danger">*</span></label>
                                 <input type="date" name="tgl" class="form-control @error('tgl') is-invalid @enderror"
-                                    value="{{ old('tgl', \Carbon\Carbon::parse($kartuKontrol->tgl)->format('Y-m-d')) }}" required>
+                                    value="{{ old('tgl', \Carbon\Carbon::parse($kartuKontrol->tgl)->format('Y-m-d')) }}"
+                                    required>
                                 @error('tgl')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -51,8 +52,7 @@
                                 if ($selectedGuruId) {
                                     $sg = $guruList->firstWhere('id', $selectedGuruId);
                                     if ($sg) {
-                                        $selectedGuruName =
-                                            ($sg->personil?->nama ?? '');
+                                        $selectedGuruName = $sg->personil?->nama ?? '';
                                     }
                                 }
                             @endphp
@@ -108,8 +108,7 @@
                                     if ($selectedJenisPoinId) {
                                         $sjp = $jenisPoinList->firstWhere('id', $selectedJenisPoinId);
                                         if ($sjp) {
-                                            $selectedJenisPoinName =
-                                                $sjp->kode . ' - ' . $sjp->deskripsi;
+                                            $selectedJenisPoinName = $sjp->kode . ' - ' . $sjp->deskripsi;
                                         }
                                     }
                                 @endphp
@@ -131,7 +130,8 @@
                             <div class="col-md-3 mb-3">
                                 <label class="form-label">Skor</label>
                                 <input type="number" step="1" name="skor" id="skor_input"
-                                    class="form-control @error('skor') is-invalid @enderror" value="{{ old('skor', $kartuKontrol->skor) }}">
+                                    class="form-control @error('skor') is-invalid @enderror"
+                                    value="{{ old('skor', $kartuKontrol->skor) }}">
                                 @error('skor')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -211,7 +211,11 @@
                                 <div class="d-flex justify-content-between">
                                     <strong>{{ $jp->deskripsi }}</strong>
                                     <span
-                                        class="badge {{ $jp->jenis === 'reward' ? 'bg-success' : 'bg-danger' }}">{{ ucfirst($jp->jenis) }}</span>
+                                        class="badge {{ match ($jp->jenis) {
+                                            'reward' => 'bg-success',
+                                            'pelanggaran' => 'bg-danger',
+                                            default => 'bg-info',
+                                        } }}">{{ ucfirst($jp->jenis) }}</span>
                                 </div>
                                 <small class="text-muted">Kode: {{ $jp->kode }} | Skor: {{ $jp->skor }}</small>
                             </button>
@@ -239,8 +243,7 @@
                     <div class="list-group" id="guruList">
                         @foreach ($guruList as $g)
                             <button type="button" class="list-group-item list-group-item-action guru-item"
-                                data-id="{{ $g->id }}"
-                                data-name="{{ $g->personil?->nama }}">
+                                data-id="{{ $g->id }}" data-name="{{ $g->personil?->nama }}">
                                 <strong>{{ $g->personil?->nama }}</strong>
                                 <br><small class="text-muted">NIP: {{ $g->nip ?? '-' }}</small>
                             </button>

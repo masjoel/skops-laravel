@@ -92,10 +92,12 @@ class KartuKontrolController extends Controller
             ->get()
             ->keyBy('jenis');
 
-        $totalPelanggaran  = $totals['pelanggaran']?->jumlah ?? 0;
         $totalReward       = $totals['reward']?->jumlah ?? 0;
-        $skorPelanggaran   = $totals['pelanggaran']?->total_skor ?? 0;
         $skorReward        = $totals['reward']?->total_skor ?? 0;
+        $totalPelanggaran  = $totals['pelanggaran']?->jumlah ?? 0;
+        $skorPelanggaran   = $totals['pelanggaran']?->total_skor ?? 0;
+        $totalPemutihan  = $totals['pemutihan']?->jumlah ?? 0;
+        $skorPemutihan   = $totals['pemutihan']?->total_skor ?? 0;
 
         $tahunAjaran = TahunAjaran::orderByDesc('nama')->get();
         $title = 'Kartu Kontrol';
@@ -110,6 +112,8 @@ class KartuKontrolController extends Controller
             'totalReward',
             'skorPelanggaran',
             'skorReward',
+            'totalPemutihan',
+            'skorPemutihan'
         ));
     }
 

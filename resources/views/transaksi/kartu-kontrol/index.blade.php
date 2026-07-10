@@ -1,6 +1,49 @@
 @extends('layouts.app')
 @section('title', 'Data ' . $title)
 @section('content')
+    <style>
+        .stat-card {
+            border-radius: 12px;
+            transition: transform .2s, box-shadow .2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            /* text-transform: uppercase; */
+            letter-spacing: .5px;
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 4px;
+        }
+
+        .stat-sub {
+            font-size: 11.5px;
+            color: var(--text-muted);
+        }
+
+        .stat-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+    </style>
+
     <div class="page-header">
         <div>
             <h1><i class="fas fa-chart-line me-2" style="color:#6366f1"></i>{{ $title }}</h1>
@@ -15,29 +58,63 @@
     </div>
 
     <div class="row g-3">
-        <div class="col-12">
-            <div class="card-body border-top d-flex flex-wrap gap-3" style="padding:12px 20px">
-                <div class="d-flex align-items-center gap-2 px-3 py-2 rounded-2" style="background:rgba(239,68,68,.1)">
-                    <i class="fas fa-exclamation-triangle" style="color:#ef4444"></i>
-                    <span style="font-size:13px;color:var(--text-muted)">Total Pelanggaran:</span>
-                    <strong style="color:#ef4444">{{ $totalPelanggaran }}</strong>
-                </div>
-                <div class="d-flex align-items-center gap-2 px-3 py-2 rounded-2" style="background:rgba(239,68,68,.07)">
-                    <i class="fas fa-minus-circle" style="color:#ef4444"></i>
-                    <span style="font-size:13px;color:var(--text-muted)">Poin Pelanggaran:</span>
-                    <strong style="color:#ef4444">{{ $skorPelanggaran }}</strong>
-                </div>
-                <div class="d-flex align-items-center gap-2 px-3 py-2 rounded-2" style="background:rgba(34,197,94,.1)">
-                    <i class="fas fa-star" style="color:#16a34a"></i>
-                    <span style="font-size:13px;color:var(--text-muted)">Total Reward:</span>
-                    <strong style="color:#16a34a">{{ $totalReward }}</strong>
-                </div>
-                <div class="d-flex align-items-center gap-2 px-3 py-2 rounded-2" style="background:rgba(34,197,94,.07)">
-                    <i class="fas fa-plus-circle" style="color:#16a34a"></i>
-                    <span style="font-size:13px;color:var(--text-muted)">Poin Reward:</span>
-                    <strong style="color:#16a34a">{{ $skorReward }}</strong>
+        <div class="col-6 col-xl-4">
+            <div class="card stat-card" style="border-left:4px solid #22c55e">
+                <div class="card-body" style="padding:18px">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <div class="stat-label">Reward</div>
+                            <div class="stat-value text-success" id="val-jual">
+                                {{ number_format($totalReward, 0, ',', '.') }}
+                            </div>
+                            <div class="stat-sub text-success">{{ number_format($skorReward, 0, ',', '.') }} poin
+                            </div>
+                        </div>
+                        <div class="stat-icon" style="background:rgba(34,197,94,.12);color:#22c55e">
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </div>
+        <div class="col-6 col-xl-4">
+            <div class="card stat-card" style="border-left:4px solid #63b6f1">
+                <div class="card-body" style="padding:18px">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <div class="stat-label">Pemutihan</div>
+                            <div class="stat-value text-info" id="val-barang">
+                                {{ number_format($totalPemutihan, 0, ',', '.') }}</div>
+                            <div class="stat-sub text-info">{{ number_format($skorPemutihan, 0, ',', '.') }} poin
+                            </div>
+                        </div>
+                        <div class="stat-icon" style="background:rgba(99,102,241,.12);color:#63b6f1">
+                            <i class="fas fa-recycle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-4">
+            <div class="card stat-card" style="border-left:4px solid #ef4444">
+                <div class="card-body" style="padding:18px">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <div class="stat-label">Pelanggaran</div>
+                            <div class="stat-value text-danger" id="val-kritis">
+                                {{ number_format($totalPelanggaran, 0, ',', '.') }}</div>
+                            <div class="stat-sub text-danger">
+                                {{ number_format($skorPelanggaran, 0, ',', '.') }} poin
+                            </div>
+                        </div>
+                        <div class="stat-icon" style="background:rgba(239,68,68,.12);color:#ef4444">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12">
             {{-- Filter Bar --}}
             <div class="card bg-light mb-3">
                 <div class="card-body" style="padding:14px 20px">
@@ -57,7 +134,9 @@
                                 <option value="">Semua Jenis</option>
                                 <option value="pelanggaran" {{ request('jenis') == 'pelanggaran' ? 'selected' : '' }}>
                                     Pelanggaran</option>
-                                <option value="prestasi" {{ request('jenis') == 'prestasi' ? 'selected' : '' }}>Prestasi
+                                <option value="reward" {{ request('jenis') == 'reward' ? 'selected' : '' }}>Reward
+                                </option>
+                                <option value="pemutihan" {{ request('jenis') == 'pemutihan' ? 'selected' : '' }}>Pemutihan
                                 </option>
                             </select>
                         </div>
@@ -95,8 +174,8 @@
                     <span class="mb-2">Daftar {{ $title }} <span class="text-muted fw-normal"
                             style="font-size:13px">({{ $kartuKontrol->total() }} data)</span></span>
                     <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#importKKModal"
-                            style="font-size:12px;padding:4px 12px">
+                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#importKKModal" style="font-size:12px;padding:4px 12px">
                             <i class="fas fa-file-import me-1"></i> Import
                         </button>
                         <a href="{{ route('transaksi.kartu-kontrol.download', request()->query()) }}"
@@ -146,7 +225,7 @@
                                                 style="background:rgba(34,197,94,.15);color:#16a34a">Reward</span>
                                         @elseif ($kk->jenisPoin?->jenis == 'pemutihan')
                                             <span class="badge"
-                                                style="background:rgba(234,179,8, .15);color:#eaaf08">Pemutihan</span>
+                                                style="background:rgba(8, 215, 234, 0.15);color:#2bbaed">Pemutihan</span>
                                         @else
                                             <span class="badge bg-secondary">-</span>
                                         @endif
@@ -207,7 +286,8 @@
     <div class="modal fade" id="importKKModal" tabindex="-1" aria-labelledby="importKKLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content" style="background:var(--card-bg);border-color:var(--border-color)">
-                <form action="{{ route('transaksi.kartu-kontrol.import') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('transaksi.kartu-kontrol.import') }}" method="POST"
+                    enctype="multipart/form-data">
                     @csrf
                     <div class="modal-header border-bottom" style="border-color:var(--border-color)!important">
                         <h5 class="modal-title" id="importKKLabel">Import Data Kartu Kontrol</h5>
@@ -216,14 +296,16 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="fileKK" class="form-label">Pilih File Excel (.xlsx, .xls, .csv)</label>
-                            <input class="form-control" type="file" id="fileKK" name="file" accept=".xlsx,.xls,.csv" required>
+                            <input class="form-control" type="file" id="fileKK" name="file"
+                                accept=".xlsx,.xls,.csv" required>
                         </div>
                         <div class="alert alert-warning py-2" style="font-size:12px">
                             <strong>Penting:</strong> Gunakan file Export dari sistem ini sebagai template.
                             <ul class="mb-0 mt-1">
                                 <li>Data akan diimpor ke <strong>tahun ajaran aktif</strong>.</li>
                                 <li>Kolom <strong>Kode</strong> digunakan untuk mencari jenis poin.</li>
-                                <li>Kolom <strong>Guru</strong> bisa diisi <strong>Nama</strong> atau <strong>NIP</strong> guru (sesuai hasil Export).</li>
+                                <li>Kolom <strong>Guru</strong> bisa diisi <strong>Nama</strong> atau <strong>NIP</strong>
+                                    guru (sesuai hasil Export).</li>
                                 <li>Kolom <strong>Semester</strong>: tulis <em>Ganjil</em> atau <em>Genap</em>.</li>
                             </ul>
                         </div>
