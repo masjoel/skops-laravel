@@ -32,7 +32,7 @@ class DatabaseSeeder extends Seeder
             'init' => null,
             'bank' => null,
             'footnot' => null,
-            'jdigit' => 0,
+            'jdigit' => 100,
             'jdelay' => 0,
         ]);
 
