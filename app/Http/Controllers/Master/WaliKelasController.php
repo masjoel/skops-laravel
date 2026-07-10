@@ -375,6 +375,15 @@ class WaliKelasController extends Controller
             $redirect->with('error', 'Tidak ada data yang valid untuk diimpor.');
         }
 
+        if (isset($warningMsg)) {
+            $existingError = session()->get("error");
+            if (isset($errorMsg)) {
+                $redirect->with("error", trim($errorMsg . " " . $warningMsg));
+            } else {
+                $redirect->with("error", $warningMsg);
+            }
+        }
+
         return $redirect;
     }
 }

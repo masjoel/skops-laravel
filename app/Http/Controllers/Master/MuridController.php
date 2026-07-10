@@ -222,6 +222,14 @@ class MuridController extends Controller
 
         // Lewati baris pertama (header)
         array_shift($rows);
+        
+        $maxImport = \App\Models\Perusahaan::first()?->jdigit;
+        $totalRows = count($rows);
+        $warningMsg = null;
+        if ($maxImport && $totalRows > $maxImport) {
+            $rows = array_slice($rows, 0, $maxImport);
+            $warningMsg = "Hanya memproses $maxImport baris pertama (batas maksimal).";
+        }
 
         $imported = 0;
         $skipped = [];
@@ -295,6 +303,15 @@ class MuridController extends Controller
 
         if ($imported === 0 && count($skipped) === 0) {
             $redirect->with('error', 'Tidak ada data yang valid untuk diimpor.');
+        }
+
+        if (isset($warningMsg)) {
+            $existingError = session()->get("error");
+            if (isset($errorMsg)) {
+                $redirect->with("error", trim($errorMsg . " " . $warningMsg));
+            } else {
+                $redirect->with("error", $warningMsg);
+            }
         }
 
         return $redirect;

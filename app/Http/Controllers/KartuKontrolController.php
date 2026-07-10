@@ -317,6 +317,13 @@ class KartuKontrolController extends Controller
         // Kolom: A=Tanggal, B=Nama Siswa, C=Kelas, D=Kode, E=Deskripsi, F=Jenis, G=Skor, H=Tindakan, I=Guru (NIP), J=Semester
         // Lewati 3 baris pertama (info + kosong + header)
         $rows = array_slice($rows, 3);
+        $maxImport = \App\Models\Perusahaan::first()?->jdigit;
+        $totalRows = count($rows);
+        $warningMsg = null;
+        if ($maxImport && $totalRows > $maxImport) {
+            $rows = array_slice($rows, 0, $maxImport);
+            $warningMsg = "Hanya memproses $maxImport baris pertama (batas maksimal).";
+        }
 
         // Ambil tahun ajaran aktif untuk lookup murid_kelas
         $tahunAjaranAktifId = TahunAjaran::where('is_aktif', true)->first()?->id;
@@ -458,6 +465,15 @@ class KartuKontrolController extends Controller
         }
         if ($imported === 0 && count($skipped) === 0) {
             $redirect->with('error', 'Tidak ada data yang valid untuk diimpor.');
+        }
+
+        if (isset($warningMsg)) {
+            $existingError = session()->get("error");
+            if (isset($errorMsg)) {
+                $redirect->with("error", trim($errorMsg . " " . $warningMsg));
+            } else {
+                $redirect->with("error", $warningMsg);
+            }
         }
 
         return $redirect;
