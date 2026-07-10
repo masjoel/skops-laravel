@@ -258,7 +258,7 @@
                 <div class="card-header d-flex flex-wrap align-items-center justify-content-between">
                     <div class="text-primary"><i class="fas fa-receipt me-2 mb-2 text-primary"></i>10 Siswa dengan poin
                         tertinggi</div>
-                    <a href="{{ route('laporan.rekapitulasi') }}" class="btn btn-sm btn-primary"
+                    <a href="{{ route('laporan.rekapitulasi') }}" class="btn btn-sm btn-outline-primary"
                         style="font-size:12px;padding:4px 12px">
                         Lihat Semua <i class="fas fa-arrow-right ms-1"></i>
                     </a>
