@@ -364,11 +364,11 @@
                         </div>
                         <div class="feature-item">
                             <div class="feature-icon"><i class="fas fa-book-open"></i></div>
-                            <div class="feature-text">Rapor siswa</div>
+                            <div class="text-secondary">Rapor siswa <i>(dalam pengembangan)</i></div>
                         </div>
                         <div class="feature-item">
                             <div class="feature-icon"><i class="fas fa-calendar-check"></i></div>
-                            <div class="feature-text">Absensi</div>
+                            <div class="text-secondary">Absensi <i>(dalam pengembangan)</i></div>
                         </div>
                     </div>
                 </div>
@@ -376,19 +376,19 @@
                     <div class="feature-list">
                         <div class="feature-item">
                             <div class="feature-icon"><i class="fas fa-wallet"></i></div>
-                            <div class="feature-text">Keuangan sekolah, tabungan, dan tagihan SPP</div>
+                            <div class="text-secondary">Keuangan sekolah, tabungan, dan tagihan SPP <i>(dalam pengembangan)</i></div>
                         </div>
                         <div class="feature-item">
                             <div class="feature-icon"><i class="fas fa-notes-medical"></i></div>
-                            <div class="feature-text">Rekam kesehatan siswa</div>
+                            <div class="text-secondary">Rekam kesehatan siswa <i>(dalam pengembangan)</i></div>
                         </div>
                         <div class="feature-item">
                             <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
-                            <div class="feature-text">Laporan dan statistik</div>
+                            <div class="text-secondary">Laporan dan statistik< <i>(dalam pengembangan)</i></div>
                         </div>
                         <div class="feature-item">
                             <div class="feature-icon"><i class="fas fa-users"></i></div>
-                            <div class="feature-text">Portal orang tua </div>
+                            <div class="text-secondary">Portal orang tua <i>(dalam pengembangan)</i></div>
                         </div>
                     </div>
                 </div>
