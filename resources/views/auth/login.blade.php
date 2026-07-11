@@ -384,7 +384,7 @@
                         </div>
                         <div class="feature-item">
                             <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
-                            <div class="text-secondary">Laporan dan statistik< <i>(dalam pengembangan)</i></div>
+                            <div class="text-secondary">Laporan dan statistik <i>(dalam pengembangan)</i></div>
                         </div>
                         <div class="feature-item">
                             <div class="feature-icon"><i class="fas fa-users"></i></div>
@@ -404,8 +404,8 @@
                     </div>
                     <h1 class="login-title">Selamat Datang</h1>
                     <p class="login-sub">
-                        @if (isset($perusahaan) && $perusahaan)
-                            <span class="company-name">{{ $perusahaan->NamaClient }}</span>
+                        @if (isset($sekolah) && $sekolah)
+                            <span class="company-name">{{ $sekolah->nama_client }}</span>
                         @else
                             Masuk ke akun Anda
                         @endif

@@ -222,8 +222,8 @@ class MuridController extends Controller
 
         // Lewati baris pertama (header)
         array_shift($rows);
-        
-        $maxImport = \App\Models\Perusahaan::first()?->jdigit;
+
+        $maxImport = \App\Models\Sekolah::first()?->jdigit;
         $totalRows = count($rows);
         $warningMsg = null;
         if ($maxImport && $totalRows > $maxImport) {

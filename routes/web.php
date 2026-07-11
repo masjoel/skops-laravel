@@ -129,10 +129,10 @@ Route::middleware(['auth.session'])->group(function () {
     | Seting (Admin Only)
     |----------------------------------------------------------------------
     */
-    Route::prefix('seting')->name('seting.')->middleware(['role:administrator,operator'])->group(function () {
+    Route::prefix('seting')->name('seting.')->group(function () {
         Route::get('/', [SetingController::class, 'index'])->name('index');
         Route::resource('user', UserController::class);
-        Route::get('/perusahaan', [SetingController::class, 'perusahaan'])->name('perusahaan');
-        Route::put('/perusahaan', [SetingController::class, 'updatePerusahaan'])->name('perusahaan.update');
+        Route::get('/sekolah', [SetingController::class, 'sekolah'])->name('sekolah');
+        Route::put('/sekolah', [SetingController::class, 'updateSekolah'])->name('sekolah.update');
     });
 });

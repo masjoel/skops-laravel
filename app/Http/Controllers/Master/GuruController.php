@@ -194,8 +194,8 @@ class GuruController extends Controller
 
         // Lewati baris pertama (header)
         array_shift($rows);
-        
-        $maxImport = \App\Models\Perusahaan::first()?->jdigit;
+
+        $maxImport = \App\Models\Sekolah::first()?->jdigit;
         $totalRows = count($rows);
         $warningMsg = null;
         if ($maxImport && $totalRows > $maxImport) {
@@ -266,7 +266,7 @@ class GuruController extends Controller
         }
 
         $redirect = redirect()->route('master.guru.index');
-        
+
         if ($imported > 0) {
             $redirect->with('success', "Berhasil mengimpor $imported data guru.");
         }

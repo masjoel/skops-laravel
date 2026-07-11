@@ -18,7 +18,7 @@ return new class extends Migration
                 ->cascadeOnDelete()->after('id');
             $table->string('username', 20)->unique()->after('name');
             $table->integer('opr_id')->nullable()->after('password');
-            $table->enum('role', ['admin', 'guru', 'murid', 'orang_tua'])->default('murid')->after('opr_id');
+            $table->enum('role', ['administrator', 'guru', 'murid', 'orang_tua', 'operator'])->default('murid')->after('opr_id');
             $table->boolean('status')->default(false)->after('role');
             $table->string('photo')->nullable()->after('status');
             $table->string('telpon', 50)->nullable()->after('photo');

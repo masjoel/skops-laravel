@@ -189,6 +189,94 @@
             font-weight: 600;
         }
 
+        /* ── NAV GROUP (Collapsible) ── */
+        .nav-group-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 20px;
+            cursor: pointer;
+            user-select: none;
+            border-radius: 0;
+            transition: all .2s;
+            position: relative;
+        }
+
+        .nav-group-header:hover {
+            background: var(--sidebar-hover);
+        }
+
+        .nav-group-label {
+            font-size: 10.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            color: #475569;
+            flex: 1;
+            transition: color .2s;
+        }
+
+        .nav-group-header:hover .nav-group-label {
+            color: #64748b;
+        }
+
+        .nav-group-icon {
+            width: 18px;
+            text-align: center;
+            font-size: 11px;
+            color: #334155;
+            flex-shrink: 0;
+        }
+
+        .nav-group-arrow {
+            font-size: 10px;
+            color: #334155;
+            transition: transform .3s cubic-bezier(.4, 0, .2, 1);
+            margin-left: auto;
+        }
+
+        .nav-group.open>.nav-group-header .nav-group-arrow {
+            transform: rotate(180deg);
+        }
+
+        .nav-group.open>.nav-group-header .nav-group-label {
+            color: #94a3b8;
+        }
+
+        .nav-group-body {
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height .35s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        .nav-group.open>.nav-group-body {
+            max-height: 600px;
+        }
+
+        /* Sub-menu item indentation */
+        .nav-group-body .nav-item-link {
+            padding-left: 48px;
+        }
+
+        .nav-group-body .nav-item-link .nav-icon {
+            font-size: 12px;
+            color: #475569;
+        }
+
+        .nav-group-body .nav-item-link.active .nav-icon,
+        .nav-group-body .nav-item-link:hover .nav-icon {
+            color: inherit;
+        }
+
+        /* Active group highlight */
+        .nav-group.has-active>.nav-group-header .nav-group-label {
+            color: #818cf8;
+        }
+
+        .nav-group.has-active>.nav-group-header .nav-group-icon {
+            color: #818cf8;
+        }
+
         /* Submenu */
         .has-sub .sub-arrow {
             margin-left: auto;
@@ -584,89 +672,140 @@
                 Dashboard
             </a>
 
-            {{-- Master Data --}}
-            <div class="nav-label">Master Data</div>
-            <a href="{{ route('master.guru.index') }}"
-                class="nav-item-link {{ request()->routeIs('master.guru.*') ? 'active' : '' }}">
-                <span class="nav-icon"><i class="fas fa-user-friends"></i></span>
-                Guru
-            </a>
-            <a href="{{ route('master.murid.index') }}"
-                class="nav-item-link {{ request()->routeIs('master.murid.*') ? 'active' : '' }}">
-                <span class="nav-icon"><i class="fas fa-users"></i></span>
-                Siswa
-            </a>
-            <a href="{{ route('master.walikelas.index') }}"
-                class="nav-item-link {{ request()->routeIs('master.walikelas.*') ? 'active' : '' }}">
-                <span class="nav-icon"><i class="fas fa-user-plus"></i></span>
-                Wali Kelas
-            </a>
+            {{-- Master Data Group --}}
+            @php
+                $masterActive =
+                    request()->routeIs('master.guru.*') ||
+                    request()->routeIs('master.murid.*') ||
+                    request()->routeIs('master.walikelas.*') ||
+                    request()->routeIs('master.kelas.*') ||
+                    request()->routeIs('master.jurusan.*') ||
+                    request()->routeIs('master.jenis-poin.*') ||
+                    request()->routeIs('master.jabatan.*');
+            @endphp
+            <div class="nav-group {{ $masterActive ? 'open has-active' : '' }}" data-group="master">
+                <div class="nav-group-header" onclick="toggleNavGroup(this)">
+                    <span class="nav-group-icon"><i class="fas fa-database"></i></span>
+                    <span class="nav-group-label">Master Data</span>
+                    <i class="fas fa-chevron-down nav-group-arrow"></i>
+                </div>
+                <div class="nav-group-body">
+                    <a href="{{ route('master.guru.index') }}"
+                        class="nav-item-link {{ request()->routeIs('master.guru.*') ? 'active' : '' }}">
+                        <span class="nav-icon"><i class="fas fa-user-friends"></i></span>
+                        Guru
+                    </a>
+                    <a href="{{ route('master.murid.index') }}"
+                        class="nav-item-link {{ request()->routeIs('master.murid.*') ? 'active' : '' }}">
+                        <span class="nav-icon"><i class="fas fa-users"></i></span>
+                        Siswa
+                    </a>
+                    <a href="{{ route('master.walikelas.index') }}"
+                        class="nav-item-link {{ request()->routeIs('master.walikelas.*') ? 'active' : '' }}">
+                        <span class="nav-icon"><i class="fas fa-user-plus"></i></span>
+                        Wali Kelas
+                    </a>
+                    <a href="{{ route('master.kelas.index') }}"
+                        class="nav-item-link {{ request()->routeIs('master.kelas.*') ? 'active' : '' }}">
+                        <span class="nav-icon"><i class="fas fa-chalkboard-teacher"></i></span>
+                        Kelas
+                    </a>
+                    <a href="{{ route('master.jurusan.index') }}"
+                        class="nav-item-link {{ request()->routeIs('master.jurusan.*') ? 'active' : '' }}">
+                        <span class="nav-icon"><i class="fas fa-sitemap"></i></span>
+                        Jurusan
+                    </a>
+                    <a href="{{ route('master.jenis-poin.index') }}"
+                        class="nav-item-link {{ request()->routeIs('master.jenis-poin.*') ? 'active' : '' }}">
+                        <span class="nav-icon"><i class="fas fa-list-ol"></i></span>
+                        Jenis Poin
+                    </a>
+                    <a href="{{ route('master.jabatan.index') }}"
+                        class="nav-item-link {{ request()->routeIs('master.jabatan.*') ? 'active' : '' }}">
+                        <span class="nav-icon"><i class="fas fa-user-tie"></i></span>
+                        Jabatan
+                    </a>
+                </div>
+            </div>
 
-            <a href="{{ route('master.kelas.index') }}"
-                class="nav-item-link {{ request()->routeIs('master.kelas.*') ? 'active' : '' }}">
-                <span class="nav-icon"><i class="fas fa-chalkboard-teacher"></i></span>
-                Kelas
-            </a>
-            <a href="{{ route('master.jurusan.index') }}"
-                class="nav-item-link {{ request()->routeIs('master.jurusan.*') ? 'active' : '' }}">
-                <span class="nav-icon"><i class="fas fa-sitemap"></i></span>
-                Jurusan
-            </a>
-            <a href="{{ route('master.jenis-poin.index') }}"
-                class="nav-item-link {{ request()->routeIs('master.jenis-poin.*') ? 'active' : '' }}">
-                <span class="nav-icon"><i class="fas fa-list-ol"></i></span>
-                Jenis Poin
-            </a>
-            <a href="{{ route('master.jabatan.index') }}"
-                class="nav-item-link {{ request()->routeIs('master.jabatan.*') ? 'active' : '' }}">
-                <span class="nav-icon"><i class="fas fa-user-tie"></i></span>
-                Jabatan
-            </a>
+            {{-- Perilaku Group --}}
+            @php
+                $perilakuActive = request()->routeIs('transaksi.kartu-kontrol.*');
+            @endphp
+            <div class="nav-group {{ $perilakuActive ? 'open has-active' : '' }}" data-group="perilaku">
+                <div class="nav-group-header" onclick="toggleNavGroup(this)">
+                    <span class="nav-group-icon"><i class="fas fa-heart-pulse"></i></span>
+                    <span class="nav-group-label">Perilaku</span>
+                    <i class="fas fa-chevron-down nav-group-arrow"></i>
+                </div>
+                <div class="nav-group-body">
+                    <a href="{{ route('transaksi.kartu-kontrol.index') }}"
+                        class="nav-item-link {{ request()->routeIs('transaksi.kartu-kontrol.*') ? 'active' : '' }}">
+                        <span class="nav-icon"><i class="fas fa-chart-line"></i></span>
+                        Kartu Kontrol
+                    </a>
+                </div>
+            </div>
 
-            {{-- Perilaku --}}
-            <div class="nav-label">Perilaku</div>
-            <a href="{{ route('transaksi.kartu-kontrol.index') }}"
-                class="nav-item-link {{ request()->routeIs('transaksi.kartu-kontrol.*') ? 'active' : '' }}">
-                <span class="nav-icon"><i class="fas fa-chart-line"></i></span>
-                Kartu Kontrol
-            </a>
+            {{-- Laporan Group --}}
+            @php
+                $laporanActive = request()->routeIs('laporan.*');
+            @endphp
+            <div class="nav-group {{ $laporanActive ? 'open has-active' : '' }}" data-group="laporan">
+                <div class="nav-group-header" onclick="toggleNavGroup(this)">
+                    <span class="nav-group-icon"><i class="fas fa-chart-bar"></i></span>
+                    <span class="nav-group-label">Laporan</span>
+                    <i class="fas fa-chevron-down nav-group-arrow"></i>
+                </div>
+                <div class="nav-group-body">
+                    <a href="{{ route('laporan.rekapitulasi') }}"
+                        class="nav-item-link {{ request()->routeIs('laporan.rekapitulasi') ? 'active' : '' }}">
+                        <span class="nav-icon"><i class="far fa-file"></i></span>
+                        Rekapitulasi Poin
+                    </a>
+                </div>
+            </div>
 
-            {{-- Laporan --}}
-            <div class="nav-label">Laporan</div>
-            <a href="{{ route('laporan.rekapitulasi') }}"
-                class="nav-item-link {{ request()->routeIs('laporan.rekapitulasi') ? 'active' : '' }}">
-                <span class="nav-icon"><i class="fas fa-file"></i></span>
-                Rekapitulasi Poin
-            </a>
-
-            {{-- Seting (Admin/Operator only) --}}
-            @if (in_array(session('level'), ['administrator', 'operator']))
-                <div class="nav-label">Seting</div>
-                <a href="{{ route('seting.index') }}"
-                    class="nav-item-link {{ request()->routeIs('seting.*') ? 'active' : '' }}">
-                    <span class="nav-icon"><i class="fas fa-school"></i></span>
-                    Profil
-                </a>
-                <a href="{{ route('seting.index') }}"
-                    class="nav-item-link {{ request()->routeIs('seting.*') ? 'active' : '' }}">
-                    <span class="nav-icon"><i class="fas fa-user"></i></span>
-                    User/pengguna
-                </a>
+            {{-- Seting Group (Admin/Operator only) --}}
+            @if (in_array(Auth::user()->role, ['administrator', 'operator']))
+                @php
+                    $setingActive = request()->routeIs('seting.*');
+                @endphp
+                <div class="nav-group {{ $setingActive ? 'open has-active' : '' }}" data-group="seting">
+                    <div class="nav-group-header" onclick="toggleNavGroup(this)">
+                        <span class="nav-group-icon"><i class="fas fa-cog"></i></span>
+                        <span class="nav-group-label">Seting</span>
+                        <i class="fas fa-chevron-down nav-group-arrow"></i>
+                    </div>
+                    <div class="nav-group-body">
+                        <a href="{{ route('seting.sekolah') }}"
+                            class="nav-item-link {{ request()->routeIs('seting.sekolah') ? 'active' : '' }}">
+                            <span class="nav-icon"><i class="fas fa-school"></i></span>
+                            Profil
+                        </a>
+                        <a href="{{ route('seting.user.index') }}"
+                            class="nav-item-link {{ request()->routeIs('seting.user.*') ? 'active' : '' }}">
+                            <span class="nav-icon"><i class="fas fa-user"></i></span>
+                            User/Pengguna
+                        </a>
+                    </div>
+                </div>
             @endif
         </div>
 
         {{-- Footer User --}}
         <div class="sidebar-footer">
             <div class="sidebar-footer-avatar">
-                @if (session('photo'))
-                    <img src="{{ asset('storage/' . session('photo')) }}" alt="avatar">
+                @if (Auth::user()->photo)
+                    <img src="{{ Auth::user()->photo == 'images/skops-logo.webp' ? asset(Auth::user()->photo) : Storage::url(Auth::user()->photo) }}" width="34"
+                        alt="{{ Auth::user()->name }}">
                 @else
-                    {{ strtoupper(substr(session('namaopr', 'U'), 0, 1)) }}
+                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                 @endif
             </div>
             <div class="sidebar-footer-info">
-                <div class="sidebar-footer-name">{{ session('namaopr', 'User') }}</div>
-                <div class="sidebar-footer-role">{{ ucfirst(session('level', '-')) }}</div>
+                <div class="sidebar-footer-name">{{ Auth::user()->name }}</div>
+                <div class="sidebar-footer-role">{{ ucfirst(Auth::user()->role) }}</div>
             </div>
             <form method="POST" action="{{ route('logout') }}" class="ms-auto">
                 @csrf
@@ -689,13 +828,13 @@
 
         <div class="topbar-right">
             {{-- Stok Kritis Badge --}}
-            @if (session('brgpend') > 0)
+            {{-- @if (session('brgpend') > 0)
                 <a href="{{ route('master.barang.index') }}" class="topbar-btn"
                     title="Stok Kritis: {{ session('brgpend') }} item">
                     <i class="fas fa-exclamation-triangle text-warning"></i>
                     <span class="badge-dot"></span>
                 </a>
-            @endif
+            @endif --}}
 
             {{-- Dark Mode Toggle --}}
             <button class="topbar-btn" id="theme-toggle" title="Toggle Dark Mode">
@@ -795,6 +934,33 @@
                 document.getElementById('sidebar').classList.remove('mobile-open');
                 document.getElementById('sidebar-overlay').classList.remove('show');
             }
+        });
+
+        // ── Collapsible Nav Groups ──
+        function toggleNavGroup(headerEl) {
+            const group = headerEl.closest('.nav-group');
+            const isOpen = group.classList.contains('open');
+            const groupKey = group.dataset.group;
+
+            group.classList.toggle('open', !isOpen);
+
+            // Persist state in localStorage
+            const state = JSON.parse(localStorage.getItem('nav-groups') || '{}');
+            state[groupKey] = !isOpen;
+            localStorage.setItem('nav-groups', JSON.stringify(state));
+        }
+
+        // Restore nav group states from localStorage
+        // (Active groups are already opened server-side; this restores user-manually opened/closed ones)
+        document.addEventListener('DOMContentLoaded', () => {
+            const state = JSON.parse(localStorage.getItem('nav-groups') || '{}');
+            document.querySelectorAll('.nav-group').forEach(group => {
+                const key = group.dataset.group;
+                // Don't override server-side active state
+                if (!group.classList.contains('has-active') && key in state) {
+                    group.classList.toggle('open', state[key]);
+                }
+            });
         });
     </script>
 

@@ -280,7 +280,7 @@ class KartuKontrolController extends Controller
     {
         $request->validate([
             'tgl'                => ['required', 'date'],
-            'periode_akademik_id'=> ['required', 'exists:periode_akademik,id'],
+            'periode_akademik_id' => ['required', 'exists:periode_akademik,id'],
             'jenis_poin_id'      => ['required', 'exists:jenis_poin,id'],
             'guru_id'            => ['nullable', 'exists:guru,id'],
             'skor'               => ['nullable', 'numeric'],
@@ -363,7 +363,7 @@ class KartuKontrolController extends Controller
         // Kolom: A=Tanggal, B=Nama Siswa, C=Kelas, D=Kode, E=Deskripsi, F=Jenis, G=Skor, H=Tindakan, I=Guru (NIP), J=Semester
         // Lewati 3 baris pertama (info + kosong + header)
         $rows = array_slice($rows, 3);
-        $maxImport = \App\Models\Perusahaan::first()?->jdigit;
+        $maxImport = \App\Models\Sekolah::first()?->jdigit;
         $totalRows = count($rows);
         $warningMsg = null;
         if ($maxImport && $totalRows > $maxImport) {

@@ -18,7 +18,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'status',
     ];
+    const ROLES = ['administrator', 'guru', 'murid', 'orang_tua', 'operator'];
+
     protected $hidden = [
         'password',
         'remember_token',

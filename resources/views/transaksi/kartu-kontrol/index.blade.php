@@ -53,9 +53,9 @@
             </ol>
         </div>
         <div class="d-flex gap-2">
-            {{-- <a href="{{ route('transaksi.kartu-kontrol.bulk-create') }}" class="btn btn-outline-primary">
+            <a href="{{ route('transaksi.kartu-kontrol.bulk-create') }}" class="btn btn-outline-primary">
                 <i class="fas fa-layer-group me-2"></i>Input Massal
-            </a> --}}
+            </a>
             <a href="{{ route('transaksi.kartu-kontrol.create') }}" class="btn btn-accent">
                 <i class="fas fa-plus me-2"></i>Tambah {{ $title }}
             </a>

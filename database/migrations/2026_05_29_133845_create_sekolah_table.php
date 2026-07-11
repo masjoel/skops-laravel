@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('perusahaan', function (Blueprint $table) {
+        Schema::create('sekolah', function (Blueprint $table) {
             $table->id('id');
             $table->integer('user_id')->index('user_id')->nullable();
             $table->string('nama_client');
@@ -20,7 +20,10 @@ return new class extends Migration
             $table->string('desc_app')->nullable();
             $table->string('alamat_client')->nullable();
             $table->string('signature')->nullable();
+            $table->string('kota')->nullable();
+            $table->string('telpon')->nullable();
             $table->string('email')->nullable();
+            $table->string('npsn')->nullable();
             $table->string('logo')->nullable();
             $table->string('image_icon')->nullable();
             $table->string('website')->nullable();
@@ -39,6 +42,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('perusahaan');
+        Schema::dropIfExists('sekolah');
     }
 };

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Seting;
 
 use App\Http\Controllers\Controller;
-use App\Models\UserModel;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -12,69 +12,73 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $q = UserModel::query();
+        $q = User::query();
         if ($request->filled('search')) {
             $q->where(function ($query) use ($request) {
-                $query->where('nama', 'like', '%'.$request->search.'%')
-                      ->orWhere('username', 'like', '%'.$request->search.'%');
+                $query->where('name', 'like', '%' . $request->search . '%')
+                    ->orWhere('username', 'like', '%' . $request->search . '%');
             });
         }
-        if ($request->filled('level')) {
-            $q->where('level', $request->level);
+        if ($request->filled('role')) {
+            $q->where('role', $request->role);
         }
-        $users = $q->orderBy('nama')->paginate(20)->withQueryString();
-        return view('seting.user.index', compact('users'));
+        $users = $q->orderBy('name')->paginate(20)->withQueryString();
+        $roles = User::ROLES;
+
+        return view('seting.user.index', compact('users', 'roles'));
     }
 
     public function create()
     {
-        return view('seting.user.create');
+        $roles = User::ROLES;
+        return view('seting.user.create', compact('roles'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'username' => 'required|string|max:50|unique:user,username',
-            'nama'     => 'required|string|max:100',
+            'username' => 'required|string|max:50|unique:users,username',
+            'name'     => 'required|string|max:100',
             'password' => 'required|string|min:6|confirmed',
-            'level'    => 'required|in:administrator,operator,kasir',
-            'status'   => 'required|in:Aktif,Nonaktif',
+            'role'     => 'required|in:administrator,guru,murid,orang_tua,operator',
+            'status'   => 'required',
             'email'    => 'nullable|email|max:100',
         ]);
 
-        UserModel::create([
+        User::create([
             'username' => $request->username,
-            'nama'     => $request->nama,
+            'name'     => $request->name,
             'password' => Hash::make($request->password),
-            'level'    => $request->level,
+            'role'    => $request->role,
             'status'   => $request->status,
             'email'    => $request->email,
         ]);
 
         return redirect()->route('seting.user.index')
-                         ->with('success', 'User berhasil ditambahkan.');
+            ->with('success', 'User berhasil ditambahkan.');
     }
 
     public function edit($id)
     {
-        $user = UserModel::findOrFail($id);
-        return view('seting.user.edit', compact('user'));
+        $user = User::findOrFail($id);
+        $roles = User::ROLES;
+        return view('seting.user.edit', compact('user', 'roles'));
     }
 
     public function update(Request $request, $id)
     {
-        $user = UserModel::findOrFail($id);
+        $user = User::findOrFail($id);
 
         $request->validate([
-            'username' => 'required|string|max:50|unique:user,username,' . $id . ',idx',
-            'nama'     => 'required|string|max:100',
+            'username' => 'required|string|max:50|unique:users,username,' . $id . ',id',
+            'name'     => 'required|string|max:100',
             'password' => 'nullable|string|min:6|confirmed',
-            'level'    => 'required|in:administrator,operator,kasir',
-            'status'   => 'required|in:Aktif,Nonaktif',
+            'role'     => 'required|in:administrator,guru,murid,orang_tua,operator',
+            'status'   => 'required',
             'email'    => 'nullable|email|max:100',
         ]);
 
-        $data = $request->only(['username', 'nama', 'level', 'status', 'email']);
+        $data = $request->only(['username', 'name', 'role', 'status', 'email']);
 
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
@@ -83,23 +87,26 @@ class UserController extends Controller
         $user->update($data);
 
         return redirect()->route('seting.user.index')
-                         ->with('success', 'User berhasil diperbarui.');
+            ->with('success', 'User berhasil diperbarui.');
     }
 
     public function destroy($id)
     {
-        $user = UserModel::findOrFail($id);
+        $user = User::findOrFail($id);
 
         if (Auth::id() == $id) {
             return redirect()->route('seting.user.index')
-                             ->with('error', 'Tidak dapat menghapus akun yang sedang aktif.');
+                ->with('error', 'Tidak dapat menghapus akun yang sedang aktif.');
         }
 
         $user->delete();
 
         return redirect()->route('seting.user.index')
-                         ->with('success', 'User berhasil dihapus.');
+            ->with('success', 'User berhasil dihapus.');
     }
 
-    public function show($id) { return redirect()->route('seting.user.index'); }
+    public function show($id)
+    {
+        return redirect()->route('seting.user.index');
+    }
 }

@@ -10,7 +10,7 @@
 
 <div class="row g-3">
     @php $menus = [
-        ['route'=>'seting.perusahaan','icon'=>'fa-building','label'=>'Data Perusahaan','desc'=>'Nama, alamat, logo, dan kontak perusahaan','color'=>'#6366f1'],
+        ['route'=>'seting.sekolah','icon'=>'fa-building','label'=>'Data Sekolah','desc'=>'Nama, alamat, logo, dan kontak sekolah','color'=>'#6366f1'],
         ['route'=>'seting.user.index','icon'=>'fa-users-gear','label'=>'Manajemen User','desc'=>'Tambah, edit, dan atur hak akses pengguna','color'=>'#8b5cf6'],
         ['route'=>'master.barang.index','icon'=>'fa-boxes-stacked','label'=>'Master Barang','desc'=>'Kelola data barang, kategori, satuan, lokasi','color'=>'#22c55e'],
         ['route'=>'master.suplier.index','icon'=>'fa-truck','label'=>'Master Suplier','desc'=>'Kelola data pemasok barang','color'=>'#f59e0b'],
@@ -35,22 +35,22 @@
     @endforeach
 </div>
 
-@if($perusahaan)
+@if($sekolah)
 <div class="card mt-4">
-    <div class="card-header"><i class="fas fa-info-circle me-2" style="color:#6366f1"></i>Info Perusahaan Aktif</div>
+    <div class="card-header"><i class="fas fa-info-circle me-2" style="color:#6366f1"></i>Info sekolah Aktif</div>
     <div class="card-body">
         <div class="row g-3">
             <div class="col-auto">
-                @if($perusahaan->Logo)
-                    <img src="{{ asset('storage/'.$perusahaan->Logo) }}" style="height:60px;border-radius:8px;object-fit:contain">
+                @if($sekolah->logo)
+                    <img src="{{ asset('storage/'.$sekolah->logo) }}" style="height:60px;border-radius:8px;object-fit:contain">
                 @else
                     <div style="width:60px;height:60px;background:rgba(99,102,241,.1);border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="fas fa-building fa-lg" style="color:#6366f1"></i></div>
                 @endif
             </div>
             <div>
-                <div style="font-size:18px;font-weight:700;color:var(--text-primary)">{{ $perusahaan->NamaClient }}</div>
-                <div style="font-size:13px;color:var(--text-muted)">{{ $perusahaan->Alamat }}</div>
-                <div style="font-size:13px;color:var(--text-muted)">{{ $perusahaan->Telp }} {{ $perusahaan->Email ? '· '.$perusahaan->Email : '' }}</div>
+                <div style="font-size:18px;font-weight:700;color:var(--text-primary)">{{ $sekolah->nama_client }}</div>
+                <div style="font-size:13px;color:var(--text-muted)">{{ $sekolah->alamat_client }}</div>
+                <div style="font-size:13px;color:var(--text-muted)">{{ $sekolah->telpon }} {{ $sekolah->email ? '· '.$sekolah->email : '' }}</div>
             </div>
         </div>
     </div>

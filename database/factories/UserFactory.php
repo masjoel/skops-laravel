@@ -32,6 +32,7 @@ class UserFactory extends Factory
             'role' => $this->faker->randomElement(['guru', 'murid', 'orang_tua']),
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
+            'status' => 1,
             'email_verified_at' => now(),
             'remember_token' => Str::random(10),
         ];
@@ -39,7 +40,7 @@ class UserFactory extends Factory
     public function admin(): static
     {
         return $this->state(fn(array $attributes) => [
-            'role' => 'admin',
+            'role' => 'administrator',
         ]);
     }
 

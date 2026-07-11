@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\Perusahaan;
+use App\Models\Sekolah;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -16,8 +16,8 @@ class LoginController extends Controller
         if (Auth::check()) {
             return redirect()->route('dashboard');
         }
-        $perusahaan = Perusahaan::first();
-        return view('auth.login', compact('perusahaan'));
+        $Sekolah = Sekolah::first();
+        return view('auth.login', compact('Sekolah'));
     }
 
     public function login(Request $request)
@@ -31,14 +31,14 @@ class LoginController extends Controller
         ]);
 
         $user = User::where('username', $request->username)
-            ->where('status', 'Aktif')
+            ->where('status', true)
             ->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return back()->withErrors(['login' => 'Username atau password salah.'])->withInput();
         }
 
-        $perusahaan = Perusahaan::first();
+        $Sekolah = Sekolah::first();
         // $pending    = \App\Models\Barang::whereColumn('stok', '<=', 'stok_kritis')->count();
 
         Auth::login($user);
@@ -51,16 +51,11 @@ class LoginController extends Controller
             'level'     => $user->level,
             'photo'     => $user->photo,
             'status'    => $user->status,
-            'LOGO'      => $perusahaan?->logo,
-            'jdigit'    => $perusahaan?->jdigit,
+            'LOGO'      => $Sekolah?->logo,
+            'jdigit'    => $Sekolah?->jdigit,
             // 'brgpend'   => $pending,
             'linkseg'   => in_array($user->level, ['administrator', 'operator']) ? 'seting' : 'dashboard',
         ]);
-
-        // Redirect berdasarkan level
-        // if ($user->level === 'operator') {
-        //     return redirect()->route('penjualan.index');
-        // }
 
         return redirect()->route('dashboard');
     }

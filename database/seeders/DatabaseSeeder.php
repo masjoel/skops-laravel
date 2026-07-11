@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Perusahaan;
+use App\Models\Sekolah;
 use App\Models\User;
 use Database\Seeders\TahunAjaranSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // User::factory(10)->create();
-        Perusahaan::create([
+        Sekolah::create([
             'nama_client' => 'SKOPS',
             'nama_app' => 'Sistem Kelola Operasional Sekolah',
             'versi_app' => '1.0',
@@ -28,6 +28,8 @@ class DatabaseSeeder extends Seeder
             'email' => 'sekolah@sekolah.com',
             'logo' => 'images/skops-logo.webp',
             'image_icon' => 'images/skops-logo.webp',
+            'npsn' => 000000000,
+            'telpon' => 1234567890,
             'mcad' => null,
             'init' => null,
             'bank' => null,
@@ -42,7 +44,8 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('password'),
             'name' => 'Administrator',
             'photo' => 'images/skops-logo.webp',
-            'role' => 'admin',
+            'role' => 'administrator',
+            'status' => 1,
         ]);
         $this->call([
             TahunAjaranSeeder::class,

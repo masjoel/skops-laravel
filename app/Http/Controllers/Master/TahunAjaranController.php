@@ -82,7 +82,7 @@ class TahunAjaranController extends Controller
 
         if ($adaMurid || $adaWaliKelas) {
             return Redirect::back()->withErrors([
-                'delete' => 'Tidak bisa menghapus tahun ajaran ini karena sudah ada data murid/wali kelas yang terhubung. Hubungi admin sistem kalau memang perlu dihapus paksa.',
+                'delete' => 'Tidak bisa menghapus tahun ajaran ini karena sudah ada data murid/wali kelas yang terhubung.',
             ]);
         }
 
@@ -124,12 +124,12 @@ class TahunAjaranController extends Controller
                 function ($attribute, $value, $fail) {
                     [$tahunAwal, $tahunAkhir] = explode('/', $value);
                     if ((int) $tahunAkhir !== (int) $tahunAwal + 1) {
-                        $fail('Tahun kedua harus tepat satu tahun setelah tahun pertama, contoh: 2026/2027.');
+                        $fail('Tahun kedua harus tepat satu tahun setelah tahun pertama, contoh: '.date('Y').'/'.date('Y')+1);
                     }
                 },
             ],
         ], [
-            'nama.regex' => 'Format tahun ajaran harus seperti 2026/2027.',
+            'nama.regex' => 'Format tahun ajaran harus seperti '.date('Y').'/'.date('Y')+1,
         ]);
     }
 }

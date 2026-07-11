@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Seting;
 
 use App\Http\Controllers\Controller;
-use App\Models\Perusahaan;
+use App\Models\Sekolah;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -11,43 +11,45 @@ class SetingController extends Controller
 {
     public function index()
     {
-        $perusahaan = Perusahaan::first();
-        return view('seting.index', compact('perusahaan'));
+        $sekolah = Sekolah::first();
+        return view('seting.index', compact('sekolah'));
     }
 
-    public function perusahaan()
+    public function sekolah()
     {
-        $perusahaan = Perusahaan::first();
-        return view('seting.perusahaan', compact('perusahaan'));
+        $sekolah = Sekolah::first();
+        return view('seting.sekolah', compact('sekolah'));
     }
 
-    public function updatePerusahaan(Request $request)
+    public function updateSekolah(Request $request)
     {
         $request->validate([
-            'NamaClient' => 'required|string|max:150',
-            'Alamat'     => 'nullable|string|max:255',
-            'Telp'       => 'nullable|string|max:20',
-            'Email'      => 'nullable|email|max:100',
-            'jdigit'     => 'nullable|integer|min:1|max:10',
-            'Logo'       => 'nullable|image|max:2048',
+            'nama_client' => 'required|string|max:150',
+            'alamat_client' => 'nullable|string|max:255',
+            'kota' => 'nullable|string|max:255',
+            'npsn'       => 'required|numeric',
+            'telpon'       => 'nullable|string|max:20',
+            'email'      => 'nullable|email|max:100',
+            'jdigit'     => 'required|integer|min:1|max:10000',
+            'logo'       => 'nullable|image|max:2048',
         ]);
 
-        $perusahaan = Perusahaan::firstOrNew([]);
-        $data = $request->except(['Logo', '_token', '_method']);
+        $sekolah = Sekolah::firstOrNew([]);
+        $data = $request->except(['logo', '_token', '_method']);
 
-        if ($request->hasFile('Logo')) {
-            if ($perusahaan->Logo) {
-                Storage::disk('public')->delete($perusahaan->Logo);
+        if ($request->hasFile('logo')) {
+            if ($sekolah->logo) {
+                Storage::disk('public')->delete($sekolah->logo);
             }
-            $data['Logo'] = $request->file('Logo')->store('perusahaan', 'public');
+            $data['logo'] = $request->file('logo')->store('sekolah', 'public');
         }
 
-        $perusahaan->fill($data)->save();
+        $sekolah->fill($data)->save();
 
         // Update session logo
-        session(['LOGO' => $perusahaan->Logo]);
+        session(['LOGO' => $sekolah->logo]);
 
-        return redirect()->route('seting.perusahaan')
-                         ->with('success', 'Data perusahaan berhasil diperbarui.');
+        return redirect()->route('seting.sekolah')
+            ->with('success', 'Data sekolah berhasil diperbarui.');
     }
 }
