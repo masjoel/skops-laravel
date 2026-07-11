@@ -44,31 +44,35 @@
                                 @enderror
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Guru</label>
-                            @php
-                                $selectedGuruId = old('guru_id');
-                                $selectedGuruName = '';
-                                if ($selectedGuruId) {
-                                    $sg = $guruList->firstWhere('id', $selectedGuruId);
-                                    if ($sg) {
-                                        $selectedGuruName = $sg->personil?->nama ?? '';
+                        @if (auth()->user()->role == 'guru')
+                            <input type="hidden" name="guru_id" value="{{ Auth::user()->id }}">
+                        @else
+                            <div class="mb-3">
+                                <label class="form-label">Guru</label>
+                                @php
+                                    $selectedGuruId = old('guru_id');
+                                    $selectedGuruName = '';
+                                    if ($selectedGuruId) {
+                                        $sg = $guruList->firstWhere('id', $selectedGuruId);
+                                        if ($sg) {
+                                            $selectedGuruName = $sg->personil?->nama ?? '';
+                                        }
                                     }
-                                }
-                            @endphp
-                            <div class="input-group">
-                                <input type="hidden" name="guru_id" id="guru_id" value="{{ $selectedGuruId }}">
-                                <input type="text" class="form-control @error('guru_id') is-invalid @enderror"
-                                    id="guru_name_display" placeholder="Pilih Guru..." value="{{ $selectedGuruName }}"
-                                    readonly style="background-color: #f8f9fa; cursor: pointer;" data-bs-toggle="modal"
-                                    data-bs-target="#modalPilihGuru">
-                                <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal"
-                                    data-bs-target="#modalPilihGuru"><i class="fas fa-search"></i> Cari</button>
+                                @endphp
+                                <div class="input-group">
+                                    <input type="hidden" name="guru_id" id="guru_id" value="{{ $selectedGuruId }}">
+                                    <input type="text" class="form-control @error('guru_id') is-invalid @enderror"
+                                        id="guru_name_display" placeholder="Pilih Guru..." value="{{ $selectedGuruName }}"
+                                        readonly style="background-color: #f8f9fa; cursor: pointer;" data-bs-toggle="modal"
+                                        data-bs-target="#modalPilihGuru">
+                                    <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal"
+                                        data-bs-target="#modalPilihGuru"><i class="fas fa-search"></i> Cari</button>
+                                </div>
+                                @error('guru_id')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
                             </div>
-                            @error('guru_id')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                        </div>
+                        @endif
                         <div class="mb-3">
                             <label class="form-label">Siswa <span class="text-danger">*</span></label>
                             @php

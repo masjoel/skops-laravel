@@ -27,7 +27,9 @@
                             <label class="form-label">Tanggal <span class="text-danger">*</span></label>
                             <input type="date" name="tgl" class="form-control @error('tgl') is-invalid @enderror"
                                 value="{{ old('tgl', date('Y-m-d')) }}" required>
-                            @error('tgl') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            @error('tgl')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         {{-- Periode Akademik --}}
@@ -44,24 +46,29 @@
                                     </option>
                                 @endforeach
                             </select>
-                            @error('periode_akademik_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            @error('periode_akademik_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         {{-- Jenis Poin --}}
                         <div>
                             <label class="form-label">Jenis Poin <span class="text-danger">*</span></label>
-                            <input type="hidden" name="jenis_poin_id" id="jenis_poin_id" value="{{ old('jenis_poin_id') }}">
+                            <input type="hidden" name="jenis_poin_id" id="jenis_poin_id"
+                                value="{{ old('jenis_poin_id') }}">
                             <div class="input-group">
                                 <input type="text" class="form-control @error('jenis_poin_id') is-invalid @enderror"
                                     id="jenis_poin_name_display" placeholder="Pilih Jenis Poin..." readonly
-                                    style="background-color:#f8f9fa;cursor:pointer"
-                                    data-bs-toggle="modal" data-bs-target="#modalPilihJenisPoin">
-                                <button class="btn btn-outline-secondary" type="button"
-                                    data-bs-toggle="modal" data-bs-target="#modalPilihJenisPoin">
+                                    style="background-color:#f8f9fa;cursor:pointer" data-bs-toggle="modal"
+                                    data-bs-target="#modalPilihJenisPoin">
+                                <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal"
+                                    data-bs-target="#modalPilihJenisPoin">
                                     <i class="fas fa-search"></i>
                                 </button>
                             </div>
-                            @error('jenis_poin_id') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                            @error('jenis_poin_id')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         {{-- Skor --}}
@@ -70,37 +77,44 @@
                                 <small class="text-muted">(kosongkan = pakai skor default jenis poin)</small>
                             </label>
                             <input type="number" step="1" name="skor" id="skor_input"
-                                class="form-control @error('skor') is-invalid @enderror"
-                                value="{{ old('skor') }}" placeholder="Otomatis dari jenis poin">
-                            @error('skor') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                class="form-control @error('skor') is-invalid @enderror" value="{{ old('skor') }}"
+                                placeholder="Otomatis dari jenis poin">
+                            @error('skor')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         {{-- Guru --}}
-                        <div>
-                            <label class="form-label">Guru (opsional)</label>
-                            <input type="hidden" name="guru_id" id="guru_id" value="{{ old('guru_id') }}">
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="guru_name_display"
-                                    placeholder="Pilih Guru..." readonly
-                                    style="background-color:#f8f9fa;cursor:pointer"
-                                    data-bs-toggle="modal" data-bs-target="#modalPilihGuru">
-                                <button class="btn btn-outline-secondary" type="button"
-                                    data-bs-toggle="modal" data-bs-target="#modalPilihGuru">
-                                    <i class="fas fa-search"></i>
-                                </button>
-                                <button class="btn btn-outline-danger" type="button" id="clearGuru" title="Hapus pilihan guru">
-                                    <i class="fas fa-times"></i>
-                                </button>
+                        @if (auth()->user()->role == 'guru')
+                            <input type="hidden" name="guru_id" value="{{ Auth::user()->id }}">
+                        @else
+                            <div>
+                                <label class="form-label">Guru (opsional)</label>
+                                <input type="hidden" name="guru_id" id="guru_id" value="{{ old('guru_id') }}">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="guru_name_display"
+                                        placeholder="Pilih Guru..." readonly style="background-color:#f8f9fa;cursor:pointer"
+                                        data-bs-toggle="modal" data-bs-target="#modalPilihGuru">
+                                    <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal"
+                                        data-bs-target="#modalPilihGuru">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger" type="button" id="clearGuru"
+                                        title="Hapus pilihan guru">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+                        @endif
 
                         {{-- Tindakan --}}
                         <div>
                             <label class="form-label">Catatan Tindakan</label>
-                            <textarea name="tindakan" rows="2"
-                                class="form-control @error('tindakan') is-invalid @enderror"
+                            <textarea name="tindakan" rows="2" class="form-control @error('tindakan') is-invalid @enderror"
                                 placeholder="Contoh: Dipanggil BK, diberi peringatan tertulis, dsb.">{{ old('tindakan') }}</textarea>
-                            @error('tindakan') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            @error('tindakan')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                     </div>
@@ -114,7 +128,8 @@
                         <span><i class="fas fa-users me-2" style="color:#6366f1"></i>Pilih Siswa</span>
                         <div class="d-flex gap-2 align-items-center">
                             <span class="badge bg-primary" id="selectedCount">0 dipilih</span>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnSelectAll">Pilih Semua</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnSelectAll">Pilih
+                                Semua</button>
                             <button type="button" class="btn btn-sm btn-outline-danger" id="btnClearAll">Reset</button>
                         </div>
                     </div>
@@ -123,7 +138,8 @@
                         <div class="mb-3 input-group">
                             <input type="text" class="form-control" id="searchSiswaInline"
                                 placeholder="&#xF002; Cari nama siswa atau kelas..." style="font-family:inherit">
-                            <button class="btn btn-outline-secondary" type="button" id="clearSearchSiswa" title="Kosongkan pencarian">
+                            <button class="btn btn-outline-secondary" type="button" id="clearSearchSiswa"
+                                title="Kosongkan pencarian">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
@@ -143,7 +159,8 @@
                         </div> --}}
 
                         {{-- Siswa List --}}
-                        <div style="max-height:420px;overflow-y:auto;border:1px solid var(--border-color);border-radius:8px;">
+                        <div
+                            style="max-height:420px;overflow-y:auto;border:1px solid var(--border-color);border-radius:8px;">
                             <table class="table table-hover mb-0" id="siswaTable">
                                 <thead style="position:sticky;top:0;background:var(--card-bg);z-index:1">
                                     <tr>
@@ -155,13 +172,11 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($muridKelasList as $mk)
-                                        <tr class="siswa-row"
-                                            data-nama="{{ strtolower($mk->murid?->personil?->nama) }}"
+                                        <tr class="siswa-row" data-nama="{{ strtolower($mk->murid?->personil?->nama) }}"
                                             data-kelas="{{ $mk->kelas?->nama_kelas }}">
                                             <td class="text-center">
                                                 <input type="checkbox" name="murid_kelas_ids[]"
-                                                    value="{{ $mk->id }}"
-                                                    class="form-check-input siswa-checkbox"
+                                                    value="{{ $mk->id }}" class="form-check-input siswa-checkbox"
                                                     style="width:18px;height:18px;cursor:pointer"
                                                     {{ is_array(old('murid_kelas_ids')) && in_array($mk->id, old('murid_kelas_ids')) ? 'checked' : '' }}>
                                             </td>
@@ -171,7 +186,9 @@
                                                     <strong>{{ $mk->murid?->personil?->nama ?? '-' }}</strong>
                                                 </label>
                                             </td>
-                                            <td><span class="badge bg-secondary">{{ $mk->kelas?->nama_kelas ?? '-' }}</span></td>
+                                            <td><span
+                                                    class="badge bg-secondary">{{ $mk->kelas?->nama_kelas ?? '-' }}</span>
+                                            </td>
                                             <td><small class="text-muted">{{ $mk->murid?->nis ?? '-' }}</small></td>
                                         </tr>
                                     @endforeach
@@ -211,11 +228,12 @@
                                 data-name="{{ $jp->kode }} — {{ $jp->deskripsi }}">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <strong>{{ $jp->deskripsi }}</strong>
-                                    <span class="badge {{ match($jp->jenis) {
-                                        'reward' => 'bg-success',
-                                        'pelanggaran' => 'bg-danger',
-                                        default => 'bg-info'
-                                    } }}">{{ ucfirst($jp->jenis) }}</span>
+                                    <span
+                                        class="badge {{ match ($jp->jenis) {
+                                            'reward' => 'bg-success',
+                                            'pelanggaran' => 'bg-danger',
+                                            default => 'bg-info',
+                                        } }}">{{ ucfirst($jp->jenis) }}</span>
                                 </div>
                                 <small class="text-muted">Kode: {{ $jp->kode }} | Skor: {{ $jp->skor }}</small>
                             </button>
@@ -235,7 +253,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="text" class="form-control mb-3" id="searchGuruInput" placeholder="Cari nama atau NIP...">
+                    <input type="text" class="form-control mb-3" id="searchGuruInput"
+                        placeholder="Cari nama atau NIP...">
                     <div class="list-group" id="guruList">
                         @foreach ($guruList as $g)
                             <button type="button" class="list-group-item list-group-item-action guru-item"
@@ -251,130 +270,139 @@
     </div>
 
     @push('scripts')
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
 
-        // ── Jenis Poin Modal ──
-        const jpItems = document.querySelectorAll('.jenis-poin-item');
-        const jpSearch = document.getElementById('searchJenisPoinInput');
-        const jpModal  = document.getElementById('modalPilihJenisPoin');
+                // ── Jenis Poin Modal ──
+                const jpItems = document.querySelectorAll('.jenis-poin-item');
+                const jpSearch = document.getElementById('searchJenisPoinInput');
+                const jpModal = document.getElementById('modalPilihJenisPoin');
 
-        jpSearch.addEventListener('input', () => {
-            const q = jpSearch.value.toLowerCase();
-            jpItems.forEach(el => el.style.display = el.innerText.toLowerCase().includes(q) ? '' : 'none');
-        });
-        jpItems.forEach(el => el.addEventListener('click', function () {
-            document.getElementById('jenis_poin_id').value = this.dataset.id;
-            document.getElementById('jenis_poin_name_display').value = this.dataset.name;
-            document.getElementById('skor_input').value = this.dataset.skor;
-            if (this.dataset.tindakan) {
-                document.querySelector('textarea[name="tindakan"]').value = this.dataset.tindakan;
-            }
-            bootstrap.Modal.getInstance(jpModal).hide();
-        }));
-        jpModal.addEventListener('shown.bs.modal', () => jpSearch.focus());
+                jpSearch.addEventListener('input', () => {
+                    const q = jpSearch.value.toLowerCase();
+                    jpItems.forEach(el => el.style.display = el.innerText.toLowerCase().includes(q) ? '' :
+                        'none');
+                });
+                jpItems.forEach(el => el.addEventListener('click', function() {
+                    document.getElementById('jenis_poin_id').value = this.dataset.id;
+                    document.getElementById('jenis_poin_name_display').value = this.dataset.name;
+                    document.getElementById('skor_input').value = this.dataset.skor;
+                    if (this.dataset.tindakan) {
+                        document.querySelector('textarea[name="tindakan"]').value = this.dataset.tindakan;
+                    }
+                    bootstrap.Modal.getInstance(jpModal).hide();
+                }));
+                jpModal.addEventListener('shown.bs.modal', () => jpSearch.focus());
 
-        // ── Guru Modal ──
-        const guruItems  = document.querySelectorAll('.guru-item');
-        const guruSearch = document.getElementById('searchGuruInput');
-        const guruModal  = document.getElementById('modalPilihGuru');
+                // ── Guru Modal ──
+                const guruItems = document.querySelectorAll('.guru-item');
+                const guruSearch = document.getElementById('searchGuruInput');
+                const guruModal = document.getElementById('modalPilihGuru');
 
-        guruSearch.addEventListener('input', () => {
-            const q = guruSearch.value.toLowerCase();
-            guruItems.forEach(el => el.style.display = el.innerText.toLowerCase().includes(q) ? '' : 'none');
-        });
-        guruItems.forEach(el => el.addEventListener('click', function () {
-            document.getElementById('guru_id').value = this.dataset.id;
-            document.getElementById('guru_name_display').value = this.dataset.name;
-            bootstrap.Modal.getInstance(guruModal).hide();
-        }));
-        guruModal.addEventListener('shown.bs.modal', () => guruSearch.focus());
+                guruSearch.addEventListener('input', () => {
+                    const q = guruSearch.value.toLowerCase();
+                    guruItems.forEach(el => el.style.display = el.innerText.toLowerCase().includes(q) ? '' :
+                        'none');
+                });
+                guruItems.forEach(el => el.addEventListener('click', function() {
+                    document.getElementById('guru_id').value = this.dataset.id;
+                    document.getElementById('guru_name_display').value = this.dataset.name;
+                    bootstrap.Modal.getInstance(guruModal).hide();
+                }));
+                guruModal.addEventListener('shown.bs.modal', () => guruSearch.focus());
 
-        document.getElementById('clearGuru').addEventListener('click', () => {
-            document.getElementById('guru_id').value = '';
-            document.getElementById('guru_name_display').value = '';
-        });
+                document.getElementById('clearGuru').addEventListener('click', () => {
+                    document.getElementById('guru_id').value = '';
+                    document.getElementById('guru_name_display').value = '';
+                });
 
-        // ── Siswa Checkbox Counter ──
-        const checkboxes = document.querySelectorAll('.siswa-checkbox');
-        const countLabel  = document.getElementById('countLabel');
-        const selectedBadge = document.getElementById('selectedCount');
+                // ── Siswa Checkbox Counter ──
+                const checkboxes = document.querySelectorAll('.siswa-checkbox');
+                const countLabel = document.getElementById('countLabel');
+                const selectedBadge = document.getElementById('selectedCount');
 
-        function updateCount() {
-            const n = document.querySelectorAll('.siswa-checkbox:checked').length;
-            countLabel.textContent = n;
-            selectedBadge.textContent = n + ' dipilih';
-        }
-        checkboxes.forEach(cb => cb.addEventListener('change', updateCount));
-        updateCount();
-
-        // ── Row click to toggle checkbox ──
-        document.querySelectorAll('.siswa-row').forEach(row => {
-            row.addEventListener('click', function (e) {
-                if (e.target.tagName === 'INPUT') return;
-                const cb = row.querySelector('.siswa-checkbox');
-                cb.checked = !cb.checked;
+                function updateCount() {
+                    const n = document.querySelectorAll('.siswa-checkbox:checked').length;
+                    countLabel.textContent = n;
+                    selectedBadge.textContent = n + ' dipilih';
+                }
+                checkboxes.forEach(cb => cb.addEventListener('change', updateCount));
                 updateCount();
-            });
-            row.style.cursor = 'pointer';
-        });
 
-        // ── Select All / Clear ──
-        document.getElementById('btnSelectAll').addEventListener('click', () => {
-            document.querySelectorAll('.siswa-row:not([style*="display: none"]) .siswa-checkbox').forEach(cb => cb.checked = true);
-            updateCount();
-        });
-        document.getElementById('btnClearAll').addEventListener('click', () => {
-            checkboxes.forEach(cb => cb.checked = false);
-            updateCount();
-        });
-
-        // ── Inline Search ──
-        const searchInput = document.getElementById('searchSiswaInline');
-        searchInput.addEventListener('input', function () {
-            const q = this.value.toLowerCase();
-            document.querySelectorAll('.siswa-row').forEach(row => {
-                const match = row.dataset.nama.includes(q) || row.dataset.kelas.toLowerCase().includes(q);
-                // Also respect kelas filter
-                const kelasMatch = activeKelas === '' || row.dataset.kelas === activeKelas;
-                row.style.display = (match && kelasMatch) ? '' : 'none';
-            });
-        });
-
-        // ── Clear Search Siswa ──
-        document.getElementById('clearSearchSiswa').addEventListener('click', () => {
-            searchInput.value = '';
-            searchInput.dispatchEvent(new Event('input'));
-            searchInput.focus();
-        });
-
-        // ── Filter Kelas ──
-        let activeKelas = '';
-        document.querySelectorAll('.kelas-filter-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                document.querySelectorAll('.kelas-filter-btn').forEach(b => b.classList.remove('active','btn-primary'));
-                document.querySelectorAll('.kelas-filter-btn').forEach(b => b.classList.add('btn-outline-secondary'));
-                this.classList.add('active', 'btn-primary');
-                this.classList.remove('btn-outline-secondary');
-
-                activeKelas = this.dataset.kelas;
-                const q = searchInput.value.toLowerCase();
+                // ── Row click to toggle checkbox ──
                 document.querySelectorAll('.siswa-row').forEach(row => {
-                    const kelasMatch = activeKelas === '' || row.dataset.kelas === activeKelas;
-                    const namaMatch  = row.dataset.nama.includes(q) || row.dataset.kelas.toLowerCase().includes(q);
-                    row.style.display = (kelasMatch && namaMatch) ? '' : 'none';
+                    row.addEventListener('click', function(e) {
+                        if (e.target.tagName === 'INPUT') return;
+                        const cb = row.querySelector('.siswa-checkbox');
+                        cb.checked = !cb.checked;
+                        updateCount();
+                    });
+                    row.style.cursor = 'pointer';
+                });
+
+                // ── Select All / Clear ──
+                document.getElementById('btnSelectAll').addEventListener('click', () => {
+                    document.querySelectorAll('.siswa-row:not([style*="display: none"]) .siswa-checkbox')
+                        .forEach(cb => cb.checked = true);
+                    updateCount();
+                });
+                document.getElementById('btnClearAll').addEventListener('click', () => {
+                    checkboxes.forEach(cb => cb.checked = false);
+                    updateCount();
+                });
+
+                // ── Inline Search ──
+                const searchInput = document.getElementById('searchSiswaInline');
+                searchInput.addEventListener('input', function() {
+                    const q = this.value.toLowerCase();
+                    document.querySelectorAll('.siswa-row').forEach(row => {
+                        const match = row.dataset.nama.includes(q) || row.dataset.kelas.toLowerCase()
+                            .includes(q);
+                        // Also respect kelas filter
+                        const kelasMatch = activeKelas === '' || row.dataset.kelas === activeKelas;
+                        row.style.display = (match && kelasMatch) ? '' : 'none';
+                    });
+                });
+
+                // ── Clear Search Siswa ──
+                document.getElementById('clearSearchSiswa').addEventListener('click', () => {
+                    searchInput.value = '';
+                    searchInput.dispatchEvent(new Event('input'));
+                    searchInput.focus();
+                });
+
+                // ── Filter Kelas ──
+                let activeKelas = '';
+                document.querySelectorAll('.kelas-filter-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        document.querySelectorAll('.kelas-filter-btn').forEach(b => b.classList.remove(
+                            'active', 'btn-primary'));
+                        document.querySelectorAll('.kelas-filter-btn').forEach(b => b.classList.add(
+                            'btn-outline-secondary'));
+                        this.classList.add('active', 'btn-primary');
+                        this.classList.remove('btn-outline-secondary');
+
+                        activeKelas = this.dataset.kelas;
+                        const q = searchInput.value.toLowerCase();
+                        document.querySelectorAll('.siswa-row').forEach(row => {
+                            const kelasMatch = activeKelas === '' || row.dataset.kelas ===
+                                activeKelas;
+                            const namaMatch = row.dataset.nama.includes(q) || row.dataset.kelas
+                                .toLowerCase().includes(q);
+                            row.style.display = (kelasMatch && namaMatch) ? '' : 'none';
+                        });
+                    });
+                });
+
+                // Highlight checked rows
+                checkboxes.forEach(cb => {
+                    cb.addEventListener('change', function() {
+                        this.closest('tr').style.background = this.checked ? 'rgba(99,102,241,.08)' :
+                            '';
+                    });
+                    if (cb.checked) cb.closest('tr').style.background = 'rgba(99,102,241,.08)';
                 });
             });
-        });
-
-        // Highlight checked rows
-        checkboxes.forEach(cb => {
-            cb.addEventListener('change', function () {
-                this.closest('tr').style.background = this.checked ? 'rgba(99,102,241,.08)' : '';
-            });
-            if (cb.checked) cb.closest('tr').style.background = 'rgba(99,102,241,.08)';
-        });
-    });
-    </script>
+        </script>
     @endpush
 @endsection
