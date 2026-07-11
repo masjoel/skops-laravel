@@ -9,9 +9,11 @@
                 <li class="breadcrumb-item active">{{ $title }}</li>
             </ol>
         </div>
-        <a href="{{ route('master.murid.create') }}" class="btn btn-accent">
-            <i class="fas fa-plus me-2"></i>Tambah {{ $title }}
-        </a>
+        @if (auth()->user()->role == 'administrator' || auth()->user()->role == 'operator')
+            <a href="{{ route('master.murid.create') }}" class="btn btn-accent">
+                <i class="fas fa-plus me-2"></i>Tambah {{ $title }}
+            </a>
+        @endif
     </div>
 
     <div class="row g-3">
@@ -75,15 +77,18 @@
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <span>Daftar {{ $title }} <span class="text-muted fw-normal"
                             style="font-size:13px">({{ $murid->total() }} data)</span></span>
-                    <div>
-                        <button type="button" class="btn btn-sm btn-primary me-1" data-bs-toggle="modal"
-                            data-bs-target="#importModal">
-                            <i class="fas fa-file-import me-1"></i> Import
-                        </button>
-                        <a href="{{ route('master.murid.download', request()->query()) }}" class="btn btn-sm btn-success">
-                            <i class="fas fa-file-excel me-1"></i> Export
-                        </a>
-                    </div>
+                    @if (auth()->user()->role == 'administrator' || auth()->user()->role == 'operator')
+                        <div>
+                            <button type="button" class="btn btn-sm btn-primary me-1" data-bs-toggle="modal"
+                                data-bs-target="#importModal">
+                                <i class="fas fa-file-import me-1"></i> Import
+                            </button>
+                            <a href="{{ route('master.murid.download', request()->query()) }}"
+                                class="btn btn-sm btn-success">
+                                <i class="fas fa-file-excel me-1"></i> Export
+                            </a>
+                        </div>
+                    @endif
                 </div>
                 <div class="card-body table-responsive" style="padding:0">
                     <table class="table table-hover mb-0">
@@ -95,7 +100,9 @@
                                 <th>NISN</th>
                                 <th>Kelas</th>
                                 <th>Status</th>
-                                <th class="text-center" style="width:100px">Aksi</th>
+                                @if (auth()->user()->role == 'administrator' || auth()->user()->role == 'operator')
+                                    <th class="text-center" style="width:100px">Aksi</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
@@ -131,65 +138,67 @@
                                             @break
                                         @endswitch
                                     </td>
-                                    <td class="text-center">
-                                        <div class="d-flex gap-1 justify-content-center">
-                                            <a href="{{ route('master.murid.edit', ['murid' => $s->id, 'tahun_ajaran_id' => request('tahun_ajaran_id')]) }}"
-                                                class="btn btn-sm"
-                                                style="padding:4px 8px;background:rgba(99,102,241,.1);color:#6366f1;border-radius:6px"><i
-                                                    class="fas fa-pen"></i></a>
-                                            <form method="POST" action="{{ route('master.murid.destroy', $s->id) }}"
-                                                onsubmit="return confirm('Hapus siswa {{ addslashes($s->personil->nama) }}?')">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" class="btn btn-sm"
-                                                    style="padding:4px 8px;background:rgba(239,68,68,.1);color:#ef4444;border-radius:6px"><i
-                                                        class="fas fa-trash"></i></button>
-                                            </form>
-                                        </div>
-                                    </td>
+                                    @if (auth()->user()->role == 'administrator' || auth()->user()->role == 'operator')
+                                        <td class="text-center">
+                                            <div class="d-flex gap-1 justify-content-center">
+                                                <a href="{{ route('master.murid.edit', ['murid' => $s->id, 'tahun_ajaran_id' => request('tahun_ajaran_id')]) }}"
+                                                    class="btn btn-sm"
+                                                    style="padding:4px 8px;background:rgba(99,102,241,.1);color:#6366f1;border-radius:6px"><i
+                                                        class="fas fa-pen"></i></a>
+                                                <form method="POST" action="{{ route('master.murid.destroy', $s->id) }}"
+                                                    onsubmit="return confirm('Hapus siswa {{ addslashes($s->personil->nama) }}?')">
+                                                    @csrf @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm"
+                                                        style="padding:4px 8px;background:rgba(239,68,68,.1);color:#ef4444;border-radius:6px"><i
+                                                            class="fas fa-trash"></i></button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    @endif
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="7" class="text-center" style="padding:40px;color:var(--text-muted)"><i
-                                            class="fas fa-ruler fa-2x mb-2 d-block" style="opacity:.2"></i>Belum ada siswa
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="text-center" style="padding:40px;color:var(--text-muted)"><i
+                                                class="fas fa-ruler fa-2x mb-2 d-block" style="opacity:.2"></i>Belum ada siswa
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    @if ($murid->hasPages())
+                        <div class="card-body border-top" style="padding:12px 20px">{{ $murid->links() }}</div>
+                    @endif
                 </div>
-                @if ($murid->hasPages())
-                    <div class="card-body border-top" style="padding:12px 20px">{{ $murid->links() }}</div>
-                @endif
             </div>
+
         </div>
 
-    </div>
-
-    <!-- Modal Import Siswa -->
-    <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content" style="background:var(--card-bg);border-color:var(--border-color)">
-                <form action="{{ route('master.murid.import') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <div class="modal-header border-bottom" style="border-color:var(--border-color)!important">
-                        <h5 class="modal-title" id="importModalLabel">Import Data Siswa</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="fileMurid" class="form-label">Pilih File Excel (.xlsx, .xls, .csv)</label>
-                            <input class="form-control" type="file" id="fileMurid" name="file" accept=".xlsx,.xls,.csv"
-                                required>
+        <!-- Modal Import Siswa -->
+        <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content" style="background:var(--card-bg);border-color:var(--border-color)">
+                    <form action="{{ route('master.murid.import') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <div class="modal-header border-bottom" style="border-color:var(--border-color)!important">
+                            <h5 class="modal-title" id="importModalLabel">Import Data Siswa</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <small class="text-muted">Format kolom: No, NIS, NISN, Nama, L/P, Kelas, Status. Gunakan
-                            tombol Export untuk melihat formatnya.</small>
-                    </div>
-                    <div class="modal-footer border-top" style="border-color:var(--border-color)!important">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Import</button>
-                    </div>
-                </form>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="fileMurid" class="form-label">Pilih File Excel (.xlsx, .xls, .csv)</label>
+                                <input class="form-control" type="file" id="fileMurid" name="file"
+                                    accept=".xlsx,.xls,.csv" required>
+                            </div>
+                            <small class="text-muted">Format kolom: No, NIS, NISN, Nama, L/P, Kelas, Status. Gunakan
+                                tombol Export untuk melihat formatnya.</small>
+                        </div>
+                        <div class="modal-footer border-top" style="border-color:var(--border-color)!important">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary">Import</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
-@endsection
+    @endsection

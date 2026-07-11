@@ -12,9 +12,11 @@
                 </ol>
             </nav>
         </div>
-        <a href="{{ route('master.jenis-poin.create') }}" class="btn btn-accent">
-            <i class="fas fa-plus me-2"></i>Tambah
-        </a>
+        @if (auth()->user()->role == 'administrator' || auth()->user()->role == 'operator')
+            <a href="{{ route('master.jenis-poin.create') }}" class="btn btn-accent">
+                <i class="fas fa-plus me-2"></i>Tambah
+            </a>
+        @endif
     </div>
 
     <div class="card bg-light">
@@ -38,13 +40,16 @@
                     </a>
                 @endif
 
-                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#importJenisPoinModal">
-                    <i class="fas fa-file-import me-1"></i> Import
-                </button>
+                @if (auth()->user()->role == 'administrator' || auth()->user()->role == 'operator')
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                        data-bs-target="#importJenisPoinModal">
+                        <i class="fas fa-file-import me-1"></i> Import
+                    </button>
 
-                <a href="{{ route('master.jenis-poin.download', request()->query()) }}" class="btn btn-sm btn-success">
-                    <i class="fas fa-file-excel me-1"></i> Export
-                </a>
+                    <a href="{{ route('master.jenis-poin.download', request()->query()) }}" class="btn btn-sm btn-success">
+                        <i class="fas fa-file-excel me-1"></i> Export
+                    </a>
+                @endif
             </form>
         </div>
         <div class="card-body table-responsive" style="padding:0">
@@ -58,7 +63,9 @@
                         <th>Keterangan</th>
                         <th>Tindak Lanjut</th>
                         <th class="text-center">Skor</th>
-                        <th class="text-center" style="width:100px">Aksi</th>
+                        @if (auth()->user()->role == 'administrator' || auth()->user()->role == 'operator')
+                            <th class="text-center" style="width:100px">Aksi</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody>
@@ -77,22 +84,24 @@
                                     {{ $jp->skor }}
                                 </span>
                             </td>
-                            <td class="text-center">
-                                <div class="d-flex gap-1 justify-content-center">
-                                    <a href="{{ route('master.jenis-poin.edit', $jp->id) }}" class="btn btn-sm"
-                                        style="padding:4px 8px;background:rgba(99,102,241,.1);color:#6366f1;border-radius:6px">
-                                        <i class="fas fa-pen"></i>
-                                    </a>
-                                    <form method="POST" action="{{ route('master.jenis-poin.destroy', $jp->id) }}"
-                                        onsubmit="return confirm('Hapus jenis poin {{ addslashes($jp->nama) }}?')">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="btn btn-sm"
-                                            style="padding:4px 8px;background:rgba(239,68,68,.1);color:#ef4444;border-radius:6px">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
+                            @if (auth()->user()->role == 'administrator' || auth()->user()->role == 'operator')
+                                <td class="text-center">
+                                    <div class="d-flex gap-1 justify-content-center">
+                                        <a href="{{ route('master.jenis-poin.edit', $jp->id) }}" class="btn btn-sm"
+                                            style="padding:4px 8px;background:rgba(99,102,241,.1);color:#6366f1;border-radius:6px">
+                                            <i class="fas fa-pen"></i>
+                                        </a>
+                                        <form method="POST" action="{{ route('master.jenis-poin.destroy', $jp->id) }}"
+                                            onsubmit="return confirm('Hapus jenis poin {{ addslashes($jp->nama) }}?')">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="btn btn-sm"
+                                                style="padding:4px 8px;background:rgba(239,68,68,.1);color:#ef4444;border-radius:6px">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            @endif
                         </tr>
                     @empty
                         <tr>
@@ -110,7 +119,8 @@
     </div>
 
     <!-- Modal Import Jenis Poin -->
-    <div class="modal fade" id="importJenisPoinModal" tabindex="-1" aria-labelledby="importJenisPoinLabel" aria-hidden="true">
+    <div class="modal fade" id="importJenisPoinModal" tabindex="-1" aria-labelledby="importJenisPoinLabel"
+        aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content" style="background:var(--card-bg);border-color:var(--border-color)">
                 <form action="{{ route('master.jenis-poin.import') }}" method="POST" enctype="multipart/form-data">
@@ -122,9 +132,11 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="fileJenisPoin" class="form-label">Pilih File Excel (.xlsx, .xls, .csv)</label>
-                            <input class="form-control" type="file" id="fileJenisPoin" name="file" accept=".xlsx,.xls,.csv" required>
+                            <input class="form-control" type="file" id="fileJenisPoin" name="file"
+                                accept=".xlsx,.xls,.csv" required>
                         </div>
-                        <small class="text-muted">Format kolom: No, Kode, Jenis (reward/pelanggaran), Skor, Deskripsi, Tindakan, Keterangan. Gunakan tombol Export untuk melihat formatnya.</small>
+                        <small class="text-muted">Format kolom: No, Kode, Jenis (reward/pelanggaran), Skor, Deskripsi,
+                            Tindakan, Keterangan. Gunakan tombol Export untuk melihat formatnya.</small>
                     </div>
                     <div class="modal-footer border-top" style="border-color:var(--border-color)!important">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
