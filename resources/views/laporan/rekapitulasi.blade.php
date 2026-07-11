@@ -124,7 +124,7 @@
             <div class="card bg-light mb-3">
                 <div class="card-body" style="padding:14px 20px">
                     <form method="GET" class="row g-2 align-items-end">
-                        <div class="col-12 col-md-6">
+                        <div class="col-12 col-md-4">
                             <div class="input-group" style="border-radius:8px;overflow:hidden">
                                 <span class="input-group-text"
                                     style="background:var(--card-bg);border-color:var(--border-color);color:var(--text-muted)">
@@ -158,20 +158,19 @@
                                 <a href="{{ route('laporan.rekapitulasi') }}"
                                     class="btn btn-outline-secondary ms-1">Reset</a>
                             @endif
+                            <a href="{{ route('laporan.rekapitulasi.download', request()->query()) }}"
+                                class="btn btn-success ms-1" style="font-size:12px">
+                                <i class="fas fa-file-excel me-1"></i> Excel
+                            </a>
                         </div>
                     </form>
                 </div>
             </div>
             <div class="card bg-light">
                 <div class="card-header d-flex flex-wrap align-items-center justify-content-between">
-                    <div>Rekapitulasi Poin Siswa <span
-                            class="text-muted fw-normal" style="font-size:13px">({{ $rekapitullasi->total() }} data)</span>
+                    <div>Rekapitulasi Poin Siswa <span class="text-muted fw-normal"
+                            style="font-size:13px">({{ $rekapitullasi->total() }} data)</span>
                     </div>
-                    <a href="{{ route('laporan.rekapitulasi.download', request()->query()) }}" class="btn btn-sm btn-success"
-                        style="font-size:12px;padding:4px 12px">
-                        <i class="fas fa-file-excel me-1"></i> Excel
-                        {{-- Download <i class="fas fa-download ms-1"></i> --}}
-                    </a>
                 </div>
                 <div class="card-body" style="padding:0">
                     <div class="table-responsive">

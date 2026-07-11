@@ -785,11 +785,13 @@
                             <span class="nav-icon"><i class="fas fa-school"></i></span>
                             Profil
                         </a>
-                        <a href="{{ route('seting.user.index') }}"
-                            class="nav-item-link {{ request()->routeIs('seting.user.*') ? 'active' : '' }}">
-                            <span class="nav-icon"><i class="fas fa-user"></i></span>
-                            User/Pengguna
-                        </a>
+                        @if (Auth::user()->role === 'administrator')
+                            <a href="{{ route('seting.user.index') }}"
+                                class="nav-item-link {{ request()->routeIs('seting.user.*') ? 'active' : '' }}">
+                                <span class="nav-icon"><i class="fas fa-user"></i></span>
+                                User/Pengguna
+                            </a>
+                        @endif
                     </div>
                 </div>
             @endif
@@ -806,7 +808,11 @@
                 @endif
             </div>
             <div class="sidebar-footer-info">
-                <div class="sidebar-footer-name">{{ Auth::user()->name }}</div>
+                <div class="sidebar-footer-name">
+                    <a href="{{ route('profile.edit') }}" style="color: inherit; text-decoration: none;" title="Edit Profil">
+                        {{ Auth::user()->name }} <i class="fas fa-edit ms-1" style="font-size: 10px; opacity: 0.7;"></i>
+                    </a>
+                </div>
                 <div class="sidebar-footer-role">{{ ucfirst(Auth::user()->role) }}</div>
             </div>
             <form method="POST" action="{{ route('logout') }}" class="ms-auto">

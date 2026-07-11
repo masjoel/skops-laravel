@@ -23,12 +23,12 @@ class MuridSeeder extends Seeder
             ->create()
             ->each(function (Murid $murid) use ($kelasList, $tahunAktif, $tahunLalu) {
                 // akun login murid
-                User::factory()
-                    ->murid()
-                    ->create([
-                        'personil_id' => $murid->personil_id,
-                        'username' => 'murid' . $murid->id,
-                    ]);
+                // User::factory()
+                //     ->murid()
+                //     ->create([
+                //         'personil_id' => $murid->personil_id,
+                //         'username' => 'murid' . $murid->id,
+                //     ]);
 
                 // tempatkan murid ke salah satu kelas untuk tahun ajaran berjalan
                 $kelasSekarang = $kelasList->random();
@@ -69,12 +69,12 @@ class MuridSeeder extends Seeder
                 foreach (array_slice($hubunganTersedia, 0, $jumlahOrtu) as $hubungan) {
                     $orangTua = OrangTua::factory()->create();
 
-                    User::factory()
-                        ->orangTua()
-                        ->create([
-                            'personil_id' => $orangTua->personil_id,
-                            'username' => 'ortu' . $orangTua->id,
-                        ]);
+                    // User::factory()
+                    //     ->orangTua()
+                    //     ->create([
+                    //         'personil_id' => $orangTua->personil_id,
+                    //         'username' => 'ortu' . $orangTua->id,
+                    //     ]);
 
                     $murid->orangTua()->attach($orangTua->id, [
                         'hubungan' => $hubungan,

@@ -79,7 +79,7 @@
                     {{ strtoupper(substr($muridKelas->murid?->personil?->nama ?? 'S', 0, 1)) }}
                 </div>
                 <div class="flex-grow-1">
-                    <div style="font-size:18px;font-weight:700;color:var(--text-primary)">
+                    <div class="mb-2 text-primary" style="font-size:18px;font-weight:700;">
                         {{ $muridKelas->murid?->personil?->nama ?? '-' }}
                     </div>
                     <div class="d-flex flex-wrap gap-3 mt-1" style="font-size:13px;color:var(--text-muted)">
@@ -103,21 +103,21 @@
 
             {{-- Stat Mini Row --}}
             <div class="d-flex flex-wrap gap-2 mt-3">
-                <div class="stat-mini" style="background:rgba(34,197,94,.08)">
+                <div class="col-12 col-md-3 stat-mini" style="background:rgba(34,197,94,.08)">
                     <i class="fas fa-star" style="color:#22c55e;font-size:18px"></i>
                     <div>
                         <div class="stat-val" style="color:#22c55e">{{ $totalReward }}</div>
                         <div class="stat-lbl">Total Reward</div>
                     </div>
                 </div>
-                <div class="stat-mini" style="background:rgba(239,68,68,.08)">
+                <div class="col-12 col-md-3 stat-mini" style="background:rgba(239,68,68,.08)">
                     <i class="fas fa-exclamation-triangle" style="color:#ef4444;font-size:18px"></i>
                     <div>
                         <div class="stat-val" style="color:#ef4444">{{ $totalPelanggaran }}</div>
                         <div class="stat-lbl">Total Pelanggaran</div>
                     </div>
                 </div>
-                <div class="stat-mini" style="background:rgba(99,182,241,.08)">
+                <div class="col-12 col-md-3 stat-mini" style="background:rgba(99,182,241,.08)">
                     <i class="fas fa-recycle" style="color:#63b6f1;font-size:18px"></i>
                     <div>
                         <div class="stat-val" style="color:#63b6f1">{{ $totalPemutihan }}</div>
@@ -158,13 +158,11 @@
                         <a href="{{ route('laporan.rekapitulasi.show', $muridKelas->id) }}"
                             class="btn btn-sm btn-outline-secondary">Reset</a>
                     @endif
+                    <a href="{{ route('laporan.rekapitulasi.download-detail', array_merge(['muridKelasId' => $muridKelas->id], request()->query())) }}"
+                        class="btn btn-sm btn-success">
+                        <i class="fas fa-file-excel me-1"></i> Excel
+                    </a>
                 </form>
-                {{-- Tombol Download --}}
-                <a href="{{ route('laporan.rekapitulasi.download-detail', array_merge(['muridKelasId' => $muridKelas->id], request()->query())) }}"
-                    class="btn btn-sm btn-success">
-                    <i class="fas fa-file-excel me-1"></i> Excel
-                    {{-- Download <i class="fas fa-download ms-1"></i> --}}
-                </a>
             </div>
         </div>
         <div class="card-body table-responsive" style="padding:0">

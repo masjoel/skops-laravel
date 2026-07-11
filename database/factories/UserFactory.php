@@ -29,7 +29,8 @@ class UserFactory extends Factory
             'personil_id' => Personil::factory(),
             'username' => $this->faker->unique()->userName(),
             'password' => Hash::make('password'), // default: "password"
-            'role' => $this->faker->randomElement(['guru', 'murid', 'orang_tua']),
+            // 'role' => $this->faker->randomElement(['guru', 'murid', 'orang_tua']),
+            'role' => $this->faker->randomElement(['guru']),
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'status' => 1,
