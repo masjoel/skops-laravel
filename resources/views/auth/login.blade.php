@@ -428,7 +428,7 @@
                         <div class="input-wrapper">
                             <i class="fas fa-user input-icon"></i>
                             <input type="text" id="username" name="username" class="form-input"
-                                placeholder="Masukkan username" value="{{ old('username', 'admin') }}" autocomplete="username"
+                                placeholder="Masukkan username" value="{{ old('username', 'demo') }}" autocomplete="username"
                                 autofocus required>
                         </div>
                         @error('username')
@@ -440,8 +440,8 @@
                         <label class="form-label-auth" for="password">Password</label>
                         <div class="input-wrapper">
                             <i class="fas fa-lock input-icon"></i>
-                            <input type="password" id="password" name="password" class="form-input"
-                                placeholder="Masukkan password" autocomplete="current-password"  value="password" required>
+                            <input type="text" id="password" name="password" class="form-input"
+                                placeholder="Masukkan password" autocomplete="current-password"  value="demo" required>
                             <button type="button" class="input-toggle" onclick="togglePassword()" id="toggleBtn">
                                 <i class="fas fa-eye" id="eyeIcon"></i>
                             </button>

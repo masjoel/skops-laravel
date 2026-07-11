@@ -39,9 +39,9 @@ class DatabaseSeeder extends Seeder
         ]);
 
         User::factory()->create([
-            'username' => 'admin',
+            'username' => 'demo',
             'email' => 'admin@skops.web.id',
-            'password' => bcrypt('password'),
+            'password' => bcrypt('demo'),
             'name' => 'Administrator',
             'photo' => 'images/skops-logo.webp',
             'role' => 'administrator',
