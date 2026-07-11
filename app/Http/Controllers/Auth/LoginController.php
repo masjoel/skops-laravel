@@ -31,11 +31,14 @@ class LoginController extends Controller
         ]);
 
         $user = User::where('username', $request->username)
-            ->where('status', true)
+            // ->where('status', true)
             ->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return back()->withErrors(['login' => 'Username atau password salah.'])->withInput();
+        }
+        if (!$user->status) {
+            return back()->withErrors(['login' => 'Status belum Aktif, silakan hubungi Administrator.'])->withInput();
         }
 
         $Sekolah = Sekolah::first();
