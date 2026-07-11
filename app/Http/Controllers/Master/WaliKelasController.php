@@ -17,8 +17,6 @@ class WaliKelasController extends Controller
     {
         $q = WaliKelas::with(['guru.personil', 'kelas', 'tahunAjaran']);
 
-        // Default: tampilkan wali kelas untuk tahun ajaran aktif,
-        // kecuali user secara eksplisit memilih tahun ajaran lain.
         $tahunAjaranId = $request->filled('tahun_ajaran_id')
             ? $request->tahun_ajaran_id
             : TahunAjaran::aktif()?->id;

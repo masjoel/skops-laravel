@@ -673,18 +673,21 @@
             </a>
 
             {{-- Master Data Group --}}
-            @if (in_array(Auth::user()->role, ['administrator', 'operator']))
-                @php
-                    $masterActive =
-                        request()->routeIs('master.guru.*') ||
-                        request()->routeIs('master.murid.*') ||
-                        request()->routeIs('master.walikelas.*') ||
-                        request()->routeIs('master.kelas.*') ||
-                        request()->routeIs('master.jurusan.*') ||
-                        request()->routeIs('master.jenis-poin.*') ||
-                        request()->routeIs('master.jabatan.*') ||
-                        request()->routeIs('master.kenaikan-kelas.*');
-                @endphp
+            @php
+                $userRole = Auth::user()->role;
+                $masterActive =
+                    request()->routeIs('master.guru.*') ||
+                    request()->routeIs('master.murid.*') ||
+                    request()->routeIs('master.walikelas.*') ||
+                    request()->routeIs('master.kelas.*') ||
+                    request()->routeIs('master.jurusan.*') ||
+                    request()->routeIs('master.jenis-poin.*') ||
+                    request()->routeIs('master.jabatan.*') ||
+                    request()->routeIs('master.kenaikan-kelas.*');
+            @endphp
+
+            {{-- Izinkan administrator, operator, dan guru melihat menu Master Data --}}
+            @if (in_array($userRole, ['administrator', 'operator', 'guru']))
                 <div class="nav-group {{ $masterActive ? 'open has-active' : '' }}" data-group="master">
                     <div class="nav-group-header" onclick="toggleNavGroup(this)">
                         <span class="nav-group-icon"><i class="fas fa-database"></i></span>
@@ -692,50 +695,54 @@
                         <i class="fas fa-chevron-down nav-group-arrow"></i>
                     </div>
                     <div class="nav-group-body">
-                        <a href="{{ route('master.guru.index') }}"
-                            class="nav-item-link {{ request()->routeIs('master.guru.*') ? 'active' : '' }}">
-                            <span class="nav-icon"><i class="fas fa-user-friends"></i></span>
-                            Guru
-                        </a>
+
+                        {{-- Menu yang HANYA bisa dilihat admin & operator --}}
+                        @if (in_array($userRole, ['administrator', 'operator']))
+                            <a href="{{ route('master.guru.index') }}"
+                                class="nav-item-link {{ request()->routeIs('master.guru.*') ? 'active' : '' }}">
+                                <span class="nav-icon"><i class="fas fa-user-friends"></i></span> Guru
+                            </a>
+                        @endif
+
+                        {{-- Menu Siswa: Bisa dilihat oleh admin, operator, DAN guru --}}
                         <a href="{{ route('master.murid.index') }}"
                             class="nav-item-link {{ request()->routeIs('master.murid.*') ? 'active' : '' }}">
-                            <span class="nav-icon"><i class="fas fa-users"></i></span>
-                            Siswa
+                            <span class="nav-icon"><i class="fas fa-users"></i></span> Siswa
                         </a>
                         <a href="{{ route('master.walikelas.index') }}"
                             class="nav-item-link {{ request()->routeIs('master.walikelas.*') ? 'active' : '' }}">
-                            <span class="nav-icon"><i class="fas fa-user-plus"></i></span>
-                            Wali Kelas
-                        </a>
-                        <a href="{{ route('master.kelas.index') }}"
-                            class="nav-item-link {{ request()->routeIs('master.kelas.*') ? 'active' : '' }}">
-                            <span class="nav-icon"><i class="fas fa-chalkboard-teacher"></i></span>
-                            Kelas
-                        </a>
-                        <a href="{{ route('master.jurusan.index') }}"
-                            class="nav-item-link {{ request()->routeIs('master.jurusan.*') ? 'active' : '' }}">
-                            <span class="nav-icon"><i class="fas fa-sitemap"></i></span>
-                            Jurusan
+                            <span class="nav-icon"><i class="fas fa-user-plus"></i></span> Wali Kelas
                         </a>
                         <a href="{{ route('master.jenis-poin.index') }}"
                             class="nav-item-link {{ request()->routeIs('master.jenis-poin.*') ? 'active' : '' }}">
-                            <span class="nav-icon"><i class="fas fa-list-ol"></i></span>
-                            Jenis Poin
+                            <span class="nav-icon"><i class="fas fa-list-ol"></i></span> Jenis Poin
                         </a>
-                        <a href="{{ route('master.jabatan.index') }}"
-                            class="nav-item-link {{ request()->routeIs('master.jabatan.*') ? 'active' : '' }}">
-                            <span class="nav-icon"><i class="fas fa-user-tie"></i></span>
-                            Jabatan
-                        </a>
-                        <a href="{{ route('master.kenaikan-kelas.index') }}"
-                            class="nav-item-link {{ request()->routeIs('master.kenaikan-kelas.*') ? 'active' : '' }}">
-                            <span class="nav-icon"><i class="fas fa-graduation-cap"></i></span>
-                            Kenaikan Kelas
-                        </a>
+
+                        {{-- Menu lainnya yang HANYA bisa dilihat admin & operator --}}
+                        @if (in_array($userRole, ['administrator', 'operator']))
+                            <a href="{{ route('master.kelas.index') }}"
+                                class="nav-item-link {{ request()->routeIs('master.kelas.*') ? 'active' : '' }}">
+                                <span class="nav-icon"><i class="fas fa-chalkboard-teacher"></i></span> Kelas
+                            </a>
+                            <a href="{{ route('master.jurusan.index') }}"
+                                class="nav-item-link {{ request()->routeIs('master.jurusan.*') ? 'active' : '' }}">
+                                <span class="nav-icon"><i class="fas fa-sitemap"></i></span> Jurusan
+                            </a>
+                        @endif
+                        @if (in_array($userRole, ['administrator', 'operator']))
+                            <a href="{{ route('master.jabatan.index') }}"
+                                class="nav-item-link {{ request()->routeIs('master.jabatan.*') ? 'active' : '' }}">
+                                <span class="nav-icon"><i class="fas fa-user-tie"></i></span> Jabatan
+                            </a>
+                            <a href="{{ route('master.kenaikan-kelas.index') }}"
+                                class="nav-item-link {{ request()->routeIs('master.kenaikan-kelas.*') ? 'active' : '' }}">
+                                <span class="nav-icon"><i class="fas fa-graduation-cap"></i></span> Kenaikan Kelas
+                            </a>
+                        @endif
+
                     </div>
                 </div>
             @endif
-
             {{-- Perilaku Group --}}
             @php
                 $perilakuActive = request()->routeIs('transaksi.kartu-kontrol.*');
@@ -815,8 +822,10 @@
             </div>
             <div class="sidebar-footer-info">
                 <div class="sidebar-footer-name">
-                    <a href="{{ route('profile.edit') }}" style="color: inherit; text-decoration: none;" title="Edit Profil">
-                        {{ Auth::user()->name }} <i class="fas fa-edit ms-1" style="font-size: 10px; opacity: 0.7;"></i>
+                    <a href="{{ route('profile.edit') }}" style="color: inherit; text-decoration: none;"
+                        title="Edit Profil">
+                        {{ Auth::user()->name }} <i class="fas fa-edit ms-1"
+                            style="font-size: 10px; opacity: 0.7;"></i>
                     </a>
                 </div>
                 <div class="sidebar-footer-role">{{ ucfirst(Auth::user()->role) }}</div>

@@ -14,7 +14,7 @@ class CheckRole
         // $userLevel = session('level');
 
         if (!$userLevel || !in_array($userLevel, $roles)) {
-            abort(403, 'Akses ditolak. Level Anda tidak memiliki izin untuk halaman ini.');
+            abort(403, 'Anda tidak memiliki izin di halaman ini.');
         }
 
         return $next($request);
