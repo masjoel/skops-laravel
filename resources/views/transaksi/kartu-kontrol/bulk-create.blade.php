@@ -120,9 +120,12 @@
                     </div>
                     <div class="card-body">
                         {{-- Search --}}
-                        <div class="mb-3">
+                        <div class="mb-3 input-group">
                             <input type="text" class="form-control" id="searchSiswaInline"
                                 placeholder="&#xF002; Cari nama siswa atau kelas..." style="font-family:inherit">
+                            <button class="btn btn-outline-secondary" type="button" id="clearSearchSiswa" title="Kosongkan pencarian">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
 
                         @error('murid_kelas_ids')
@@ -130,14 +133,14 @@
                         @enderror
 
                         {{-- Filter Kelas --}}
-                        <div class="mb-3 d-flex flex-wrap gap-2" id="kelasFilterBtns">
+                        {{-- <div class="mb-3 d-flex flex-wrap gap-2" id="kelasFilterBtns">
                             <button type="button" class="btn btn-sm btn-outline-secondary active kelas-filter-btn"
                                 data-kelas="">Semua Kelas</button>
                             @foreach ($muridKelasList->groupBy('kelas.nama_kelas') as $kelasNama => $items)
                                 <button type="button" class="btn btn-sm btn-outline-secondary kelas-filter-btn"
                                     data-kelas="{{ $kelasNama }}">{{ $kelasNama }}</button>
                             @endforeach
-                        </div>
+                        </div> --}}
 
                         {{-- Siswa List --}}
                         <div style="max-height:420px;overflow-y:auto;border:1px solid var(--border-color);border-radius:8px;">
@@ -332,8 +335,17 @@
             const q = this.value.toLowerCase();
             document.querySelectorAll('.siswa-row').forEach(row => {
                 const match = row.dataset.nama.includes(q) || row.dataset.kelas.toLowerCase().includes(q);
-                row.style.display = match ? '' : 'none';
+                // Also respect kelas filter
+                const kelasMatch = activeKelas === '' || row.dataset.kelas === activeKelas;
+                row.style.display = (match && kelasMatch) ? '' : 'none';
             });
+        });
+
+        // ── Clear Search Siswa ──
+        document.getElementById('clearSearchSiswa').addEventListener('click', () => {
+            searchInput.value = '';
+            searchInput.dispatchEvent(new Event('input'));
+            searchInput.focus();
         });
 
         // ── Filter Kelas ──
