@@ -258,7 +258,6 @@ class KartuKontrolController extends Controller
         $validated = $this->validasi($request);
 
         DB::transaction(function () use ($validated) {
-            // kalau skor tidak diisi manual, ambil dari jenis poin terkait
             if (!isset($validated['skor']) || $validated['skor'] === null) {
                 $validated['skor'] = JenisPoin::find($validated['jenis_poin_id'])->skor;
             }
@@ -333,8 +332,9 @@ class KartuKontrolController extends Controller
         if (!isset($validated['skor']) || $validated['skor'] === null) {
             $validated['skor'] = JenisPoin::find($validated['jenis_poin_id'])->skor;
         }
-
-        $kartuKontrol->update($validated);
+        DB::transaction(function () use ($validated, $kartuKontrol) {
+            $kartuKontrol->update($validated);
+        });
 
         return Redirect::route('transaksi.kartu-kontrol.index')
             ->with('success', 'Kartu kontrol berhasil diperbarui.');
