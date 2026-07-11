@@ -15,6 +15,9 @@ return new class extends Migration
                 ->cascadeOnDelete();
             $table->string('nis', 30)->unique();
             $table->string('nisn', 30)->nullable()->unique();
+            $table->enum('status', ['aktif', 'lulus', 'keluar', 'pindah'])->default('aktif');
+            $table->date('tgl_status')->nullable();
+            $table->text('keterangan_status')->nullable();
             $table->timestamps();
             // kelas_id sengaja tidak diletakkan di sini,
             // digantikan oleh tabel riwayat murid_kelas

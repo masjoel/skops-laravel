@@ -86,7 +86,7 @@
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
-                        <div class="mb-4">
+                        {{-- <div class="mb-4">
                             <label class="form-label d-block">Status</label>
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input @error('status') is-invalid @enderror" type="radio"
@@ -103,7 +103,7 @@
                             @error('status')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
-                        </div>
+                        </div> --}}
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-accent flex-fill"><i
                                     class="fas fa-save me-2"></i>Simpan</button>

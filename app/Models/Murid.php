@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Murid extends Model
 {
@@ -18,7 +19,52 @@ class Murid extends Model
         'personil_id',
         'nis',
         'nisn',
+        'status',
+        'tgl_status',
+        'keterangan_status',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'tgl_status' => 'date',
+        ];
+    }
+
+    /**
+     * Hanya murid yang masih aktif bersekolah (belum lulus/keluar/pindah).
+     */
+    public function scopeAktif($query)
+    {
+        return $query->where('status', 'aktif');
+    }
+
+    public function luluskan(?string $keterangan = null): void
+    {
+        $this->update([
+            'status' => 'lulus',
+            'tgl_status' => now(),
+            'keterangan_status' => $keterangan,
+        ]);
+    }
+
+    public function keluarkan(?string $keterangan = null): void
+    {
+        $this->update([
+            'status' => 'keluar',
+            'tgl_status' => now(),
+            'keterangan_status' => $keterangan,
+        ]);
+    }
+
+    public function pindahkan(?string $sekolahTujuan = null): void
+    {
+        $this->update([
+            'status' => 'pindah',
+            'tgl_status' => now(),
+            'keterangan_status' => $sekolahTujuan,
+        ]);
+    }
 
     public function personil(): BelongsTo
     {
@@ -54,6 +100,15 @@ class Murid extends Model
         return $this->belongsToMany(Kelas::class, 'murid_kelas')
             ->withPivot('tahun_ajaran_id')
             ->withTimestamps();
+    }
+
+    /**
+     * Semua kartu kontrol murid ini, lintas riwayat kelas/tahun ajaran,
+     * lewat perantara murid_kelas.
+     */
+    public function kartuKontrol(): HasManyThrough
+    {
+        return $this->hasManyThrough(KartuKontrol::class, MuridKelas::class);
     }
 
     /**

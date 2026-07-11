@@ -83,8 +83,13 @@ Route::middleware(['auth.session'])->group(function () {
         Route::get('jabatan/download', [JabatanStrukturalController::class, 'download'])->name('jabatan.download');
         Route::post('jabatan/import', [JabatanStrukturalController::class, 'import'])->name('jabatan.import');
         Route::resource('jabatan', JabatanStrukturalController::class);
-        // Route::resource('tahun-ajaran', TahunAjaranController::class)->parameters(['tahun-ajaran' => 'tahunAjaran']);
-        // Route::post('tahun-ajaran/{tahunAjaran}/aktifkan', [TahunAjaranController::class, 'aktifkanTahunAjaran'])->name('aktifkan');
+        // Tambahkan ke routes/web.php, di dalam group route master/murid yang sudah ada
+        Route::post('murid/{murid}/keluar', [MuridController::class, 'keluar'])
+            ->name('murid.keluar');
+        Route::post('murid/{murid}/pindah', [MuridController::class, 'pindah'])
+            ->name('murid.pindah');
+        Route::post('murid/{murid}/aktifkan-kembali', [MuridController::class, 'aktifkanKembali'])
+            ->name('murid.aktifkan-kembali');
     });
 
     // Tambahkan ke routes/web.php, di dalam middleware auth

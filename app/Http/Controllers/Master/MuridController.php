@@ -9,6 +9,7 @@ use App\Models\MuridKelas;
 use App\Models\Personil;
 use App\Models\TahunAjaran;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -19,53 +20,29 @@ class MuridController extends Controller
      */
     public function index(Request $request)
     {
-        $tahunAjaranAktif = TahunAjaran::where('is_aktif', true)->first()->id ?? null;
-        $filterTahunAjaran = $request->input('tahun_ajaran_id', $tahunAjaranAktif);
+        $tahunAjaranAktif = TahunAjaran::aktif();
+        $filterTahunAjaran = $request->input('tahun_ajaran_id', $tahunAjaranAktif?->id);
 
-        $q = Murid::with(['personil', 'kelas', 'riwayatKelas' => function ($query) use ($filterTahunAjaran) {
-            if ($filterTahunAjaran) {
-                $query->where('tahun_ajaran_id', $filterTahunAjaran);
-            }
-        }, 'riwayatKelas.kelas.jurusan']);
+        // Default filter ke murid berstatus "aktif" saja, supaya yang sudah
+        // lulus/keluar/pindah tidak otomatis ikut nongol di listing utama.
+        $filterStatus = $request->input('status', 'aktif');
 
-        if ($request->filled('search')) {
-            $q->where(function ($query) use ($request) {
-                $query->where('nis', 'like', '%' . $request->search . '%')
-                    ->orWhereHas('personil', function ($qPersonil) use ($request) {
-                        $qPersonil->where('nama', 'like', '%' . $request->search . '%')
-                            ->orWhere('no_hp', 'like', '%' . $request->search . '%')
-                            ->orWhere('email', 'like', '%' . $request->search . '%')
-                            ->orWhere('alamat', 'like', '%' . $request->search . '%');
-                    })
-                    ->orWhereHas('kelas', function ($qKelas) use ($request) {
-                        $qKelas->where('nama_kelas', 'like', '%' . $request->search . '%');
-                    });
-            });
-        }
-        if ($request->filled('gender')) {
-            $q->whereHas('personil', function ($qPersonil) use ($request) {
-                $qPersonil->where('jenis_kelamin', $request->gender);
-            });
-        }
-        if ($request->filled('status')) {
-            $q->whereHas('personil', function ($qPersonil) use ($request) {
-                $qPersonil->where('status', $request->status);
-            });
-        }
-        if ($filterTahunAjaran) {
-            $q->whereHas('riwayatKelas', function ($qMuridKelas) use ($filterTahunAjaran) {
-                $qMuridKelas->where('tahun_ajaran_id', $filterTahunAjaran);
-            });
-        }
+        $q = $this->queryMuridDenganFilter($request, $filterTahunAjaran, $filterStatus);
 
-        // Subquery ordering to avoid explicit join
         $murid = $q->orderBy(Personil::select('nama')->whereColumn('personil.id', 'murid.personil_id'))
             ->paginate(20)
             ->withQueryString();
-        $tahunAjaran = TahunAjaran::get();
+
+        $tahunAjaran = TahunAjaran::orderByDesc('nama')->get();
 
         $title = 'Siswa';
-        return view('master.murid.index', compact('murid', 'title', 'tahunAjaran', 'tahunAjaranAktif'));
+        return view('master.murid.index', compact(
+            'murid',
+            'title',
+            'tahunAjaran',
+            'tahunAjaranAktif',
+            'filterStatus',
+        ));
     }
 
     /**
@@ -75,7 +52,8 @@ class MuridController extends Controller
     {
         $title = 'Siswa';
         $kelas = Kelas::all();
-        $tahunAjaranAktif = TahunAjaran::where('is_aktif', true)->first();
+        $tahunAjaranAktif = TahunAjaran::aktif();
+
         return view('master.murid.create', compact('title', 'kelas', 'tahunAjaranAktif'));
     }
 
@@ -84,30 +62,27 @@ class MuridController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'nama' => 'required|string|max:100',
-            'nis' => 'required|numeric|unique:murid,nis',
-            'nisn' => 'nullable|numeric|unique:murid,nisn',
-            'jenis_kelamin' => 'nullable|in:L,P',
-            'status' => 'nullable|in:aktif,nonaktif',
-        ]);
+        $validated = $this->validasi($request);
 
-        $personil = Personil::create([
-            'nama' => $request->nama,
-            'jenis_kelamin' => $request->jenis_kelamin,
-            'status' => $request->status,
-        ]);
+        DB::transaction(function () use ($validated) {
+            $personil = Personil::create([
+                'nama' => $validated['nama'],
+                'jenis_kelamin' => $validated['jenis_kelamin'] ?? null,
+                'status' => $validated['status'] ?? 'aktif',
+            ]);
 
-        $murid = Murid::create([
-            'personil_id' => $personil->id,
-            'nis' => $request->nis,
-            'nisn' => $request->nisn,
-        ]);
-        MuridKelas::create([
-            'murid_id' => $murid->id,
-            'kelas_id' => $request->kelas_id,
-            'tahun_ajaran_id' => $request->tahun_ajaran_id,
-        ]);
+            $murid = Murid::create([
+                'personil_id' => $personil->id,
+                'nis' => $validated['nis'],
+                'nisn' => $validated['nisn'] ?? null,
+            ]);
+
+            MuridKelas::create([
+                'murid_id' => $murid->id,
+                'kelas_id' => $validated['kelas_id'],
+                'tahun_ajaran_id' => $validated['tahun_ajaran_id'],
+            ]);
+        });
 
         return redirect()->route('master.murid.index')
             ->with('success', 'Murid berhasil ditambahkan.');
@@ -115,53 +90,18 @@ class MuridController extends Controller
 
     public function download(Request $request)
     {
-        $tahunAjaranAktif = TahunAjaran::where('is_aktif', true)->first()->id ?? null;
-        $filterTahunAjaran = $request->input('tahun_ajaran_id', $tahunAjaranAktif);
+        $tahunAjaranAktif = TahunAjaran::aktif();
+        $filterTahunAjaran = $request->input('tahun_ajaran_id', $tahunAjaranAktif?->id);
+        $filterStatus = $request->input('status', 'aktif');
 
-        $q = Murid::with(['personil', 'kelas', 'riwayatKelas' => function ($query) use ($filterTahunAjaran) {
-            if ($filterTahunAjaran) {
-                $query->where('tahun_ajaran_id', $filterTahunAjaran);
-            }
-        }, 'riwayatKelas.kelas.jurusan']);
-
-        if ($request->filled('search')) {
-            $q->where(function ($query) use ($request) {
-                $query->where('nis', 'like', '%' . $request->search . '%')
-                    ->orWhereHas('personil', function ($qPersonil) use ($request) {
-                        $qPersonil->where('nama', 'like', '%' . $request->search . '%')
-                            ->orWhere('no_hp', 'like', '%' . $request->search . '%')
-                            ->orWhere('email', 'like', '%' . $request->search . '%')
-                            ->orWhere('alamat', 'like', '%' . $request->search . '%');
-                    })
-                    ->orWhereHas('kelas', function ($qKelas) use ($request) {
-                        $qKelas->where('nama_kelas', 'like', '%' . $request->search . '%');
-                    });
-            });
-        }
-        if ($request->filled('gender')) {
-            $q->whereHas('personil', function ($qPersonil) use ($request) {
-                $qPersonil->where('jenis_kelamin', $request->gender);
-            });
-        }
-        if ($request->filled('status')) {
-            $q->whereHas('personil', function ($qPersonil) use ($request) {
-                $qPersonil->where('status', $request->status);
-            });
-        }
-        if ($filterTahunAjaran) {
-            $q->whereHas('riwayatKelas', function ($qMuridKelas) use ($filterTahunAjaran) {
-                $qMuridKelas->where('tahun_ajaran_id', $filterTahunAjaran);
-            });
-        }
-
-        $murid = $q->orderBy(Personil::select('nama')->whereColumn('personil.id', 'murid.personil_id'))
+        $murid = $this->queryMuridDenganFilter($request, $filterTahunAjaran, $filterStatus)
+            ->orderBy(Personil::select('nama')->whereColumn('personil.id', 'murid.personil_id'))
             ->get();
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Data Siswa');
 
-        // $headers = ['No', 'NIS', 'NISN', 'Nama', 'L/P', 'Kelas', 'No. HP', 'Email', 'Status'];
         $headers = ['No', 'NIS', 'NISN', 'Nama', 'L/P', 'Kelas', 'Status'];
         $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
         foreach ($headers as $idx => $h) {
@@ -184,9 +124,7 @@ class MuridController extends Controller
             $sheet->setCellValue('D' . $row, $m->personil->nama ?? '-');
             $sheet->setCellValue('E' . $row, $m->personil->jenis_kelamin ?? '-');
             $sheet->setCellValue('F' . $row, $kelasStr);
-            // $sheet->setCellValueExplicit('G' . $row, $m->personil->no_hp ?? '-', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-            // $sheet->setCellValue('H' . $row, $m->personil->email ?? '-');
-            $sheet->setCellValue('G' . $row, ucfirst($m->personil->status ?? '-'));
+            $sheet->setCellValue('G' . $row, ucfirst($m->status ?? '-'));
             $row++;
         }
 
@@ -210,10 +148,10 @@ class MuridController extends Controller
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv|max:2048'
+            'file' => 'required|mimes:xlsx,xls,csv|max:2048',
         ]);
 
-        $tahunAjaranAktif = TahunAjaran::where('is_aktif', true)->first();
+        $tahunAjaranAktif = TahunAjaran::aktif();
 
         $file = $request->file('file');
         $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getPathname());
@@ -234,87 +172,120 @@ class MuridController extends Controller
         $imported = 0;
         $skipped = [];
 
-        foreach ($rows as $row) {
+        // Lacak NIS/NISN yang sudah dipakai DI DALAM file ini juga --
+        // bukan cuma cek ke database -- supaya baris duplikat di file
+        // yang sama juga ketahuan, bukan cuma bikin error mentah.
+        $nisTerpakai = [];
+        $nisnTerpakai = [];
+
+        foreach ($rows as $baris => $row) {
+            $nomorBaris = $baris + 2; // +2: index 0-based + 1 baris header
+
             // Kolom A=No, B=NIS, C=NISN, D=Nama, E=L/P, F=Kelas, G=Status
-            if (empty($row[3])) continue; // Skip jika Nama kosong
-
-            $nis          = $row[1];
-            $nisn         = $row[2];
-            $nama         = $row[3];
-            $jenisKelamin = $row[4];
-            $kelasNama    = $row[5];
-            $status       = strtolower($row[6] ?? 'aktif');
-
-            // Cek duplikat NIS
-            if (!empty($nis) && $nis !== '-' && Murid::where('nis', $nis)->exists()) {
-                $skipped[] = "$nama (NIS duplikat)";
-                continue;
+            if (empty($row[3])) {
+                continue; // Skip jika Nama kosong
             }
 
-            // Cek duplikat NISN
-            if (!empty($nisn) && $nisn !== '-' && Murid::where('nisn', $nisn)->exists()) {
-                $skipped[] = "$nama (NISN duplikat)";
-                continue;
+            $nis          = trim((string) ($row[1] ?? ''));
+            $nisn         = trim((string) ($row[2] ?? ''));
+            $nama         = trim((string) $row[3]);
+            $jenisKelamin = trim((string) ($row[4] ?? ''));
+            $kelasNama    = trim((string) ($row[5] ?? ''));
+            $status       = strtolower(trim((string) ($row[6] ?? 'aktif')));
+
+            // Cek duplikat NIS (di file & di database)
+            if ($nis !== '' && $nis !== '-') {
+                if (isset($nisTerpakai[$nis]) || Murid::where('nis', $nis)->exists()) {
+                    $skipped[] = "Baris $nomorBaris: $nama (NIS $nis duplikat)";
+                    continue;
+                }
+            }
+
+            // Cek duplikat NISN (di file & di database)
+            if ($nisn !== '' && $nisn !== '-') {
+                if (isset($nisnTerpakai[$nisn]) || Murid::where('nisn', $nisn)->exists()) {
+                    $skipped[] = "Baris $nomorBaris: $nama (NISN $nisn duplikat)";
+                    continue;
+                }
             }
 
             // Cari kelas
             $kelasId = null;
             if ($kelasNama && $kelasNama !== '-') {
                 $kelas = Kelas::where('nama_kelas', $kelasNama)->first();
-                if ($kelas) $kelasId = $kelas->id;
+                if ($kelas) {
+                    $kelasId = $kelas->id;
+                }
             }
 
-            $personil = Personil::create([
-                'nama'         => $nama,
-                'jenis_kelamin' => ($jenisKelamin === 'L' || $jenisKelamin === 'P') ? $jenisKelamin : null,
-                'status'       => in_array($status, ['aktif', 'nonaktif']) ? $status : 'aktif',
-            ]);
+            try {
+                DB::transaction(function () use (
+                    $nama,
+                    $jenisKelamin,
+                    $status,
+                    $nis,
+                    $nisn,
+                    $kelasId,
+                    $tahunAjaranAktif
+                ) {
+                    $personil = Personil::create([
+                        'nama' => $nama,
+                        'jenis_kelamin' => in_array($jenisKelamin, ['L', 'P']) ? $jenisKelamin : null,
+                        'status' => in_array($status, ['aktif', 'nonaktif']) ? $status : 'aktif',
+                    ]);
 
-            $murid = Murid::create([
-                'personil_id' => $personil->id,
-                'nis'         => $nis === '-' ? null : $nis,
-                'nisn'        => $nisn === '-' ? null : $nisn,
-            ]);
+                    $murid = Murid::create([
+                        'personil_id' => $personil->id,
+                        'nis' => $nis === '' || $nis === '-' ? null : $nis,
+                        'nisn' => $nisn === '' || $nisn === '-' ? null : $nisn,
+                    ]);
 
-            if ($kelasId && $tahunAjaranAktif) {
-                MuridKelas::create([
-                    'murid_id'       => $murid->id,
-                    'kelas_id'       => $kelasId,
-                    'tahun_ajaran_id' => $tahunAjaranAktif->id,
-                ]);
+                    if ($kelasId && $tahunAjaranAktif) {
+                        MuridKelas::create([
+                            'murid_id' => $murid->id,
+                            'kelas_id' => $kelasId,
+                            'tahun_ajaran_id' => $tahunAjaranAktif->id,
+                        ]);
+                    }
+                });
+
+                if ($nis !== '' && $nis !== '-') {
+                    $nisTerpakai[$nis] = true;
+                }
+                if ($nisn !== '' && $nisn !== '-') {
+                    $nisnTerpakai[$nisn] = true;
+                }
+
+                $imported++;
+            } catch (\Throwable $e) {
+                // 1 baris gagal tidak boleh menghentikan baris lain --
+                // dicatat sebagai skipped, lanjut ke baris berikutnya.
+                $skipped[] = "Baris $nomorBaris: $nama (gagal disimpan: " . $e->getMessage() . ")";
             }
-
-            $imported++;
         }
 
-        $redirect = redirect()->route('master.murid.index');
+        $pesan = [];
 
         if ($imported > 0) {
-            $redirect->with('success', "Berhasil mengimpor $imported data siswa.");
+            $pesan['success'] = "Berhasil mengimpor $imported data siswa.";
         }
 
         if (count($skipped) > 0) {
-            $errorMsg = count($skipped) . " data gagal diimpor karena duplikasi (NIS/NISN): ";
-            $errorMsg .= count($skipped) > 1
-                ? implode(', ', array_slice($skipped, 0, 1)) . ', dan ' . (count($skipped) - 1) . ' lainnya.'
-                : implode(', ', $skipped);
-            $redirect->with('error', $errorMsg);
+            $ringkasSkipped = count($skipped) > 3
+                ? implode('; ', array_slice($skipped, 0, 3)) . '; dan ' . (count($skipped) - 3) . ' lainnya.'
+                : implode('; ', $skipped);
+            $pesan['error'] = count($skipped) . ' data gagal diimpor: ' . $ringkasSkipped;
         }
 
         if ($imported === 0 && count($skipped) === 0) {
-            $redirect->with('error', 'Tidak ada data yang valid untuk diimpor.');
+            $pesan['error'] = 'Tidak ada data yang valid untuk diimpor.';
         }
 
-        if (isset($warningMsg)) {
-            $existingError = session()->get("error");
-            if (isset($errorMsg)) {
-                $redirect->with("error", trim($errorMsg . " " . $warningMsg));
-            } else {
-                $redirect->with("error", $warningMsg);
-            }
+        if ($warningMsg) {
+            $pesan['error'] = trim(($pesan['error'] ?? '') . ' ' . $warningMsg);
         }
 
-        return $redirect;
+        return redirect()->route('master.murid.index')->with($pesan);
     }
 
     /**
@@ -324,9 +295,9 @@ class MuridController extends Controller
     {
         $title = 'Siswa';
         $kelas = Kelas::all();
-        $tahunAjaranAktif = TahunAjaran::where('is_aktif', true)->first();
+        $tahunAjaranAktif = TahunAjaran::aktif();
 
-        $tahunAjaranId = $request->input('tahun_ajaran_id', $tahunAjaranAktif->id ?? null);
+        $tahunAjaranId = $request->input('tahun_ajaran_id', $tahunAjaranAktif?->id);
         $tahunAjaranEdit = TahunAjaran::find($tahunAjaranId) ?? $tahunAjaranAktif;
 
         return view('master.murid.edit', compact('title', 'murid', 'kelas', 'tahunAjaranEdit'));
@@ -337,37 +308,87 @@ class MuridController extends Controller
      */
     public function update(Request $request, Murid $murid)
     {
-        $request->validate([
-            'nama' => 'required|string|max:100',
-            'nis' => 'required|numeric|unique:murid,nis,' . $murid->id,
-            'nisn' => 'nullable|numeric|unique:murid,nisn,' . $murid->id,
-            'jenis_kelamin' => 'nullable|in:L,P',
-            'status' => 'nullable|in:aktif,nonaktif',
-        ]);
+        $validated = $this->validasi($request, $murid);
 
-        $personil = $murid->personil;
-        $personil->update([
-            'nama' => $request->nama,
-            'jenis_kelamin' => $request->jenis_kelamin,
-            'status' => $request->status,
-        ]);
+        DB::transaction(function () use ($validated, $murid) {
+            $murid->personil->update([
+                'nama' => $validated['nama'],
+                'jenis_kelamin' => $validated['jenis_kelamin'] ?? null,
+                'status' => $validated['status'] ?? 'aktif',
+            ]);
 
-        $murid->update([
-            'nis' => $request->nis,
-            'nisn' => $request->nisn,
-        ]);
-        MuridKelas::updateOrCreate(
-            [
-                'murid_id' => $murid->id,
-                'tahun_ajaran_id' => $request->tahun_ajaran_id
-            ],
-            [
-                'kelas_id' => $request->kelas_id
-            ]
-        );
+            $murid->update([
+                'nis' => $validated['nis'],
+                'nisn' => $validated['nisn'] ?? null,
+            ]);
+
+            MuridKelas::updateOrCreate(
+                [
+                    'murid_id' => $murid->id,
+                    'tahun_ajaran_id' => $validated['tahun_ajaran_id'],
+                ],
+                [
+                    'kelas_id' => $validated['kelas_id'],
+                ]
+            );
+        });
 
         return redirect()->route('master.murid.index')
             ->with('success', 'Murid berhasil diperbarui.');
+    }
+
+    public function keluar(Request $request, Murid $murid)
+    {
+        if ($murid->status !== 'aktif') {
+            return redirect()->back()->withErrors([
+                'status' => 'Murid ini statusnya sudah ' . $murid->status . ', tidak bisa diubah lagi.',
+            ]);
+        }
+
+        $validated = $request->validate([
+            'keterangan_status' => ['required', 'string', 'max:500'],
+        ], [
+            'keterangan_status.required' => 'Alasan keluar wajib diisi.',
+        ]);
+
+        $murid->keluarkan($validated['keterangan_status']);
+
+        return redirect()->back()->with('success', 'Status murid diubah menjadi Keluar.');
+    }
+
+    public function pindah(Request $request, Murid $murid)
+    {
+        if ($murid->status !== 'aktif') {
+            return redirect()->back()->withErrors([
+                'status' => 'Murid ini statusnya sudah ' . $murid->status . ', tidak bisa diubah lagi.',
+            ]);
+        }
+
+        $validated = $request->validate([
+            'keterangan_status' => ['required', 'string', 'max:255'],
+        ], [
+            'keterangan_status.required' => 'Nama sekolah tujuan wajib diisi.',
+        ]);
+
+        $murid->pindahkan($validated['keterangan_status']);
+
+        return redirect()->back()->with('success', 'Status murid diubah menjadi Pindah Sekolah.');
+    }
+
+    /**
+     * Batalkan status keluar/pindah/lulus -- untuk jaga-jaga kalau admin
+     * salah klik. Tidak menghapus riwayat kelas, cuma kembalikan status
+     * murid jadi aktif lagi.
+     */
+    public function aktifkanKembali(Murid $murid)
+    {
+        $murid->update([
+            'status' => 'aktif',
+            'tgl_status' => null,
+            'keterangan_status' => null,
+        ]);
+
+        return redirect()->back()->with('success', 'Status murid dikembalikan menjadi Aktif.');
     }
 
     /**
@@ -375,17 +396,86 @@ class MuridController extends Controller
      */
     public function destroy(Murid $murid)
     {
-        // cek kartu kontrol yang terkait dengan murid ini
-        $kartuKontrolCount = $murid->kartuKontrol()->count();
-        if ($kartuKontrolCount > 0) {
+        if ($murid->kartuKontrol()->exists()) {
             return redirect()->route('master.murid.index')
-                ->with('error', 'Murid tidak bisa dihapus karena sudah digunakan.');
+                ->with('error', 'Murid tidak bisa dihapus karena sudah punya catatan kartu kontrol.');
         }
-        $personil = $murid->personil;
-        $murid->delete();
-        $personil->delete();
+
+        DB::transaction(function () use ($murid) {
+            $personil = $murid->personil;
+            $murid->delete();
+            $personil?->delete();
+        });
 
         return redirect()->route('master.murid.index')
             ->with('success', 'Murid berhasil dihapus.');
+    }
+
+    /**
+     * Query dasar dengan semua filter yang dipakai bersama oleh
+     * index() dan download(), supaya tidak ada logic yang beda sendiri
+     * antara tampilan di layar dan file yang di-export.
+     */
+    private function queryMuridDenganFilter(Request $request, ?int $filterTahunAjaran, string $filterStatus)
+    {
+        $q = Murid::with([
+            'personil',
+            'kelas',
+            'riwayatKelas' => function ($query) use ($filterTahunAjaran) {
+                if ($filterTahunAjaran) {
+                    $query->where('tahun_ajaran_id', $filterTahunAjaran);
+                }
+            },
+            'riwayatKelas.kelas.jurusan',
+        ]);
+
+        if ($filterStatus !== 'semua') {
+            $q->where('status', $filterStatus);
+        }
+
+        if ($request->filled('search')) {
+            $q->where(function ($query) use ($request) {
+                $query->where('nis', 'like', '%' . $request->search . '%')
+                    ->orWhereHas('personil', function ($qPersonil) use ($request) {
+                        $qPersonil->where('nama', 'like', '%' . $request->search . '%')
+                            ->orWhere('no_hp', 'like', '%' . $request->search . '%')
+                            ->orWhere('email', 'like', '%' . $request->search . '%')
+                            ->orWhere('alamat', 'like', '%' . $request->search . '%');
+                    })
+                    ->orWhereHas('kelas', function ($qKelas) use ($request) {
+                        $qKelas->where('nama_kelas', 'like', '%' . $request->search . '%');
+                    });
+            });
+        }
+
+        if ($request->filled('gender')) {
+            $q->whereHas('personil', function ($qPersonil) use ($request) {
+                $qPersonil->where('jenis_kelamin', $request->gender);
+            });
+        }
+
+        if ($filterTahunAjaran) {
+            $q->whereHas('riwayatKelas', function ($qMuridKelas) use ($filterTahunAjaran) {
+                $qMuridKelas->where('tahun_ajaran_id', $filterTahunAjaran);
+            });
+        }
+
+        return $q;
+    }
+
+    /**
+     * Validasi bersama untuk store & update.
+     */
+    private function validasi(Request $request, ?Murid $murid = null): array
+    {
+        return $request->validate([
+            'nama' => 'required|string|max:100',
+            'nis' => 'required|numeric|unique:murid,nis,' . ($murid?->id ?? 'NULL'),
+            'nisn' => 'nullable|numeric|unique:murid,nisn,' . ($murid?->id ?? 'NULL'),
+            'jenis_kelamin' => 'nullable|in:L,P',
+            'status' => 'nullable|in:aktif,nonaktif',
+            'kelas_id' => 'required|exists:kelas,id',
+            'tahun_ajaran_id' => 'required|exists:tahun_ajaran,id',
+        ]);
     }
 }

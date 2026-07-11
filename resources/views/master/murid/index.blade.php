@@ -39,17 +39,23 @@
                         </div>
                         <div class="col-12 col-md-2">
                             <select name="status" class="form-select">
-                                <option value="">Status</option>
-                                <option value="aktif" {{ request('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
-                                <option value="nonaktif" {{ request('status') == 'nonaktif' ? 'selected' : '' }}>Non Aktif
+                                <option value="aktif" {{ request('status', 'aktif') == 'aktif' ? 'selected' : '' }}>
+                                    Aktif</option>
+                                <option value="lulus" {{ request('status') == 'lulus' ? 'selected' : '' }}>Lulus
                                 </option>
+                                <option value="keluar" {{ request('status') == 'keluar' ? 'selected' : '' }}>Keluar
+                                </option>
+                                <option value="pindah" {{ request('status') == 'pindah' ? 'selected' : '' }}>Pindah
+                                    Sekolah</option>
+                                <option value="semua" {{ request('status') == 'semua' ? 'selected' : '' }}>Semua
+                                    Status</option>
                             </select>
                         </div>
                         <div class="col-12 col-md-2">
                             <select name="tahun_ajaran_id" class="form-select">
                                 @foreach ($tahunAjaran as $ta)
                                     <option value="{{ $ta->id }}"
-                                        {{ request('tahun_ajaran_id', $tahunAjaranAktif) == $ta->id ? 'selected' : '' }}>
+                                        {{ request('tahun_ajaran_id', $tahunAjaranAktif->id ?? null) == $ta->id ? 'selected' : '' }}>
                                         {{ $ta->nama }}
                                     </option>
                                 @endforeach
@@ -70,7 +76,8 @@
                     <span>Daftar {{ $title }} <span class="text-muted fw-normal"
                             style="font-size:13px">({{ $murid->total() }} data)</span></span>
                     <div>
-                        <button type="button" class="btn btn-sm btn-primary me-1" data-bs-toggle="modal" data-bs-target="#importModal">
+                        <button type="button" class="btn btn-sm btn-primary me-1" data-bs-toggle="modal"
+                            data-bs-target="#importModal">
                             <i class="fas fa-file-import me-1"></i> Import
                         </button>
                         <a href="{{ route('master.murid.download', request()->query()) }}" class="btn btn-sm btn-success">
@@ -101,10 +108,33 @@
                                     <td>{{ $s->nisn }}</td>
                                     <td>{{ $s->riwayatKelas->first()->kelas->nama_kelas ?? 'Tidak ada kelas' }}
                                         {{ $s->riwayatKelas->first()->kelas->jurusan->nama ?? '' }}</td>
-                                    <td>{{ ucfirst($s->personil->status) }}</td>
+                                    <td>
+                                        @switch($s->status)
+                                            @case('aktif')
+                                                <span class="badge"
+                                                    style="background:rgba(34,197,94,.15);color:#16a34a">Aktif</span>
+                                            @break
+
+                                            @case('lulus')
+                                                <span class="badge"
+                                                    style="background:rgba(99,102,241,.15);color:#6366f1">Lulus</span>
+                                            @break
+
+                                            @case('keluar')
+                                                <span class="badge"
+                                                    style="background:rgba(239,68,68,.15);color:#ef4444">Keluar</span>
+                                            @break
+
+                                            @case('pindah')
+                                                <span class="badge"
+                                                    style="background:rgba(234,179,8,.15);color:#ca8a04">Pindah</span>
+                                            @break
+                                        @endswitch
+                                    </td>
                                     <td class="text-center">
                                         <div class="d-flex gap-1 justify-content-center">
-                                            <a href="{{ route('master.murid.edit', ['murid' => $s->id, 'tahun_ajaran_id' => request('tahun_ajaran_id')]) }}" class="btn btn-sm"
+                                            <a href="{{ route('master.murid.edit', ['murid' => $s->id, 'tahun_ajaran_id' => request('tahun_ajaran_id')]) }}"
+                                                class="btn btn-sm"
                                                 style="padding:4px 8px;background:rgba(99,102,241,.1);color:#6366f1;border-radius:6px"><i
                                                     class="fas fa-pen"></i></a>
                                             <form method="POST" action="{{ route('master.murid.destroy', $s->id) }}"
@@ -148,9 +178,11 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="fileMurid" class="form-label">Pilih File Excel (.xlsx, .xls, .csv)</label>
-                            <input class="form-control" type="file" id="fileMurid" name="file" accept=".xlsx,.xls,.csv" required>
+                            <input class="form-control" type="file" id="fileMurid" name="file" accept=".xlsx,.xls,.csv"
+                                required>
                         </div>
-                        <small class="text-muted">Format kolom: No, NIS, NISN, Nama, L/P, Kelas, Status. Gunakan tombol Export untuk melihat formatnya.</small>
+                        <small class="text-muted">Format kolom: No, NIS, NISN, Nama, L/P, Kelas, Status. Gunakan
+                            tombol Export untuk melihat formatnya.</small>
                     </div>
                     <div class="modal-footer border-top" style="border-color:var(--border-color)!important">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>

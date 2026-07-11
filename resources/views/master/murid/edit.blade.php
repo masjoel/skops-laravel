@@ -10,6 +10,14 @@
     </div>
     <div class="row justify-content-center">
         <div class="col-12 col-md-5">
+
+            {{-- Status murid (Aktif/Lulus/Keluar/Pindah) SENGAJA di luar form
+                 edit di bawah, karena partial ini punya <form> sendiri untuk
+                 aksi Keluar/Pindah/Aktifkan Kembali -- <form> tidak boleh
+                 nested di dalam <form> lain (melanggar spek HTML, bikin
+                 browser salah kaprah soal form mana yang di-submit). --}}
+            @include('partials.status-murid', ['murid' => $murid])
+
             <div class="card bg-light">
                 <div class="card-header"><i class="fas fa-ruler me-2" style="color:#6366f1"></i>Form Edit {{ $title }}
                 </div>
@@ -63,12 +71,12 @@
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Tahun Ajaran <span class="text-danger">*</span></label>
-                                <input type="text" name="tahun_ajaran"
-                                    class="form-control @error('tahun_ajaran') is-invalid @enderror"
+                                <input type="text" class="form-control"
                                     value="{{ old('tahun_ajaran', $tahunAjaranEdit->nama ?? '') }}" placeholder=""
                                     readonly>
+                                <input type="hidden" name="tahun_ajaran_id"
+                                    value="{{ old('tahun_ajaran_id', $tahunAjaranEdit->id ?? '') }}">
                             </div>
-                            <input type="hidden" name="tahun_ajaran_id" value="{{ $tahunAjaranEdit->id ?? '' }}">
                         </div>
                         <div class="mb-3">
                             <label class="form-label d-block">Jenis Kelamin</label>
@@ -85,24 +93,6 @@
                                 <label class="form-check-label" for="jk_p">Perempuan</label>
                             </div>
                             @error('jenis_kelamin')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label d-block">Status</label>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input @error('status') is-invalid @enderror" type="radio"
-                                    name="status" id="status_aktif" value="aktif"
-                                    {{ old('status', $murid->personil->status) == 'aktif' ? 'checked' : '' }}>
-                                <label class="form-check-label" for="status_aktif">Aktif</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input @error('status') is-invalid @enderror" type="radio"
-                                    name="status" id="status_nonaktif" value="nonaktif"
-                                    {{ old('status', $murid->personil->status) == 'nonaktif' ? 'checked' : '' }}>
-                                <label class="form-check-label" for="status_nonaktif">Non Aktif</label>
-                            </div>
-                            @error('status')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
