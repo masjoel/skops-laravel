@@ -682,7 +682,8 @@
                         request()->routeIs('master.kelas.*') ||
                         request()->routeIs('master.jurusan.*') ||
                         request()->routeIs('master.jenis-poin.*') ||
-                        request()->routeIs('master.jabatan.*');
+                        request()->routeIs('master.jabatan.*') ||
+                        request()->routeIs('master.kenaikan-kelas.*');
                 @endphp
                 <div class="nav-group {{ $masterActive ? 'open has-active' : '' }}" data-group="master">
                     <div class="nav-group-header" onclick="toggleNavGroup(this)">
@@ -725,6 +726,11 @@
                             class="nav-item-link {{ request()->routeIs('master.jabatan.*') ? 'active' : '' }}">
                             <span class="nav-icon"><i class="fas fa-user-tie"></i></span>
                             Jabatan
+                        </a>
+                        <a href="{{ route('master.kenaikan-kelas.index') }}"
+                            class="nav-item-link {{ request()->routeIs('master.kenaikan-kelas.*') ? 'active' : '' }}">
+                            <span class="nav-icon"><i class="fas fa-graduation-cap"></i></span>
+                            Kenaikan Kelas
                         </a>
                     </div>
                 </div>

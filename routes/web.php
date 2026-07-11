@@ -3,18 +3,19 @@
 // use App\Http\Controllers\api\BarangApiController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\KartuKontrolController;
 use App\Http\Controllers\Master\GuruController;
 use App\Http\Controllers\Master\JabatanStrukturalController;
 use App\Http\Controllers\Master\JenisPoinController;
 use App\Http\Controllers\Master\JurusanController;
 use App\Http\Controllers\Master\KelasController;
+use App\Http\Controllers\Master\KenaikanKelasController;
 use App\Http\Controllers\Master\MuridController;
 use App\Http\Controllers\Master\OrangTuaController;
 use App\Http\Controllers\Master\PersonilController;
 use App\Http\Controllers\Master\TahunAjaranController;
 use App\Http\Controllers\Master\WaliKelasController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RekapitulasiController;
 use App\Http\Controllers\Seting\SetingController;
 use App\Http\Controllers\Seting\UserController;
@@ -90,6 +91,8 @@ Route::middleware(['auth.session'])->group(function () {
             ->name('murid.pindah');
         Route::post('murid/{murid}/aktifkan-kembali', [MuridController::class, 'aktifkanKembali'])
             ->name('murid.aktifkan-kembali');
+        Route::get('kenaikan-kelas', [KenaikanKelasController::class, 'index'])->name('kenaikan-kelas.index');
+        Route::post('kenaikan-kelas', [KenaikanKelasController::class, 'store'])->name('kenaikan-kelas.store');
     });
 
     // Tambahkan ke routes/web.php, di dalam middleware auth
