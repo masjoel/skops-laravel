@@ -673,60 +673,62 @@
             </a>
 
             {{-- Master Data Group --}}
-            @php
-                $masterActive =
-                    request()->routeIs('master.guru.*') ||
-                    request()->routeIs('master.murid.*') ||
-                    request()->routeIs('master.walikelas.*') ||
-                    request()->routeIs('master.kelas.*') ||
-                    request()->routeIs('master.jurusan.*') ||
-                    request()->routeIs('master.jenis-poin.*') ||
-                    request()->routeIs('master.jabatan.*');
-            @endphp
-            <div class="nav-group {{ $masterActive ? 'open has-active' : '' }}" data-group="master">
-                <div class="nav-group-header" onclick="toggleNavGroup(this)">
-                    <span class="nav-group-icon"><i class="fas fa-database"></i></span>
-                    <span class="nav-group-label">Master Data</span>
-                    <i class="fas fa-chevron-down nav-group-arrow"></i>
+            @if (in_array(Auth::user()->role, ['administrator', 'operator']))
+                @php
+                    $masterActive =
+                        request()->routeIs('master.guru.*') ||
+                        request()->routeIs('master.murid.*') ||
+                        request()->routeIs('master.walikelas.*') ||
+                        request()->routeIs('master.kelas.*') ||
+                        request()->routeIs('master.jurusan.*') ||
+                        request()->routeIs('master.jenis-poin.*') ||
+                        request()->routeIs('master.jabatan.*');
+                @endphp
+                <div class="nav-group {{ $masterActive ? 'open has-active' : '' }}" data-group="master">
+                    <div class="nav-group-header" onclick="toggleNavGroup(this)">
+                        <span class="nav-group-icon"><i class="fas fa-database"></i></span>
+                        <span class="nav-group-label">Master Data</span>
+                        <i class="fas fa-chevron-down nav-group-arrow"></i>
+                    </div>
+                    <div class="nav-group-body">
+                        <a href="{{ route('master.guru.index') }}"
+                            class="nav-item-link {{ request()->routeIs('master.guru.*') ? 'active' : '' }}">
+                            <span class="nav-icon"><i class="fas fa-user-friends"></i></span>
+                            Guru
+                        </a>
+                        <a href="{{ route('master.murid.index') }}"
+                            class="nav-item-link {{ request()->routeIs('master.murid.*') ? 'active' : '' }}">
+                            <span class="nav-icon"><i class="fas fa-users"></i></span>
+                            Siswa
+                        </a>
+                        <a href="{{ route('master.walikelas.index') }}"
+                            class="nav-item-link {{ request()->routeIs('master.walikelas.*') ? 'active' : '' }}">
+                            <span class="nav-icon"><i class="fas fa-user-plus"></i></span>
+                            Wali Kelas
+                        </a>
+                        <a href="{{ route('master.kelas.index') }}"
+                            class="nav-item-link {{ request()->routeIs('master.kelas.*') ? 'active' : '' }}">
+                            <span class="nav-icon"><i class="fas fa-chalkboard-teacher"></i></span>
+                            Kelas
+                        </a>
+                        <a href="{{ route('master.jurusan.index') }}"
+                            class="nav-item-link {{ request()->routeIs('master.jurusan.*') ? 'active' : '' }}">
+                            <span class="nav-icon"><i class="fas fa-sitemap"></i></span>
+                            Jurusan
+                        </a>
+                        <a href="{{ route('master.jenis-poin.index') }}"
+                            class="nav-item-link {{ request()->routeIs('master.jenis-poin.*') ? 'active' : '' }}">
+                            <span class="nav-icon"><i class="fas fa-list-ol"></i></span>
+                            Jenis Poin
+                        </a>
+                        <a href="{{ route('master.jabatan.index') }}"
+                            class="nav-item-link {{ request()->routeIs('master.jabatan.*') ? 'active' : '' }}">
+                            <span class="nav-icon"><i class="fas fa-user-tie"></i></span>
+                            Jabatan
+                        </a>
+                    </div>
                 </div>
-                <div class="nav-group-body">
-                    <a href="{{ route('master.guru.index') }}"
-                        class="nav-item-link {{ request()->routeIs('master.guru.*') ? 'active' : '' }}">
-                        <span class="nav-icon"><i class="fas fa-user-friends"></i></span>
-                        Guru
-                    </a>
-                    <a href="{{ route('master.murid.index') }}"
-                        class="nav-item-link {{ request()->routeIs('master.murid.*') ? 'active' : '' }}">
-                        <span class="nav-icon"><i class="fas fa-users"></i></span>
-                        Siswa
-                    </a>
-                    <a href="{{ route('master.walikelas.index') }}"
-                        class="nav-item-link {{ request()->routeIs('master.walikelas.*') ? 'active' : '' }}">
-                        <span class="nav-icon"><i class="fas fa-user-plus"></i></span>
-                        Wali Kelas
-                    </a>
-                    <a href="{{ route('master.kelas.index') }}"
-                        class="nav-item-link {{ request()->routeIs('master.kelas.*') ? 'active' : '' }}">
-                        <span class="nav-icon"><i class="fas fa-chalkboard-teacher"></i></span>
-                        Kelas
-                    </a>
-                    <a href="{{ route('master.jurusan.index') }}"
-                        class="nav-item-link {{ request()->routeIs('master.jurusan.*') ? 'active' : '' }}">
-                        <span class="nav-icon"><i class="fas fa-sitemap"></i></span>
-                        Jurusan
-                    </a>
-                    <a href="{{ route('master.jenis-poin.index') }}"
-                        class="nav-item-link {{ request()->routeIs('master.jenis-poin.*') ? 'active' : '' }}">
-                        <span class="nav-icon"><i class="fas fa-list-ol"></i></span>
-                        Jenis Poin
-                    </a>
-                    <a href="{{ route('master.jabatan.index') }}"
-                        class="nav-item-link {{ request()->routeIs('master.jabatan.*') ? 'active' : '' }}">
-                        <span class="nav-icon"><i class="fas fa-user-tie"></i></span>
-                        Jabatan
-                    </a>
-                </div>
-            </div>
+            @endif
 
             {{-- Perilaku Group --}}
             @php
@@ -797,8 +799,8 @@
         <div class="sidebar-footer">
             <div class="sidebar-footer-avatar">
                 @if (Auth::user()->photo)
-                    <img src="{{ Auth::user()->photo == 'images/skops-logo.webp' ? asset(Auth::user()->photo) : Storage::url(Auth::user()->photo) }}" width="34"
-                        alt="{{ Auth::user()->name }}">
+                    <img src="{{ Auth::user()->photo == 'images/skops-logo.webp' ? asset(Auth::user()->photo) : Storage::url(Auth::user()->photo) }}"
+                        width="34" alt="{{ Auth::user()->name }}">
                 @else
                     {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                 @endif

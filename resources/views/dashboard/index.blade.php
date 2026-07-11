@@ -240,12 +240,12 @@
                         @php
                             $totalSkorNet = $skorReward + $skorPelanggaran + $skorPemutihan;
                         @endphp
-                        <div class="d-flex justify-content-between align-items-center">
+                        {{-- <div class="d-flex justify-content-between align-items-center">
                             <span style="font-size:14px;font-weight:600">Net Skor Total</span>
                             <strong style="font-size:14px;color:{{ $totalSkorNet >= 0 ? '#22c55e' : '#ef4444' }}">
                                 {{ number_format($totalSkorNet, 0, ',', '.') }}
                             </strong>
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
             </div>

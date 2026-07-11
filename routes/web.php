@@ -56,7 +56,7 @@ Route::middleware(['auth.session'])->group(function () {
     | Master Data
     |----------------------------------------------------------------------
     */
-    Route::prefix('master')->name('master.')->group(function () {
+    Route::prefix('master')->name('master.')->middleware(['role:administrator,operator'])->group(function () {
         Route::resource('personil', PersonilController::class);
         Route::get('guru/download', [GuruController::class, 'download'])->name('guru.download');
         Route::post('guru/import', [GuruController::class, 'import'])->name('guru.import');
@@ -86,18 +86,18 @@ Route::middleware(['auth.session'])->group(function () {
     // PENTING: route ini harus masuk daftar $except di PastikanPeriodeAktif
     // (sudah didaftarkan sebagai 'master.tahun-ajaran.*')
     Route::prefix('master/tahun-ajaran')->name('master.tahun-ajaran.')->group(function () {
-        Route::get('/', [TahunAjaranController::class, 'index'])->name('index');
-        Route::post('/', [TahunAjaranController::class, 'store'])->name('store');
-        Route::get('/{tahunAjaran}/edit', [TahunAjaranController::class, 'edit'])->name('edit');
-        Route::put('/{tahunAjaran}', [TahunAjaranController::class, 'update'])->name('update');
-        Route::delete('/{tahunAjaran}', [TahunAjaranController::class, 'destroy'])->name('destroy');
+        Route::get('/', [TahunAjaranController::class, 'index'])->name('index')->middleware(['role:administrator,operator']);
+        Route::post('/', [TahunAjaranController::class, 'store'])->name('store')->middleware(['role:administrator,operator']);
+        Route::get('/{tahunAjaran}/edit', [TahunAjaranController::class, 'edit'])->name('edit')->middleware(['role:administrator,operator']);
+        Route::put('/{tahunAjaran}', [TahunAjaranController::class, 'update'])->name('update')->middleware(['role:administrator,operator']);
+        Route::delete('/{tahunAjaran}', [TahunAjaranController::class, 'destroy'])->name('destroy')->middleware(['role:administrator,operator']);
         Route::post('/{tahunAjaran}/aktifkan', [TahunAjaranController::class, 'aktifkanTahunAjaran'])
             ->name('aktifkan');
     });
 
     Route::post('/periode-akademik/{periodeAkademik}/aktifkan', [TahunAjaranController::class, 'aktifkanPeriode'])
         ->name('periode-akademik.aktifkan');
-        
+
     /*
     |----------------------------------------------------------------------
     | Transaksi Data
@@ -131,8 +131,8 @@ Route::middleware(['auth.session'])->group(function () {
     */
     Route::prefix('seting')->name('seting.')->group(function () {
         Route::get('/', [SetingController::class, 'index'])->name('index');
-        Route::resource('user', UserController::class);
-        Route::get('/sekolah', [SetingController::class, 'sekolah'])->name('sekolah');
-        Route::put('/sekolah', [SetingController::class, 'updateSekolah'])->name('sekolah.update');
+        Route::resource('user', UserController::class)->middleware(['role:administrator']);
+        Route::get('/sekolah', [SetingController::class, 'sekolah'])->name('sekolah')->middleware(['role:administrator,operator']);
+        Route::put('/sekolah', [SetingController::class, 'updateSekolah'])->name('sekolah.update')->middleware(['role:administrator,operator']);
     });
 });
