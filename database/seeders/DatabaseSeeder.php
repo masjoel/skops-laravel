@@ -39,9 +39,9 @@ class DatabaseSeeder extends Seeder
         ]);
 
         User::factory()->create([
-            'username' => 'demo',
+            'username' => 'admin',
             'email' => 'admin@skops.web.id',
-            'password' => bcrypt('demo'),
+            'password' => bcrypt('password'),
             'name' => 'Administrator',
             'photo' => 'images/skops-logo.webp',
             'role' => 'administrator',
@@ -51,11 +51,11 @@ class DatabaseSeeder extends Seeder
             TahunAjaranSeeder::class,
             KelasSeeder::class,
             JabatanStrukturalSeeder::class,
-            GuruSeeder::class,
-            WaliKelasSeeder::class,
-            MuridSeeder::class,
+            // GuruSeeder::class,
+            // WaliKelasSeeder::class,
+            // MuridSeeder::class,
             JenisPoinSeeder::class,
-            KartuKontrolSeeder::class,
+            // KartuKontrolSeeder::class,
         ]);
     }
 }
