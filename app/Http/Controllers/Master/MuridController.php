@@ -219,6 +219,7 @@ class MuridController extends Controller
             }
 
             try {
+
                 DB::transaction(function () use (
                     $nama,
                     $jenisKelamin,
@@ -228,39 +229,55 @@ class MuridController extends Controller
                     $kelasId,
                     $tahunAjaranAktif
                 ) {
+
+                    // Validasi wajib
+                    if (empty($nama)) {
+                        throw new \Exception("Nama tidak boleh kosong.");
+                    }
+
+                    if (!$kelasId) {
+                        throw new \Exception("Kelas tidak ditemukan.");
+                    }
+
+                    if (!$tahunAjaranAktif) {
+                        throw new \Exception("Tahun ajaran aktif tidak ditemukan.");
+                    }
+
+                    // Simpan Personil
                     $personil = Personil::create([
                         'nama' => $nama,
                         'jenis_kelamin' => in_array($jenisKelamin, ['L', 'P']) ? $jenisKelamin : null,
                         'status' => in_array($status, ['aktif', 'nonaktif']) ? $status : 'aktif',
                     ]);
 
+                    // Simpan Murid
                     $murid = Murid::create([
                         'personil_id' => $personil->id,
-                        'nis' => $nis === '' || $nis === '-' ? null : $nis,
-                        'nisn' => $nisn === '' || $nisn === '-' ? null : $nisn,
+                        'nis' => ($nis === '' || $nis === '-') ? null : $nis,
+                        'nisn' => ($nisn === '' || $nisn === '-') ? null : $nisn,
                     ]);
 
-                    if ($kelasId && $tahunAjaranAktif) {
-                        MuridKelas::create([
-                            'murid_id' => $murid->id,
-                            'kelas_id' => $kelasId,
-                            'tahun_ajaran_id' => $tahunAjaranAktif->id,
-                        ]);
-                    }
+                    // Simpan Relasi Kelas
+                    MuridKelas::create([
+                        'murid_id' => $murid->id,
+                        'kelas_id' => $kelasId,
+                        'tahun_ajaran_id' => $tahunAjaranAktif->id,
+                    ]);
                 });
 
+                // Hanya dijalankan kalau transaction sukses
                 if ($nis !== '' && $nis !== '-') {
                     $nisTerpakai[$nis] = true;
                 }
+
                 if ($nisn !== '' && $nisn !== '-') {
                     $nisnTerpakai[$nisn] = true;
                 }
 
                 $imported++;
             } catch (\Throwable $e) {
-                // 1 baris gagal tidak boleh menghentikan baris lain --
-                // dicatat sebagai skipped, lanjut ke baris berikutnya.
-                $skipped[] = "Baris $nomorBaris: $nama (gagal disimpan: " . $e->getMessage() . ")";
+
+                $skipped[] = "Baris {$nomorBaris}: {$nama} ({$e->getMessage()})";
             }
         }
 
